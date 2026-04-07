@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小说百科 Wiki 系统 - GitHub版</title>
+    <script>
+        // 全局错误捕获
+        window.onerror = function(msg, url, line, col, error) {
+            console.error('【全局错误捕获】', msg, 'URL:', url, '行:', line, '列:', col);
+            setTimeout(() => {
+                if (document.body && (document.body.innerHTML.trim() === '' || document.body.innerHTML.length < 100)) {
+                    document.body.innerHTML = '<div style="padding:20px;font-family:sans-serif;color:#333;">' +
+                        '<h2 style="color:#dc2626;">页面加载遇到问题</h2>' +
+                        '<p style="color:#666;font-size:14px;">错误：' + msg + '</p>' +
+                        '<button onclick="location.reload()" style="margin-top:20px;padding:8px 16px;background:#4f46e5;color:white;border:none;border-radius:4px;">刷新重试</button>' +
+                        '</div>';
+                }
+            }, 500);
+            return false;
+        };
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('【未处理的 Promise 错误】:', event.reason);
+        });
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+        :root {
+            --hex-width: 140px;
+            --hex-height: 160px;
+            --color-primary: #4f46e5;
+            --color-bg: #f3f4f6;
+            --custom-font: 'Noto Sans SC', sans-serif;
+        }
+
+        body {
+            font-family: var(--custom-font);
+            background-color: var(--color-bg);
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 六边形角色卡片 */
+        .hexagon-wrapper {
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .hexagon {
+            width: var(--hex-width);
+            height: var(--hex-height);
+            background-color: white;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .hexagon.lvl-1 { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+        .hexagon.lvl-2 { background: linear-gradient(135deg, #e0f2fe, #bae6fd); }
+        .hexagon.lvl-3 { background: linear-gradient(135deg, #ffffff, #f3f4f6); }
+        .hexagon.lvl-4 { background: linear-gradient(135deg, #f3f4f6, #e5e7eb); }
+        .hexagon.lvl-5 { background: linear-gradient(135deg, #f9fafb, #f3f4f6); opacity: 0.8; }
+
+        /* 角色徽章 */
+        .role-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            z-index: 10;
+        }
+        .badge-protagonist {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        .badge-important {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+        }
+
+        /* 版本时间线 */
+        .version-timeline {
+            position: relative;
+            padding-left: 20px;
+        }
+        .version-timeline::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e5e7eb;
+        }
+        .version-dot {
+            position: absolute;
+            left: 0;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #4f46e5;
+            z-index: 10;
+        }
+        .version-dot.active { background: #4f46e5; }
+
+        /* 搜索下拉框 */
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            margin-top: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* 富文本编辑 */
+        .rich-editor {
+            min-height: 60px;
+            outline: none;
+        }
+        .rich-editor:focus {
+            border-color: #4f46e5;
+        }
+
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 450px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* 登录表单 */
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* 模式切换 */
+        .mode-badge {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .mode-badge.frontend {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .mode-badge.backend {
+            background: #fce7f3;
+            color: #be185d;
+        }
+
+        /* 分享码输入 */
+        .share-code-input {
+            letter-spacing: 0.5em;
+            font-family: monospace;
+            text-transform: uppercase;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 3px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col text-gray-800">
+
+    <!-- 模式徽章 -->
+    <div id="mode-badge" class="mode-badge frontend hidden">前台模式</div>
+
+    <!-- 全局状态提示 -->
+    <div id="save-toast" class="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 pointer-events-none flex items-center gap-2 z-[99999] transition-opacity">
+        <i class="fa-solid fa-check-circle"></i>
+        <span>已保存</span>
+    </div>
+
+    <!-- 顶部导航 -->
+    <header class="bg-white shadow-sm z-50 px-4 py-3 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-3 overflow-hidden">
+            <div class="bg-indigo-600 text-white p-2 rounded-lg shrink-0">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            <div class="min-w-0">
+                <h1 id="wiki-title-display" class="text-lg font-bold text-gray-900 truncate">未命名 Wiki</h1>
+                <p id="wiki-subtitle-display" class="text-[10px] text-gray-500 truncate hidden">GitHub版</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 relative">
+            <div class="relative hidden sm:block">
+                <input type="text" id="global-search" placeholder="搜索编号或名称..." 
+                    class="pl-8 pr-3 py-1.5 bg-gray-100 border-none rounded-full text-sm focus:ring-2 focus:ring-indigo-500 w-32 sm:w-48 transition-all"
+                    oninput="app.handleSearchInput(this.value)"
+                    onfocus="app.showSearchDropdown()"
+                    onblur="setTimeout(() => app.hideSearchDropdown(), 200)">
+                <i class="fa-solid fa-search absolute left-3 top-2 text-gray-400 text-xs"></i>
+                <div id="search-dropdown" class="search-dropdown hidden"></div>
+            </div>
+
+            <!-- 后台模式显示编辑按钮 -->
+            <div id="mode-switch-container" class="bg-gray-100 p-1 rounded-lg flex text-xs font-medium hidden">
+                <button onclick="app.setMode('view')" id="btn-mode-view" class="px-3 py-1.5 rounded-md bg-white shadow-sm text-gray-800 transition-all">
+                    <i class="fa-solid fa-eye sm:mr-1"></i><span class="hidden sm:inline">查看</span>
+                </button>
+                <button onclick="app.setMode('edit')" id="btn-mode-edit" class="px-3 py-1.5 rounded-md text-gray-500 hover:text-gray-800 transition-all">
+                    <i class="fa-solid fa-pen sm:mr-1"></i><span class="hidden sm:inline">编辑</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main id="main-container" class="flex-1 overflow-hidden relative bg-gray-50"></main>
+
+    <!-- 底部导航 -->
+    <nav class="bg-white border-t border-gray-200 shrink-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-around items-center h-14">
+            <button onclick="app.router('home')" class="nav-btn flex flex-col items-center gap-0.5 text-gray-500 hover:text-indigo-600 w-full py-1" data-target="home">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-[10px]">首页</span>
+            </button>
+            <button onclick="app.router('characters')" class="nav-btn flex flex-col items-center gap-0.5 text-gray-500 hover:text-indigo-600 w-full py-1" data-target="characters">
+                <i class="fa-solid fa-users text-lg"></i>
+                <span class="text-[10px]">角色</span>
+            </button>
+            <button onclick="app.router('non-characters')" class="nav-btn flex flex-col items-center gap-0.5 text-gray-500 hover:text-indigo-600 w-full py-1" data-target="non-characters">
+                <i class="fa-solid fa-map text-lg"></i>
+                <span class="text-[10px]">设定</span>
+            </button>
+            <button onclick="app.router('graph')" class="nav-btn flex flex-col items-center gap-0.5 text-gray-500 hover:text-indigo-600 w-full py-1" data-target="graph">
+                <i class="fa-solid fa-diagram-project text-lg"></i>
+                <span class="text-[10px]">关系</span>
+            </button>
+            <button onclick="app.router('settings')" id="nav-settings" class="nav-btn flex flex-col items-center gap-0.5 text-gray-500 hover:text-indigo-600 w-full py-1" data-target="settings">
+                <i class="fa-solid fa-cog text-lg"></i>
+                <span class="text-[10px]">设置</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ========== Templates ========== -->
+
+    <!-- 登录/配置模板 -->
+    <template id="tpl-login">
+        <div class="h-full overflow-y-auto p-4 fade-in">
+            <div class="max-w-md mx-auto pt-10">
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-brands fa-github text-4xl text-indigo-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">GitHub Wiki</h2>
+                    <p class="text-gray-500 text-sm mt-2">连接到GitHub仓库以访问Wiki数据</p>
+                </div>
+
+                <div id="login-form" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">GitHub用户名</label>
+                        <input type="text" id="github-owner" class="w-full p-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="例如: yourname">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">仓库名称</label>
+                        <input type="text" id="github-repo" class="w-full p-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="例如: my-wiki">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">分支 (可选)</label>
+                        <input type="text" id="github-branch" class="w-full p-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="默认: main">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Personal Access Token</label>
+                        <input type="password" id="github-token" class="w-full p-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="ghp_xxxxxxxxxxxx">
+                        <p class="text-xs text-gray-400 mt-1">
+                            <i class="fa-solid fa-info-circle mr-1"></i>
+                            需要repo权限，<a href="https://github.com/settings/tokens" target="_blank" class="text-indigo-600 hover:underline">在此创建</a>
+                        </p>
+                    </div>
+                    <button onclick="app.connectToGitHub()" class="w-full py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-link"></i>
+                        连接
+                    </button>
+                    <div class="text-center">
+                        <button onclick="app.enterFrontendMode()" class="text-sm text-gray-500 hover:text-indigo-600 transition">
+                            仅浏览模式（需要分享码）
+                        </button>
+                    </div>
+                </div>
+
+                <div id="share-code-form" class="hidden bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+                    <div class="text-center mb-4">
+                        <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fa-solid fa-key text-2xl text-amber-600"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800">输入分享码</h3>
+                        <p class="text-gray-500 text-sm mt-1">输入存档分享码以访问Wiki内容</p>
+                    </div>
+                    <div>
+                        <input type="text" id="share-code-input" 
+                            class="share-code-input w-full p-4 border-2 border-gray-200 rounded-lg text-center text-2xl font-bold tracking-widest uppercase focus:border-indigo-500 focus:ring-0 outline-none transition" 
+                            placeholder="XXXXXXXX"
+                            maxlength="8">
+                    </div>
+                    <button onclick="app.verifyShareCode()" class="w-full py-3 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition">
+                        验证并进入
+                    </button>
+                    <div class="text-center">
+                        <button onclick="app.showLoginForm()" class="text-sm text-gray-500 hover:text-indigo-600 transition">
+                            返回GitHub连接
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- 首页模板 -->
+    <template id="tpl-home">
+        <div class="h-full overflow-y-auto p-4 fade-in">
+            <div class="max-w-3xl mx-auto space-y-6 pb-20">
+                <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+                    <div class="absolute top-0 right-0 opacity-10 transform translate-x-10 -translate-y-10">
+                        <i class="fa-solid fa-dragon text-9xl"></i>
+                    </div>
+                    <h2 id="welcome-title" class="text-2xl font-bold mb-2 relative z-10">欢迎来到 Wiki</h2>
+                    <p id="welcome-subtitle" class="opacity-90 mb-4 text-sm relative z-10">探索角色、世界观与错综复杂的关系网。</p>
+                    <!-- 后台模式显示编辑按钮 -->
+                    <div class="edit-only hidden flex gap-2 relative z-10 flex-wrap">
+                        <button onclick="app.createEntry('character')" class="bg-white text-indigo-600 px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-indigo-50 transition">
+                            <i class="fa-solid fa-plus mr-1"></i> 角色
+                        </button>
+                        <button onclick="app.createEntry('non-character')" class="bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-indigo-400 transition border border-indigo-400">
+                            <i class="fa-solid fa-plus mr-1"></i> 设定
+                        </button>
+                    </div>
+                </div>
+
+                <div onclick="app.router('synopsis')" class="bg-gradient-to-r from-amber-100 to-yellow-100 rounded-xl p-4 cursor-pointer hover:shadow-md transition border-2 border-amber-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-amber-600">
+                                <i class="fa-solid fa-film text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-amber-900">剧情梗概</div>
+                                <div class="text-xs text-amber-700">查看完整故事线</div>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-amber-600"></i>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div onclick="app.router('characters')" class="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center gap-2 active:scale-95 transition cursor-pointer">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-user-astronaut"></i>
+                        </div>
+                        <span class="font-medium text-gray-700 text-xs">角色</span>
+                    </div>
+                    <div onclick="app.router('non-characters')" class="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center gap-2 active:scale-95 transition cursor-pointer">
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-tree"></i>
+                        </div>
+                        <span class="font-medium text-gray-700 text-xs">设定</span>
+                    </div>
+                    <div onclick="app.router('graph')" class="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center gap-2 active:scale-95 transition cursor-pointer">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-circle-nodes"></i>
+                        </div>
+                        <span class="font-medium text-gray-700 text-xs">关系</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- 列表模板 -->
+    <template id="tpl-list">
+        <div class="h-full overflow-y-auto p-4 fade-in">
+            <div class="flex justify-between items-center mb-4 max-w-7xl mx-auto">
+                <div class="flex items-center gap-2">
+                    <h2 id="list-title" class="text-xl font-bold text-gray-800">列表</h2>
+                    <span id="list-count" class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">0</span>
+                </div>
+                <button onclick="app.createEntryFromList()" class="edit-only hidden bg-indigo-600 text-white w-8 h-8 rounded-full shadow hover:bg-indigo-700 transition flex items-center justify-center">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+            <div id="masonry-container" class="max-w-7xl mx-auto pb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+        </div>
+    </template>
+
+    <!-- 详情查看模板 -->
+    <template id="tpl-detail-view">
+        <div class="h-full overflow-y-auto bg-white fade-in">
+            <div class="max-w-3xl mx-auto min-h-full p-5 relative pb-20">
+                <div class="sticky top-0 bg-white/90 backdrop-blur z-10 py-2 mb-4 flex justify-between items-center border-b border-gray-100">
+                    <button onclick="app.router('home')" class="text-gray-500 hover:text-gray-800 flex items-center gap-1 text-sm">
+                        <i class="fa-solid fa-arrow-left"></i> 返回
+                    </button>
+                    <div class="flex gap-2 items-center">
+                        <span id="detail-code" class="text-xs font-mono text-gray-500 bg-gray-100 px-2 py-1 rounded"></span>
+                        <button onclick="app.editCurrentEntry()" class="edit-only bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-sm hover:bg-indigo-100 transition">
+                            <i class="fa-solid fa-pen-to-square"></i> 编辑
+                        </button>
+                    </div>
+                </div>
+                <div id="detail-content" class="prose prose-sm max-w-none"></div>
+            </div>
+        </div>
+    </template>
+
+    <!-- 词条编辑模板 -->
+    <template id="tpl-detail-edit">
+        <div class="h-full flex flex-col bg-gray-50 fade-in">
+            <div class="bg-white border-b px-4 py-3 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-2 text-xs text-gray-500 overflow-hidden">
+                    <span class="truncate max-w-[100px]">编辑</span>
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    <span id="edit-breadcrumb-title" class="font-bold text-gray-800 truncate">新词条</span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="app.cancelEdit()" class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded-lg text-sm">取消</button>
+                    <button onclick="app.saveEntry()" class="px-4 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 shadow text-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-save"></i> 保存
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4">
+                <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-5 space-y-5">
+                    <div class="space-y-4">
+                        <div class="flex gap-3 items-end">
+                            <div class="flex-1">
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">版本显示名称</label>
+                                <input type="text" id="edit-title" class="w-full text-3xl font-bold border-b-2 border-gray-200 focus:border-indigo-500 outline-none py-2 bg-transparent">
+                            </div>
+                            <div class="w-32">
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">词条编号</label>
+                                <input type="text" id="edit-code" class="w-full text-sm font-mono border border-gray-200 rounded px-2 py-1.5 bg-gray-50 outline-none uppercase" readonly>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">题记</label>
+                            <textarea id="edit-subtitle" class="w-full text-lg italic text-gray-600 border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 outline-none resize-none" rows="3"></textarea>
+                        </div>
+                        <div id="edit-blocks-container" class="space-y-3 pb-20"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- 系统设置模板 -->
+    <template id="tpl-settings">
+        <div class="h-full overflow-y-auto p-4 fade-in pb-20">
+            <div class="max-w-2xl mx-auto space-y-4">
+                <!-- 前台模式：字体设置和导出 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-font text-purple-600"></i> 字体设置
+                    </h2>
+                    <div class="space-y-3">
+                        <select id="setting-font" class="w-full p-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none" onchange="app.changeFont(this.value)">
+                            <option value="'Noto Sans SC', sans-serif">默认字体</option>
+                            <option value="'Noto Serif SC', serif">宋体</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 后台模式：分享码管理 -->
+                <div class="edit-only hidden bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-key text-amber-600"></i> 存档分享码
+                    </h2>
+                    <div class="space-y-3">
+                        <div class="flex gap-2">
+                            <input type="text" id="new-share-code" class="flex-1 p-2 border rounded-lg text-sm" placeholder="留空自动生成">
+                            <input type="text" id="share-code-desc" class="flex-1 p-2 border rounded-lg text-sm" placeholder="描述（可选）">
+                            <button onclick="app.generateShareCode()" class="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm hover:bg-amber-600 transition">
+                                生成
+                            </button>
+                        </div>
+                        <div id="share-code-list" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <!-- 后台模式：GitHub设置 -->
+                <div class="edit-only hidden bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <i class="fa-brands fa-github text-gray-800"></i> GitHub设置
+                    </h2>
+                    <div class="space-y-3">
+                        <div class="text-sm text-gray-600">
+                            <p>当前仓库: <span id="github-repo-display" class="font-mono">未连接</span></p>
+                        </div>
+                        <button onclick="app.disconnectGitHub()" class="w-full py-2 bg-red-50 text-red-600 rounded-lg text-sm hover:bg-red-100 transition">
+                            断开连接
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 数据导出 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-database text-blue-600"></i> 数据管理
+                    </h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="app.exportData()" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition">
+                            <i class="fa-solid fa-file-code text-lg mb-1 block"></i>
+                            导出JSON
+                        </button>
+                        <button onclick="app.exportZipBackup()" class="p-2 bg-indigo-50 hover:bg-indigo-100 rounded-lg text-sm font-medium text-indigo-700 transition">
+                            <i class="fa-solid fa-file-zipper text-lg mb-1 block"></i>
+                            导出ZIP
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- ========== JavaScript ========== -->
+    <script src="wiki-github-core.js"></script>
+    <script src="wiki-github-storage.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof app !== 'undefined' && app.init) {
+                app.init();
+            }
+        });
+    </script>
+</body>
+</html>
