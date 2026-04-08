@@ -1,16 +1,14 @@
 /**
- * GitHub版 Wiki 核心系统 v2.0
- * 功能：前后台模式分离，GitHub存储，完整功能支持
+ * GitHub版 Wiki 核心系统 v2.6
+ * 修复：数据导入格式兼容、分享码改为仅保护导出功能
  */
 
-// 确保 app 对象存在（与 storage.js 共享同一个对象）
+// 确保 app 对象存在
 if (typeof window.app === 'undefined') {
     window.app = {};
 }
 
-// 扩展 app 对象
 Object.assign(window.app, {
-    // ========== 应用状态 ==========
     data: {
         entries: [],
         chapters: [],
@@ -25,9 +23,7 @@ Object.assign(window.app, {
         wikiTitle: '未命名 Wiki',
         wikiSubtitle: '',
         fontFamily: "'Noto Sans SC', sans-serif",
-        // 自定义字段支持
         customFields: {},
-        // 首页自定义内容
         homeContent: []
     },
     
@@ -38,7 +34,7 @@ Object.assign(window.app, {
     backendLoggedIn: false,
     backendPassword: null,
     
-    // 分享码验证状态
+    // 前台模式：仅导出时需要分享码验证
     shareCodeVerified: false,
     verifiedShareCode: null,
     
@@ -47,7 +43,6 @@ Object.assign(window.app, {
     tempVersion: null,
     editingVersionId: null,
     
-    // 编辑状态追踪
     editState: {
         originalEntry: null,
         originalVersion: null,
@@ -56,9 +51,8 @@ Object.assign(window.app, {
         redoStack: []
     },
 
-    // ========== 分享码系统 ==========
+    // 分享码系统 - 仅用于保护数据导出
     shareCodeSystem: {
-        // 生成随机分享码
         generateCode() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let code = '';
@@ -68,7 +62,6 @@ Object.assign(window.app, {
             return code;
         },
         
-        // 验证分享码格式
         validateCode(code) {
             return /^[A-Z0-9]{8}$/.test(code);
         },
@@ -125,7 +118,6 @@ Object.assign(window.app, {
 
     // ========== 初始化 ==========
     init() {
-        // 绑定 GitHub 存储管理器
         this.githubStorage = window.WikiGitHubStorage;
         
         // 检查是否有保存的后台登录状态
@@ -142,22 +134,23 @@ Object.assign(window.app, {
             }
         }
         
-        // 检查是否有保存的分享码
+        // 检查是否有保存的分享码（用于导出验证）
         const savedCode = localStorage.getItem('wiki_verified_sharecode');
-        if (savedCode && !this.backendLoggedIn) {
+        if (savedCode) {
             this.verifiedShareCode = savedCode;
             this.shareCodeVerified = true;
         }
         
         // 检查GitHub配置
         if (this.githubStorage && this.githubStorage.init()) {
+            // 直接加载数据，不再要求分享码验证
             this.loadDataFromGitHub();
         } else {
             this.showLoginPage();
         }
     },
 
-    // ========== 登录页面 ==========
+    // ========== 登录页面（仅用于后台模式） ==========
     showLoginPage() {
         const container = document.getElementById('main-container');
         if (!container) return;
@@ -169,27 +162,141 @@ Object.assign(window.app, {
         container.innerHTML = '';
         container.appendChild(clone);
         
-        // 直接显示分享码登录表单（前台模式）
+        // 默认显示前台模式入口（直接查看）
         document.getElementById('login-options').classList.add('hidden');
         document.getElementById('share-code-form').classList.remove('hidden');
         
-        // 添加后台入口链接
+        // 修改提示文字 - 分享码仅用于导出
+        const descText = document.querySelector('#share-code-form p.text-gray-500');
+        if (descText) {
+            descText.textContent = '输入分享码以导出完整数据备份';
+        }
+        
+        // 添加"直接浏览"按钮
         const shareForm = document.getElementById('share-code-form');
-        const backendLink = document.createElement('div');
-        backendLink.className = 'text-center mt-4 pt-4 border-t border-gray-100';
-        backendLink.innerHTML = `
-            <button onclick="app.showBackendLogin()" class="text-sm text-gray-400 hover:text-indigo-600 transition flex items-center justify-center gap-1 mx-auto">
+        
+        // 清空原有按钮，重建布局
+        const existingButtons = shareForm.querySelectorAll('button:not([onclick*="showLoginOptions"])');
+        existingButtons.forEach(btn => btn.remove());
+        
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'space-y-3 mt-4';
+        buttonContainer.innerHTML = `
+            <button onclick="app.enterDirectView()" class="w-full py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition">
+                <i class="fa-solid fa-book-open mr-2"></i>直接浏览 Wiki
+            </button>
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-200"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-gray-500">或</span>
+                </div>
+            </div>
+            <button onclick="app.showExportCodeInput()" class="w-full py-3 bg-amber-100 text-amber-700 rounded-lg font-medium hover:bg-amber-200 transition">
+                <i class="fa-solid fa-download mr-2"></i>导出数据（需分享码）
+            </button>
+            <button onclick="app.showBackendLogin()" class="w-full py-2 text-gray-400 hover:text-indigo-600 transition text-sm flex items-center justify-center gap-1">
                 <i class="fa-solid fa-lock text-xs"></i>
                 后台模式登录
             </button>
         `;
-        shareForm.appendChild(backendLink);
         
-        // 聚焦输入框
-        setTimeout(() => {
-            const input = document.getElementById('share-code-input');
-            if (input) input.focus();
-        }, 100);
+        // 插入到返回按钮之前
+        const returnBtn = shareForm.querySelector('button[onclick="app.showLoginOptions()"]');
+        if (returnBtn) {
+            shareForm.insertBefore(buttonContainer, returnBtn);
+        } else {
+            shareForm.appendChild(buttonContainer);
+        }
+        
+        // 隐藏原来的输入框和验证按钮（移到导出功能中）
+        const input = document.getElementById('share-code-input');
+        if (input) input.parentElement.classList.add('hidden');
+    },
+
+    // 直接进入浏览模式（无需分享码）
+    async enterDirectView() {
+        if (this.githubStorage.isConfigured()) {
+            await this.loadDataFromGitHub();
+        } else {
+            // 如果没有配置，提示需要配置GitHub
+            this.showAlertDialog({
+                title: '未配置GitHub',
+                message: '请先配置GitHub仓库信息，或联系管理员获取访问链接。',
+                type: 'warning'
+            });
+        }
+    },
+
+    // 显示导出数据时的分享码输入
+    showExportCodeInput() {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black/60 z-[99999] flex items-center justify-center p-4 fade-in';
+        overlay.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-lock text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">验证分享码</h3>
+                    <p class="text-gray-600 text-sm">导出完整数据需要输入有效的分享码</p>
+                </div>
+                <div class="mb-4">
+                    <input type="text" id="export-code-input" 
+                        class="share-code-input w-full p-4 border-2 border-gray-200 rounded-lg text-center text-2xl font-bold tracking-widest uppercase focus:border-amber-500 focus:ring-0 outline-none transition" 
+                        placeholder="XXXXXXXX"
+                        maxlength="8">
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="this.closest('.fixed').remove()" class="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                        取消
+                    </button>
+                    <button onclick="app.verifyExportCode()" class="flex-1 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition font-medium shadow-lg">
+                        验证并导出
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        setTimeout(() => document.getElementById('export-code-input')?.focus(), 100);
+    },
+
+    // 验证导出分享码
+    async verifyExportCode() {
+        const input = document.getElementById('export-code-input');
+        const code = input.value.trim().toUpperCase();
+        
+        if (!this.shareCodeSystem.validateCode(code)) {
+            this.showAlertDialog({
+                title: '格式错误',
+                message: '分享码应为8位字母数字组合',
+                type: 'warning'
+            });
+            return;
+        }
+        
+        const isValid = await this.shareCodeSystem.verifyCode(code);
+        
+        if (isValid) {
+            this.shareCodeVerified = true;
+            this.verifiedShareCode = code;
+            localStorage.setItem('wiki_verified_sharecode', code);
+            
+            // 关闭弹窗
+            document.querySelector('.fixed.inset-0')?.remove();
+            this.showToast('验证成功，现在可以导出数据', 'success');
+            
+            // 直接进入并打开设置页面
+            await this.loadDataFromGitHub();
+            setTimeout(() => this.router('settings'), 100);
+        } else {
+            this.showAlertDialog({
+                title: '验证失败',
+                message: '分享码无效或已过期',
+                type: 'error'
+            });
+        }
     },
 
     // 从主页进入后台登录
@@ -200,22 +307,16 @@ Object.assign(window.app, {
         }, 50);
     },
 
-    // 进入前台模式（分享码登录）
-    enterFrontendMode() {
-        document.getElementById('login-options').classList.add('hidden');
-        document.getElementById('share-code-form').classList.remove('hidden');
-    },
-
     // 显示后台登录
     showBackendLogin() {
-        document.getElementById('share-code-form').classList.add('hidden');
-        document.getElementById('backend-login-form').classList.remove('hidden');
+        document.getElementById('share-code-form')?.classList.add('hidden');
+        document.getElementById('backend-login-form')?.classList.remove('hidden');
     },
 
-    // 返回登录选项（返回分享码登录）
+    // 返回登录选项
     showLoginOptions() {
-        document.getElementById('backend-login-form').classList.add('hidden');
-        document.getElementById('share-code-form').classList.remove('hidden');
+        document.getElementById('backend-login-form')?.classList.add('hidden');
+        document.getElementById('share-code-form')?.classList.remove('hidden');
     },
 
     // 后台模式登录
@@ -235,10 +336,8 @@ Object.assign(window.app, {
             return;
         }
         
-        // 保存GitHub配置
         this.githubStorage.saveConfig(owner, repo, token, branch);
         
-        // 测试连接
         const result = await this.githubStorage.testConnection();
         if (!result.success) {
             this.showAlertDialog({
@@ -250,10 +349,8 @@ Object.assign(window.app, {
             return;
         }
         
-        // 设置后台密码（如果提供了）
         if (password) {
             this.backendPassword = password;
-            // 保存登录状态（7天）
             localStorage.setItem('wiki_backend_login', JSON.stringify({
                 password: password,
                 expires: Date.now() + 7 * 24 * 60 * 60 * 1000
@@ -264,38 +361,6 @@ Object.assign(window.app, {
         this.runMode = 'backend';
         this.showToast('后台模式登录成功', 'success');
         this.loadDataFromGitHub();
-    },
-
-    // 验证分享码（前台模式）
-    async verifyShareCode() {
-        const input = document.getElementById('share-code-input');
-        const code = input.value.trim().toUpperCase();
-        
-        if (!this.shareCodeSystem.validateCode(code)) {
-            this.showAlertDialog({
-                title: '格式错误',
-                message: '分享码应为8位字母数字组合',
-                type: 'warning'
-            });
-            return;
-        }
-        
-        // 从GitHub获取分享码列表验证
-        const isValid = await this.shareCodeSystem.verifyCode(code);
-        
-        if (isValid) {
-            this.shareCodeVerified = true;
-            this.verifiedShareCode = code;
-            localStorage.setItem('wiki_verified_sharecode', code);
-            this.showToast('验证成功', 'success');
-            this.loadDataFromGitHub();
-        } else {
-            this.showAlertDialog({
-                title: '验证失败',
-                message: '分享码无效或已过期',
-                type: 'error'
-            });
-        }
     },
 
     // 退出后台模式
@@ -312,16 +377,23 @@ Object.assign(window.app, {
     // ========== 数据加载 ==========
     async loadDataFromGitHub() {
         try {
-            // 尝试加载 wiki-manifest.json（本地版格式）
+            // 尝试加载 wiki-manifest.json 或 data.json
             let data = await this.githubStorage.loadWikiData('wiki-manifest.json');
             
-            // 如果没有，尝试 data.json
             if (!data) {
                 data = await this.githubStorage.loadWikiData('data.json');
             }
             
             if (data) {
-                this.data = { ...this.data, ...data };
+                // 处理不同格式的数据
+                if (data.data) {
+                    // 如果是嵌套格式 {data: {...}}
+                    this.data = { ...this.data, ...data.data };
+                } else {
+                    // 如果是扁平格式
+                    this.data = { ...this.data, ...data };
+                }
+                
                 // 确保所有必要字段存在
                 if (!this.data.entries) this.data.entries = [];
                 if (!this.data.chapters) this.data.chapters = [];
@@ -356,7 +428,7 @@ Object.assign(window.app, {
 
     // ========== 根据模式更新UI ==========
     updateUIForMode() {
-        // 更新模式徽章（仅后台模式显示）
+        // 更新模式徽章
         const badge = document.getElementById('mode-badge');
         if (badge) {
             if (this.runMode === 'backend') {
@@ -390,6 +462,12 @@ Object.assign(window.app, {
         if (titleEl) {
             titleEl.textContent = this.data.wikiTitle || '未命名 Wiki';
         }
+        
+        // 更新首页的后台入口显示
+        const backendEntry = document.getElementById('backend-entry-section');
+        if (backendEntry) {
+            backendEntry.classList.toggle('hidden', this.runMode === 'backend');
+        }
     },
 
     // ========== 页面路由 ==========
@@ -406,7 +484,6 @@ Object.assign(window.app, {
             btn.classList.toggle('text-gray-500', !isActive);
         });
         
-        // 根据目标渲染不同页面
         switch(target) {
             case 'home':
                 this.renderHome(container);
@@ -477,26 +554,21 @@ Object.assign(window.app, {
         
         const clone = tpl.content.cloneNode(true);
         
-        // 更新欢迎信息
         const titleEl = clone.getElementById('welcome-title');
         const subtitleEl = clone.getElementById('welcome-subtitle');
         if (titleEl) titleEl.textContent = this.data.wikiTitle || '欢迎来到 Wiki';
         if (subtitleEl) subtitleEl.textContent = this.data.wikiSubtitle || '探索角色、世界观与错综复杂的关系网。';
         
-        // 显示/隐藏编辑按钮
         clone.querySelectorAll('.edit-only').forEach(el => {
             el.classList.toggle('hidden', this.runMode !== 'backend');
         });
         
-        // 显示/隐藏后台入口区域（仅前台模式显示）
         const backendEntry = clone.getElementById('backend-entry-section');
         if (backendEntry) {
             backendEntry.classList.toggle('hidden', this.runMode === 'backend');
         }
         
         container.appendChild(clone);
-        
-        // 渲染首页自定义内容
         this.renderHomeCustomContent();
     },
 
@@ -507,7 +579,7 @@ Object.assign(window.app, {
         container.innerHTML = '';
         
         if (!this.data.homeContent || this.data.homeContent.length === 0) {
-            container.innerHTML = '<p class="text-gray-400 text-center py-4">暂无自定义内容</p>';
+            container.innerHTML = '<p class="text-gray-400 text-center py-4 text-sm">暂无自定义内容</p>';
             return;
         }
         
@@ -525,7 +597,7 @@ Object.assign(window.app, {
                         </button>
                     `;
                 } else {
-                    div.innerHTML = `<p class="text-gray-700">${item.content || ''}</p>`;
+                    div.innerHTML = `<p class="text-gray-700 leading-relaxed">${item.content || ''}</p>`;
                 }
                 container.appendChild(div);
             } else if (item.type === 'entry-ref') {
@@ -557,7 +629,6 @@ Object.assign(window.app, {
         
         title.textContent = type === 'character' ? '角色' : '设定';
         
-        // 显示/隐藏编辑按钮
         clone.querySelectorAll('.edit-only').forEach(el => {
             el.classList.toggle('hidden', this.runMode !== 'backend');
         });
@@ -568,7 +639,6 @@ Object.assign(window.app, {
         if (items.length === 0) {
             masonry.innerHTML = '<div class="col-span-full text-center py-10 text-gray-400">暂无数据</div>';
         } else {
-            // 按重要程度排序
             items.sort((a, b) => {
                 const vA = this.getVisibleVersion(a);
                 const vB = this.getVisibleVersion(b);
@@ -607,14 +677,12 @@ Object.assign(window.app, {
         
         clone.getElementById('detail-code').textContent = entry.code;
         
-        // 显示/隐藏编辑按钮
         clone.querySelectorAll('.edit-only').forEach(el => {
             el.classList.toggle('hidden', this.runMode !== 'backend');
         });
         
         const contentEl = clone.getElementById('detail-content');
         
-        // 渲染内容
         let contentHtml = `
             <div class="flex flex-col md:flex-row gap-6 mb-6">
                 <div class="flex-1">
@@ -623,7 +691,6 @@ Object.assign(window.app, {
                 </div>
         `;
         
-        // 图片
         const img = version.images?.card || version.images?.avatar || version.image;
         if (img) {
             contentHtml += `
@@ -637,7 +704,6 @@ Object.assign(window.app, {
         
         contentHtml += '</div>';
         
-        // 正文块
         contentHtml += '<div class="prose prose-sm max-w-none">';
         if (version.blocks && version.blocks.length > 0) {
             version.blocks.forEach(block => {
@@ -654,7 +720,6 @@ Object.assign(window.app, {
         }
         contentHtml += '</div>';
         
-        // 版本切换
         if (entry.versions.length > 1) {
             contentHtml += `
                 <div class="mt-8 pt-6 border-t border-gray-200">
@@ -680,7 +745,6 @@ Object.assign(window.app, {
     renderEdit(container) {
         const isNew = !this.data.editingId;
         
-        // 初始化临时数据
         if (isNew) {
             const type = this.data.editingType || 'character';
             const code = this.generateCode(type);
@@ -741,7 +805,6 @@ Object.assign(window.app, {
         if (codeInput) codeInput.value = this.tempEntry.code;
         if (subtitleInput) subtitleInput.value = this.tempVersion.subtitle || '';
         
-        // 绑定键盘快捷键
         this.bindEditKeyboardShortcuts();
         
         container.appendChild(clone);
@@ -753,581 +816,47 @@ Object.assign(window.app, {
         
         const clone = tpl.content.cloneNode(true);
         
-        // 显示/隐藏编辑相关设置
         clone.querySelectorAll('.edit-only').forEach(el => {
             el.classList.toggle('hidden', this.runMode !== 'backend');
         });
         
-        // 更新GitHub仓库显示
+        // 前台模式：显示导出需要分享码的提示
+        if (this.runMode === 'frontend') {
+            const exportSection = clone.querySelector('.bg-white.rounded-xl.shadow-sm:has(.fa-database)');
+            if (exportSection && !this.shareCodeVerified) {
+                const warningDiv = document.createElement('div');
+                warningDiv.className = 'mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800';
+                warningDiv.innerHTML = `
+                    <i class="fa-solid fa-info-circle mr-1"></i>
+                    导出数据需要分享码验证。如需导出，请返回登录页面选择"导出数据"。
+                `;
+                exportSection.insertBefore(warningDiv, exportSection.firstChild);
+            }
+        }
+        
         if (this.runMode === 'backend' && this.githubStorage.isConfigured()) {
             const repoDisplay = clone.getElementById('github-repo-display');
             if (repoDisplay) {
                 repoDisplay.textContent = `${this.githubStorage.config.owner}/${this.githubStorage.config.repo}`;
             }
             
-            // 加载分享码列表
             this.loadShareCodeList(clone.getElementById('share-code-list'));
         }
         
         container.appendChild(clone);
-    },
-
-    // ========== 剧情梗概 ==========
-    renderSynopsis(container) {
-        const tpl = document.getElementById('tpl-synopsis-view');
-        if (!tpl) {
-            container.innerHTML = '<div class="p-8 text-center text-gray-400">剧情梗概模板未找到</div>';
-            return;
-        }
         
-        const clone = tpl.content.cloneNode(true);
-        container.appendChild(clone);
-        
-        // 同步剧情梗概与章节
-        this.syncSynopsisWithChapters();
-        
-        const list = document.getElementById('synopsis-view-list');
-        if (list) {
-            this.data.synopsis.forEach(chapter => {
-                const item = document.createElement('div');
-                item.className = 'synopsis-chapter-item p-6 border-b border-gray-200';
-                item.innerHTML = `
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">
-                        <span class="text-indigo-600 mr-2">${this.formatChapterNum(chapter.num)}</span>
-                        ${chapter.title}
-                    </h3>
-                    <div class="prose prose-sm max-w-none text-gray-600">
-                        ${chapter.content ? chapter.content.replace(/\n/g, '<br>') : '<p class="text-gray-400 italic">暂无内容</p>'}
-                    </div>
-                `;
-                list.appendChild(item);
+        // 前台模式下，如果未验证分享码，禁用导出按钮
+        if (this.runMode === 'frontend' && !this.shareCodeVerified) {
+            const exportBtns = container.querySelectorAll('button[onclick^="app.export"]');
+            exportBtns.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                btn.title = '需要分享码才能导出';
             });
         }
     },
 
-    renderSynopsisEdit(container) {
-        const tpl = document.getElementById('tpl-synopsis-edit');
-        if (!tpl) {
-            container.innerHTML = '<div class="p-8 text-center text-gray-400">剧情梗概编辑模板未找到</div>';
-            return;
-        }
-        
-        const clone = tpl.content.cloneNode(true);
-        container.appendChild(clone);
-        
-        this.syncSynopsisWithChapters();
-        
-        const list = document.getElementById('synopsis-chapters-list');
-        if (list) {
-            this.data.synopsis.forEach(chapter => {
-                const item = document.createElement('div');
-                item.className = 'bg-white rounded-lg border border-gray-200 mb-4 overflow-hidden';
-                item.innerHTML = `
-                    <div class="flex items-center gap-3 p-3 bg-gray-50 border-b border-gray-200">
-                        <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-bold">${this.formatChapterNum(chapter.num)}</span>
-                        <input type="text" class="flex-1 bg-transparent border-none outline-none text-sm font-medium" 
-                            value="${chapter.title}" onchange="app.updateSynopsisTitle('${chapter.id}', this.value)">
-                        <button onclick="app.removeSynopsisChapter('${chapter.id}')" class="text-red-500 hover:text-red-700 p-1.5">
-                            <i class="fa-solid fa-trash text-xs"></i>
-                        </button>
-                    </div>
-                    <div class="p-3">
-                        <textarea class="w-full p-2 border border-gray-200 rounded-lg text-sm resize-none" rows="4"
-                            onchange="app.updateSynopsisContent('${chapter.id}', this.value)">${chapter.content || ''}</textarea>
-                    </div>
-                `;
-                list.appendChild(item);
-            });
-        }
-    },
-
-    syncSynopsisWithChapters() {
-        const sortedChapters = [...this.data.chapters].sort((a, b) => a.order - b.order);
-        const existingSynopsis = {};
-        this.data.synopsis.forEach(s => { existingSynopsis[s.chapterId] = s; });
-
-        const newSynopsis = [];
-        sortedChapters.forEach(ch => {
-            if (existingSynopsis[ch.id]) {
-                newSynopsis.push(existingSynopsis[ch.id]);
-            } else {
-                newSynopsis.push({
-                    id: 'syn-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
-                    chapterId: ch.id,
-                    num: ch.num,
-                    title: ch.title || `第${ch.num}章`,
-                    content: '',
-                    image: null
-                });
-            }
-        });
-        this.data.synopsis = newSynopsis;
-    },
-
-    updateSynopsisTitle(chapterId, title) {
-        const chapter = this.data.synopsis.find(s => s.id === chapterId);
-        if (chapter) chapter.title = title;
-    },
-
-    updateSynopsisContent(chapterId, content) {
-        const chapter = this.data.synopsis.find(s => s.id === chapterId);
-        if (chapter) chapter.content = content;
-    },
-
-    removeSynopsisChapter(chapterId) {
-        this.showConfirmDialog({
-            title: '删除确认',
-            message: '确定删除此章节的剧情梗概？',
-            confirmText: '删除',
-            cancelText: '取消',
-            type: 'warning'
-        }).then(confirmed => {
-            if (confirmed) {
-                this.data.synopsis = this.data.synopsis.filter(s => s.id !== chapterId);
-                this.renderSynopsisEdit(document.getElementById('main-container'));
-            }
-        });
-    },
-
-    addSynopsisChapter() {
-        const num = this.data.chapters.length + 1;
-        const chapterId = 'ch-' + Date.now();
-        
-        // 添加章节
-        this.data.chapters.push({
-            id: chapterId,
-            num: num,
-            title: `第${num}章`,
-            order: num
-        });
-        
-        // 同步添加剧情梗概
-        this.data.synopsis.push({
-            id: 'syn-' + Date.now(),
-            chapterId: chapterId,
-            num: num,
-            title: `第${num}章`,
-            content: '',
-            image: null
-        });
-        
-        this.renderSynopsisEdit(document.getElementById('main-container'));
-    },
-
-    saveSynopsis() {
-        this.saveData();
-        this.showToast('剧情梗概已保存', 'success');
-    },
-
-    // ========== 时间轴/章节管理 ==========
-    renderTimelineSettings(container) {
-        const tpl = document.getElementById('tpl-timeline-settings');
-        if (!tpl) {
-            container.innerHTML = '<div class="p-8 text-center text-gray-400">章节管理模板未找到</div>';
-            return;
-        }
-        
-        const clone = tpl.content.cloneNode(true);
-        container.appendChild(clone);
-        
-        const list = document.getElementById('timeline-chapters-list');
-        if (list) {
-            const sortedChapters = [...this.data.chapters].sort((a, b) => a.order - b.order);
-            sortedChapters.forEach((ch, idx) => {
-                const item = document.createElement('div');
-                item.className = 'flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200';
-                item.innerHTML = `
-                    <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-bold font-mono w-16 text-center">${this.formatChapterNum(ch.num)}</span>
-                    <input type="text" class="flex-1 bg-transparent border border-gray-200 rounded px-2 py-1 text-sm" 
-                        value="${ch.title}" onchange="app.updateChapterTitle('${ch.id}', this.value)">
-                    <button onclick="app.moveChapter('${ch.id}', -1)" class="text-gray-400 hover:text-gray-600 p-1" ${idx === 0 ? 'disabled' : ''}>
-                        <i class="fa-solid fa-arrow-up"></i>
-                    </button>
-                    <button onclick="app.moveChapter('${ch.id}', 1)" class="text-gray-400 hover:text-gray-600 p-1" ${idx === sortedChapters.length - 1 ? 'disabled' : ''}>
-                        <i class="fa-solid fa-arrow-down"></i>
-                    </button>
-                    <button onclick="app.deleteChapter('${ch.id}')" class="text-red-400 hover:text-red-600 p-1">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                `;
-                list.appendChild(item);
-            });
-        }
-    },
-
-    updateChapterTitle(chapterId, title) {
-        const chapter = this.data.chapters.find(c => c.id === chapterId);
-        if (chapter) {
-            chapter.title = title;
-            // 同步更新剧情梗概标题
-            const synopsis = this.data.synopsis.find(s => s.chapterId === chapterId);
-            if (synopsis) synopsis.title = title;
-        }
-    },
-
-    moveChapter(chapterId, direction) {
-        const idx = this.data.chapters.findIndex(c => c.id === chapterId);
-        if (idx === -1) return;
-        
-        const newIdx = idx + direction;
-        if (newIdx < 0 || newIdx >= this.data.chapters.length) return;
-        
-        // 交换位置
-        const temp = this.data.chapters[idx];
-        this.data.chapters[idx] = this.data.chapters[newIdx];
-        this.data.chapters[newIdx] = temp;
-        
-        // 更新order
-        this.data.chapters.forEach((c, i) => c.order = i + 1);
-        
-        this.renderTimelineSettings(document.getElementById('main-container'));
-    },
-
-    deleteChapter(chapterId) {
-        this.showConfirmDialog({
-            title: '删除确认',
-            message: '确定删除此章节？相关的剧情梗概也会被删除。',
-            confirmText: '删除',
-            cancelText: '取消',
-            type: 'danger'
-        }).then(confirmed => {
-            if (confirmed) {
-                this.data.chapters = this.data.chapters.filter(c => c.id !== chapterId);
-                this.data.synopsis = this.data.synopsis.filter(s => s.chapterId !== chapterId);
-                this.renderTimelineSettings(document.getElementById('main-container'));
-            }
-        });
-    },
-
-    addChapter() {
-        const num = this.data.chapters.length + 1;
-        const chapterId = 'ch-' + Date.now();
-        
-        this.data.chapters.push({
-            id: chapterId,
-            num: num,
-            title: `第${num}章`,
-            order: num
-        });
-        
-        // 同步添加剧情梗概
-        this.data.synopsis.push({
-            id: 'syn-' + Date.now(),
-            chapterId: chapterId,
-            num: num,
-            title: `第${num}章`,
-            content: '',
-            image: null
-        });
-        
-        this.renderTimelineSettings(document.getElementById('main-container'));
-    },
-
-    saveTimelineSettings() {
-        this.saveData();
-        this.showToast('章节设置已保存', 'success');
-    },
-
-    // ========== 关系图 ==========
-    renderGraph(container) {
-        const tpl = document.getElementById('tpl-graph');
-        if (!tpl) {
-            container.innerHTML = '<div class="p-8 text-center text-gray-400">关系图模板未找到</div>';
-            return;
-        }
-        
-        const clone = tpl.content.cloneNode(true);
-        container.appendChild(clone);
-        
-        // 简单的关系图渲染
-        const graphContainer = document.getElementById('graph-container');
-        if (graphContainer) {
-            // 获取所有角色词条
-            const characters = this.data.entries.filter(e => e.type === 'character');
-            
-            if (characters.length === 0) {
-                graphContainer.innerHTML = '<div class="text-center text-gray-400 py-10">暂无角色数据</div>';
-                return;
-            }
-            
-            // 渲染角色节点
-            characters.forEach(entry => {
-                const version = this.getVisibleVersion(entry);
-                if (!version) return;
-                
-                const node = document.createElement('div');
-                node.className = 'absolute bg-white rounded-lg shadow-md border border-gray-200 p-3 cursor-pointer hover:shadow-lg transition';
-                node.style.left = `${Math.random() * 60 + 10}%`;
-                node.style.top = `${Math.random() * 60 + 10}%`;
-                node.innerHTML = `
-                    <div class="text-sm font-medium text-gray-800">${version.title}</div>
-                    <div class="text-xs text-gray-500">${entry.code}</div>
-                `;
-                node.onclick = () => this.openEntry(entry.id);
-                graphContainer.appendChild(node);
-            });
-        }
-    },
-
-    // ========== 公告编辑 ==========
-    renderAnnouncementEdit(container) {
-        const tpl = document.getElementById('tpl-announcement-edit');
-        if (!tpl) {
-            container.innerHTML = '<div class="p-8 text-center text-gray-400">公告编辑模板未找到</div>';
-            return;
-        }
-        
-        const clone = tpl.content.cloneNode(true);
-        container.appendChild(clone);
-    },
-
-    saveAnnouncement() {
-        const title = document.getElementById('announcement-edit-title')?.value;
-        const author = document.getElementById('announcement-edit-author')?.value;
-        const content = document.getElementById('announcement-edit-content')?.value;
-
-        if (!title) {
-            this.showAlertDialog({
-                title: '信息不完整',
-                message: '请输入公告标题',
-                type: 'warning'
-            });
-            return;
-        }
-
-        const newAnn = {
-            id: 'ann-' + Date.now(),
-            title,
-            author,
-            content,
-            createdAt: Date.now(),
-            date: new Date().toLocaleDateString('zh-CN'),
-            isActive: true
-        };
-        
-        // 将其他公告设为非活跃
-        this.data.announcements.forEach(a => a.isActive = false);
-        this.data.announcements.unshift(newAnn);
-
-        this.saveData();
-        this.showToast('公告已发布', 'success');
-        this.router('home');
-    },
-
-    createAnnouncement() {
-        this.data.currentAnnouncement = null;
-        this.router('announcement-edit');
-    },
-
-    viewAnnouncement() {
-        const ann = this.data.announcements?.find(a => a.isActive);
-        if (!ann) {
-            this.showToast('当前没有生效的公告', 'info');
-            return;
-        }
-        
-        const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 bg-black/60 z-[99999] flex items-center justify-center p-4 fade-in';
-        overlay.innerHTML = `
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
-                <div class="p-4 border-b bg-gradient-to-r from-orange-50 to-amber-50 flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-lg text-gray-800">${ann.title || '公告'}</h3>
-                        <p class="text-xs text-gray-500">${ann.author || '匿名'} · ${ann.date}</p>
-                    </div>
-                    <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fa-solid fa-times"></i>
-                    </button>
-                </div>
-                <div class="p-6 overflow-y-auto prose prose-sm max-w-none">
-                    ${ann.content || ''}
-                </div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
-    },
-
-    viewAnnouncementHistory() {
-        if (!this.data.announcements || this.data.announcements.length === 0) {
-            this.showToast('暂无历史公告', 'info');
-            return;
-        }
-        
-        const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 bg-black/60 z-[99999] flex items-center justify-center p-4 fade-in';
-        overlay.innerHTML = `
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
-                <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
-                    <h3 class="font-bold text-lg text-gray-800">历史公告</h3>
-                    <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fa-solid fa-times"></i>
-                    </button>
-                </div>
-                <div class="p-4 overflow-y-auto space-y-3">
-                    ${this.data.announcements.map(ann => `
-                        <div class="p-3 bg-gray-50 rounded-lg border ${ann.isActive ? 'border-orange-300 bg-orange-50' : 'border-gray-200'}">
-                            <div class="flex justify-between items-start">
-                                <h4 class="font-medium text-gray-800">${ann.title || '无标题'}</h4>
-                                ${ann.isActive ? '<span class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded">生效中</span>' : ''}
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">${ann.author || '匿名'} · ${ann.date}</p>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
-    },
-
-    // ========== 词条操作 ==========
-    createEntryCard(entry, version) {
-        const div = document.createElement('div');
-        div.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 active:scale-95 flex flex-col w-3/4 mx-auto';
-        div.onclick = () => this.openEntry(entry.id);
-        
-        const img = version.images?.card || version.images?.avatar || version.image || '';
-        const hasImage = img && (img.startsWith('data:') || img.startsWith('http'));
-        
-        div.innerHTML = `
-            <div class="relative aspect-[3/4] overflow-hidden bg-gray-100 shrink-0">
-                ${hasImage ? 
-                    `<img src="${img}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" alt="${version.title}">` :
-                    `<div class="w-full h-full flex items-center justify-center text-gray-300"><i class="fa-solid fa-user text-4xl"></i></div>`
-                }
-                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
-                    <div class="text-white font-bold text-sm truncate">${version.title}</div>
-                    <div class="text-white/80 text-xs font-mono truncate">${entry.code}</div>
-                </div>
-            </div>
-            <div class="p-3 flex-1 flex flex-col justify-between min-h-[60px]">
-                <p class="text-xs text-gray-500 line-clamp-2">${version.subtitle || ''}</p>
-            </div>
-        `;
-        
-        return div;
-    },
-
-    openEntry(id) {
-        this.data.editingId = id;
-        this.router('detail');
-    },
-
-    createEntry(type) {
-        this.data.editingType = type;
-        this.data.editingId = null;
-        this.router('edit');
-    },
-
-    createEntryFromList() {
-        const type = this.data.currentTarget === 'characters' ? 'character' : 'non-character';
-        this.createEntry(type);
-    },
-
-    editCurrentEntry() {
-        this.router('edit');
-    },
-
-    switchToVersion(entryId, versionId) {
-        this.data.editingId = entryId;
-        this.data.viewingVersionId = versionId;
-        this.router('detail', false);
-    },
-
-    // ========== 保存词条 ==========
-    async saveEntry() {
-        if (!this.tempEntry || !this.tempVersion) return;
-        
-        this.tempVersion.title = document.getElementById('edit-title')?.value?.trim() || '';
-        this.tempVersion.subtitle = document.getElementById('edit-subtitle')?.value?.trim() || '';
-        
-        if (!this.tempVersion.title) {
-            this.showAlertDialog({
-                title: '信息不完整',
-                message: '请输入版本名称',
-                type: 'warning'
-            });
-            return;
-        }
-        
-        const existingIndex = this.data.entries.findIndex(e => e.id === this.tempEntry.id);
-        if (existingIndex >= 0) {
-            this.data.entries[existingIndex] = this.tempEntry;
-        } else {
-            this.data.entries.push(this.tempEntry);
-        }
-        
-        try {
-            await this.githubStorage.saveWikiData(this.data);
-            this.showToast('保存成功', 'success');
-            this.editState.hasChanges = false;
-            this.unbindEditKeyboardShortcuts();
-            this.tempEntry = null;
-            this.tempVersion = null;
-            this.router('home');
-        } catch (error) {
-            console.error('保存失败:', error);
-            this.showAlertDialog({
-                title: '保存失败',
-                message: '无法保存到GitHub: ' + error.message,
-                type: 'error'
-            });
-        }
-    },
-
-    async cancelEdit() {
-        if (!this.editState.hasChanges && this.editState.undoStack.length === 0) {
-            this.unbindEditKeyboardShortcuts();
-            this.tempEntry = null;
-            this.tempVersion = null;
-            this.data.editingType = null;
-            this.router('home');
-            return;
-        }
-        
-        const confirmed = await this.showConfirmDialog({
-            title: '放弃编辑',
-            message: '确定放弃当前编辑？\n未保存的修改将丢失。',
-            confirmText: '放弃',
-            cancelText: '继续编辑',
-            type: 'warning'
-        });
-        
-        if (confirmed) {
-            this.unbindEditKeyboardShortcuts();
-            this.tempEntry = null;
-            this.tempVersion = null;
-            this.data.editingType = null;
-            this.editState.hasChanges = false;
-            this.editState.undoStack = [];
-            this.editState.redoStack = [];
-            this.router('home');
-        }
-    },
-
-    // ========== 删除词条 ==========
-    async deleteEntry(id) {
-        const index = this.data.entries.findIndex(e => e.id === id);
-        if (index >= 0) {
-            this.data.entries.splice(index, 1);
-            
-            try {
-                await this.githubStorage.saveWikiData(this.data);
-                this.showToast('删除成功', 'success');
-                this.router('home');
-            } catch (error) {
-                console.error('删除失败:', error);
-                this.showAlertDialog({
-                    title: '删除失败',
-                    message: '无法保存更改',
-                    type: 'error'
-                });
-            }
-        }
-    },
-
-    // ========== 数据导入 ==========
+    // ========== 数据导入（修复版） ==========
     async handleImportFolder(input) {
         const files = input.files;
         if (!files || files.length === 0) {
@@ -1337,43 +866,76 @@ Object.assign(window.app, {
 
         this.showImportStatus('正在读取文件...', 'info');
 
-        // 查找数据文件（支持 data.json 或 wiki-manifest.json）
         let dataFile = null;
         const imageFiles = [];
 
         for (const file of files) {
             const path = file.webkitRelativePath || file.name;
-            // 支持 "Wiki数据/data.json"、"Wiki数据/wiki-manifest.json" 或直接 "data.json"
+            // 支持多种路径格式
             if ((path.endsWith('data.json') || path.endsWith('wiki-manifest.json')) && !path.includes('/wiki-images/')) {
                 dataFile = file;
             }
-            // 收集图片文件（在 wiki-images 文件夹中）
             if (path.includes('/wiki-images/') && file.type.startsWith('image/')) {
                 imageFiles.push(file);
             }
         }
 
         if (!dataFile) {
-            this.showImportStatus('未找到数据文件（data.json 或 wiki-manifest.json），请确保选择了正确的"Wiki数据"文件夹', 'error');
+            this.showImportStatus('未找到数据文件（data.json 或 wiki-manifest.json），请确保选择了正确的文件夹', 'error');
             return;
         }
 
         try {
             const dataText = await dataFile.text();
-            const importedData = JSON.parse(dataText);
-
-            // 验证数据结构（支持多种格式）
-            if (!importedData.entries && !importedData.data) {
-                this.showImportStatus('数据格式不正确：缺少 entries 数组', 'error');
+            let importedData;
+            
+            try {
+                importedData = JSON.parse(dataText);
+            } catch (e) {
+                this.showImportStatus('JSON解析失败：文件格式错误', 'error');
                 return;
             }
 
-            // 处理不同格式的数据
-            const entries = importedData.entries || importedData.data?.entries || [];
-            const chapters = importedData.chapters || importedData.data?.chapters || [];
-            const camps = importedData.camps || importedData.data?.camps || [];
-            const synopsis = importedData.synopsis || importedData.data?.synopsis || [];
-            const announcements = importedData.announcements || importedData.data?.announcements || [];
+            // 修复：更健壮的数据验证逻辑
+            // 支持多种格式：
+            // 1. {entries: [...], chapters: [...]} - 扁平格式
+            // 2. {data: {entries: [...], ...}} - 嵌套格式
+            // 3. 只要有entries数组或data.entries数组即可
+            
+            let entries = null;
+            let chapters = null;
+            let camps = null;
+            let synopsis = null;
+            let announcements = null;
+            let wikiTitle = null;
+            let wikiSubtitle = null;
+
+            // 检查各种可能的格式
+            if (importedData.entries && Array.isArray(importedData.entries)) {
+                // 格式1：扁平格式
+                entries = importedData.entries;
+                chapters = importedData.chapters;
+                camps = importedData.camps;
+                synopsis = importedData.synopsis;
+                announcements = importedData.announcements;
+                wikiTitle = importedData.wikiTitle;
+                wikiSubtitle = importedData.wikiSubtitle;
+            } else if (importedData.data && importedData.data.entries && Array.isArray(importedData.data.entries)) {
+                // 格式2：嵌套格式
+                entries = importedData.data.entries;
+                chapters = importedData.data.chapters;
+                camps = importedData.data.camps;
+                synopsis = importedData.data.synopsis;
+                announcements = importedData.data.announcements;
+                wikiTitle = importedData.wikiTitle || importedData.data.wikiTitle;
+                wikiSubtitle = importedData.wikiSubtitle || importedData.data.wikiSubtitle;
+            }
+
+            // 验证是否找到entries
+            if (!entries || !Array.isArray(entries)) {
+                this.showImportStatus('数据格式错误：未找到有效的 entries 数组。支持的格式：\n1. {entries: [...], ...}\n2. {data: {entries: [...], ...}}', 'error');
+                return;
+            }
 
             this.showImportStatus(`找到 ${entries.length} 个词条，${imageFiles.length} 张图片，正在导入...`, 'info');
 
@@ -1391,42 +953,46 @@ Object.assign(window.app, {
                 }
             }
 
-            // 合并章节
-            const existingChapterIds = new Set(this.data.chapters.map(c => c.id));
-            for (const chapter of chapters) {
-                if (!existingChapterIds.has(chapter.id)) {
-                    this.data.chapters.push(chapter);
+            // 合并其他数据（如果存在）
+            if (chapters && Array.isArray(chapters)) {
+                const existingChapterIds = new Set(this.data.chapters.map(c => c.id));
+                for (const chapter of chapters) {
+                    if (!existingChapterIds.has(chapter.id)) {
+                        this.data.chapters.push(chapter);
+                    }
                 }
             }
 
-            // 合并阵营
-            for (const camp of camps) {
-                if (!this.data.camps.includes(camp)) {
-                    this.data.camps.push(camp);
+            if (camps && Array.isArray(camps)) {
+                for (const camp of camps) {
+                    if (!this.data.camps.includes(camp)) {
+                        this.data.camps.push(camp);
+                    }
                 }
             }
 
-            // 合并剧情梗概
-            const existingSynopsisIds = new Set(this.data.synopsis.map(s => s.id));
-            for (const syn of synopsis) {
-                if (!existingSynopsisIds.has(syn.id)) {
-                    this.data.synopsis.push(syn);
+            if (synopsis && Array.isArray(synopsis)) {
+                const existingSynopsisIds = new Set(this.data.synopsis.map(s => s.id));
+                for (const syn of synopsis) {
+                    if (!existingSynopsisIds.has(syn.id)) {
+                        this.data.synopsis.push(syn);
+                    }
                 }
             }
 
-            // 合并公告
-            const existingAnnIds = new Set(this.data.announcements.map(a => a.id));
-            for (const ann of announcements) {
-                if (!existingAnnIds.has(ann.id)) {
-                    this.data.announcements.push(ann);
+            if (announcements && Array.isArray(announcements)) {
+                const existingAnnIds = new Set(this.data.announcements.map(a => a.id));
+                for (const ann of announcements) {
+                    if (!existingAnnIds.has(ann.id)) {
+                        this.data.announcements.push(ann);
+                    }
                 }
             }
 
-            // 导入标题和副标题
-            if (importedData.wikiTitle) this.data.wikiTitle = importedData.wikiTitle;
-            if (importedData.wikiSubtitle) this.data.wikiSubtitle = importedData.wikiSubtitle;
+            if (wikiTitle) this.data.wikiTitle = wikiTitle;
+            if (wikiSubtitle) this.data.wikiSubtitle = wikiSubtitle;
 
-            // 上传图片到 GitHub
+            // 上传图片
             let uploadedImages = 0;
             if (imageFiles.length > 0) {
                 for (const imgFile of imageFiles) {
@@ -1446,7 +1012,6 @@ Object.assign(window.app, {
                 }
             }
 
-            // 保存到 GitHub
             await this.githubStorage.saveWikiData(this.data);
 
             this.showImportStatus(
@@ -1470,6 +1035,7 @@ Object.assign(window.app, {
         if (!statusEl) return;
 
         statusEl.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700', 'bg-blue-100', 'text-blue-700');
+        statusEl.classList.add('whitespace-pre-line'); // 支持换行
 
         const colors = {
             success: ['bg-green-100', 'text-green-700'],
@@ -1526,11 +1092,11 @@ Object.assign(window.app, {
             const item = document.createElement('div');
             item.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
             item.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <span class="font-mono font-bold text-amber-600">${code}</span>
-                    ${info.description ? `<span class="text-xs text-gray-500">${info.description}</span>` : ''}
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <span class="font-mono font-bold text-amber-600 shrink-0">${code}</span>
+                    ${info.description ? `<span class="text-xs text-gray-500 truncate">${info.description}</span>` : ''}
                 </div>
-                <div class="flex gap-2">
+                <div class="flex gap-2 shrink-0">
                     <button onclick="app.copyShareCode('${code}')" class="text-gray-500 hover:text-indigo-600 p-1" title="复制">
                         <i class="fa-solid fa-copy"></i>
                     </button>
@@ -1568,8 +1134,17 @@ Object.assign(window.app, {
         });
     },
 
-    // ========== 数据导出 ==========
-    exportData() {
+    // ========== 数据导出（前台模式需要分享码） ==========
+    async exportData() {
+        if (this.runMode === 'frontend' && !this.shareCodeVerified) {
+            this.showAlertDialog({
+                title: '需要分享码',
+                message: '前台模式导出数据需要输入有效的分享码。请在设置页面点击"输入分享码"进行验证。',
+                type: 'warning'
+            });
+            return;
+        }
+        
         const dataStr = JSON.stringify(this.data, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -1582,6 +1157,15 @@ Object.assign(window.app, {
     },
 
     async exportZipBackup() {
+        if (this.runMode === 'frontend' && !this.shareCodeVerified) {
+            this.showAlertDialog({
+                title: '需要分享码',
+                message: '前台模式导出数据需要输入有效的分享码。请在设置页面点击"输入分享码"进行验证。',
+                type: 'warning'
+            });
+            return;
+        }
+        
         const JSZip = window.JSZip;
         if (!JSZip) {
             this.showToast('ZIP库未加载', 'error');
@@ -1617,18 +1201,12 @@ Object.assign(window.app, {
         this.showToast('备份已导出', 'success');
     },
 
-    // ========== 字体设置 ==========
-    changeFont(font) {
-        this.data.fontFamily = font;
-        document.documentElement.style.setProperty('--custom-font', font);
-        this.applyFont();
+    // 显示分享码输入框（在设置页面使用）
+    showShareCodeInput() {
+        this.showExportCodeInput();
     },
 
-    applyFont() {
-        document.body.style.fontFamily = this.data.fontFamily;
-    },
-
-    // ========== 辅助函数 ==========
+    // ========== 其他辅助函数 ==========
     getVisibleVersion(entry) {
         if (!entry || !entry.versions) return null;
         
@@ -1681,7 +1259,6 @@ Object.assign(window.app, {
         }
     },
 
-    // ========== 键盘快捷键 ==========
     bindEditKeyboardShortcuts() {
         const handler = (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
@@ -1708,7 +1285,6 @@ Object.assign(window.app, {
         this.showToast('撤销功能开发中', 'info');
     },
 
-    // ========== 弹窗系统 ==========
     showConfirmDialog(options) {
         return new Promise((resolve) => {
             const { title = '确认', message, confirmText = '确认', cancelText = '取消', type = 'info' } = options;
@@ -1858,7 +1434,6 @@ Object.assign(window.app, {
         }, duration);
     },
 
-    // ========== 搜索功能 ==========
     handleSearchInput(value) {
         const dropdown = document.getElementById('search-dropdown');
         if (!value.trim()) {
@@ -1904,7 +1479,6 @@ Object.assign(window.app, {
         }, 200);
     },
 
-    // ========== 首页自定义内容 ==========
     addHomeTextBox() {
         if (!this.data.homeContent) this.data.homeContent = [];
         this.data.homeContent.push({ type: 'text', content: '' });
@@ -1987,12 +1561,10 @@ Object.assign(window.app, {
         this.showToast('首页内容已保存', 'success');
     },
 
-    // ========== 版本管理器（占位）==========
     showVersionManager() {
         this.showToast('版本管理器功能开发中', 'info');
     },
 
-    // ========== 保存数据 ==========
     async saveData() {
         try {
             await this.githubStorage.saveWikiData(this.data);
@@ -2001,7 +1573,6 @@ Object.assign(window.app, {
         }
     },
 
-    // ========== 模式切换 ==========
     setMode(mode) {
         this.data.currentMode = mode;
         const viewBtn = document.getElementById('btn-mode-view');
@@ -2017,7 +1588,573 @@ Object.assign(window.app, {
                 ? 'px-3 py-1.5 rounded-md bg-white shadow-sm text-gray-800 transition-all'
                 : 'px-3 py-1.5 rounded-md text-gray-500 hover:text-gray-800 transition-all';
         }
+    },
+
+    // 剧情梗概相关函数
+    renderSynopsis(container) {
+        const tpl = document.getElementById('tpl-synopsis-view');
+        if (!tpl) {
+            container.innerHTML = '<div class="p-8 text-center text-gray-400">剧情梗概模板未找到</div>';
+            return;
+        }
+        
+        const clone = tpl.content.cloneNode(true);
+        container.appendChild(clone);
+        
+        this.syncSynopsisWithChapters();
+        
+        const list = document.getElementById('synopsis-view-list');
+        if (list) {
+            this.data.synopsis.forEach(chapter => {
+                const item = document.createElement('div');
+                item.className = 'synopsis-chapter-item p-6 border-b border-gray-200 bg-white mb-4 rounded-xl shadow-sm';
+                item.innerHTML = `
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">
+                        <span class="text-indigo-600 mr-2">${this.formatChapterNum(chapter.num)}</span>
+                        ${chapter.title}
+                    </h3>
+                    <div class="prose prose-sm max-w-none text-gray-600 leading-relaxed">
+                        ${chapter.content ? chapter.content.replace(/\n/g, '<br>') : '<p class="text-gray-400 italic">暂无内容</p>'}
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+    },
+
+    renderSynopsisEdit(container) {
+        const tpl = document.getElementById('tpl-synopsis-edit');
+        if (!tpl) {
+            container.innerHTML = '<div class="p-8 text-center text-gray-400">剧情梗概编辑模板未找到</div>';
+            return;
+        }
+        
+        const clone = tpl.content.cloneNode(true);
+        container.appendChild(clone);
+        
+        this.syncSynopsisWithChapters();
+        
+        const list = document.getElementById('synopsis-chapters-list');
+        if (list) {
+            this.data.synopsis.forEach(chapter => {
+                const item = document.createElement('div');
+                item.className = 'bg-white rounded-lg border border-gray-200 mb-4 overflow-hidden';
+                item.innerHTML = `
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 border-b border-gray-200">
+                        <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-bold">${this.formatChapterNum(chapter.num)}</span>
+                        <input type="text" class="flex-1 bg-transparent border-none outline-none text-sm font-medium" 
+                            value="${chapter.title}" onchange="app.updateSynopsisTitle('${chapter.id}', this.value)">
+                        <button onclick="app.removeSynopsisChapter('${chapter.id}')" class="text-red-500 hover:text-red-700 p-1.5">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </div>
+                    <div class="p-3">
+                        <textarea class="w-full p-2 border border-gray-200 rounded-lg text-sm resize-none" rows="4"
+                            onchange="app.updateSynopsisContent('${chapter.id}', this.value)">${chapter.content || ''}</textarea>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+    },
+
+    syncSynopsisWithChapters() {
+        const sortedChapters = [...this.data.chapters].sort((a, b) => a.order - b.order);
+        const existingSynopsis = {};
+        this.data.synopsis.forEach(s => { existingSynopsis[s.chapterId] = s; });
+
+        const newSynopsis = [];
+        sortedChapters.forEach(ch => {
+            if (existingSynopsis[ch.id]) {
+                newSynopsis.push(existingSynopsis[ch.id]);
+            } else {
+                newSynopsis.push({
+                    id: 'syn-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+                    chapterId: ch.id,
+                    num: ch.num,
+                    title: ch.title || `第${ch.num}章`,
+                    content: '',
+                    image: null
+                });
+            }
+        });
+        this.data.synopsis = newSynopsis;
+    },
+
+    updateSynopsisTitle(chapterId, title) {
+        const chapter = this.data.synopsis.find(s => s.id === chapterId);
+        if (chapter) chapter.title = title;
+    },
+
+    updateSynopsisContent(chapterId, content) {
+        const chapter = this.data.synopsis.find(s => s.id === chapterId);
+        if (chapter) chapter.content = content;
+    },
+
+    removeSynopsisChapter(chapterId) {
+        this.showConfirmDialog({
+            title: '删除确认',
+            message: '确定删除此章节的剧情梗概？',
+            confirmText: '删除',
+            cancelText: '取消',
+            type: 'warning'
+        }).then(confirmed => {
+            if (confirmed) {
+                this.data.synopsis = this.data.synopsis.filter(s => s.id !== chapterId);
+                this.renderSynopsisEdit(document.getElementById('main-container'));
+            }
+        });
+    },
+
+    addSynopsisChapter() {
+        const num = this.data.chapters.length + 1;
+        const chapterId = 'ch-' + Date.now();
+        
+        this.data.chapters.push({
+            id: chapterId,
+            num: num,
+            title: `第${num}章`,
+            order: num
+        });
+        
+        this.data.synopsis.push({
+            id: 'syn-' + Date.now(),
+            chapterId: chapterId,
+            num: num,
+            title: `第${num}章`,
+            content: '',
+            image: null
+        });
+        
+        this.renderSynopsisEdit(document.getElementById('main-container'));
+    },
+
+    saveSynopsis() {
+        this.saveData();
+        this.showToast('剧情梗概已保存', 'success');
+    },
+
+    renderTimelineSettings(container) {
+        const tpl = document.getElementById('tpl-timeline-settings');
+        if (!tpl) {
+            container.innerHTML = '<div class="p-8 text-center text-gray-400">章节管理模板未找到</div>';
+            return;
+        }
+        
+        const clone = tpl.content.cloneNode(true);
+        container.appendChild(clone);
+        
+        const list = document.getElementById('timeline-chapters-list');
+        if (list) {
+            const sortedChapters = [...this.data.chapters].sort((a, b) => a.order - b.order);
+            sortedChapters.forEach((ch, idx) => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200';
+                item.innerHTML = `
+                    <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-xs font-bold font-mono w-16 text-center">${this.formatChapterNum(ch.num)}</span>
+                    <input type="text" class="flex-1 bg-transparent border border-gray-200 rounded px-2 py-1 text-sm" 
+                        value="${ch.title}" onchange="app.updateChapterTitle('${ch.id}', this.value)">
+                    <button onclick="app.moveChapter('${ch.id}', -1)" class="text-gray-400 hover:text-gray-600 p-1" ${idx === 0 ? 'disabled' : ''}>
+                        <i class="fa-solid fa-arrow-up"></i>
+                    </button>
+                    <button onclick="app.moveChapter('${ch.id}', 1)" class="text-gray-400 hover:text-gray-600 p-1" ${idx === sortedChapters.length - 1 ? 'disabled' : ''}>
+                        <i class="fa-solid fa-arrow-down"></i>
+                    </button>
+                    <button onclick="app.deleteChapter('${ch.id}')" class="text-red-400 hover:text-red-600 p-1">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                `;
+                list.appendChild(item);
+            });
+        }
+    },
+
+    updateChapterTitle(chapterId, title) {
+        const chapter = this.data.chapters.find(c => c.id === chapterId);
+        if (chapter) {
+            chapter.title = title;
+            const synopsis = this.data.synopsis.find(s => s.chapterId === chapterId);
+            if (synopsis) synopsis.title = title;
+        }
+    },
+
+    moveChapter(chapterId, direction) {
+        const idx = this.data.chapters.findIndex(c => c.id === chapterId);
+        if (idx === -1) return;
+        
+        const newIdx = idx + direction;
+        if (newIdx < 0 || newIdx >= this.data.chapters.length) return;
+        
+        const temp = this.data.chapters[idx];
+        this.data.chapters[idx] = this.data.chapters[newIdx];
+        this.data.chapters[newIdx] = temp;
+        
+        this.data.chapters.forEach((c, i) => c.order = i + 1);
+        
+        this.renderTimelineSettings(document.getElementById('main-container'));
+    },
+
+    deleteChapter(chapterId) {
+        this.showConfirmDialog({
+            title: '删除确认',
+            message: '确定删除此章节？相关的剧情梗概也会被删除。',
+            confirmText: '删除',
+            cancelText: '取消',
+            type: 'danger'
+        }).then(confirmed => {
+            if (confirmed) {
+                this.data.chapters = this.data.chapters.filter(c => c.id !== chapterId);
+                this.data.synopsis = this.data.synopsis.filter(s => s.chapterId !== chapterId);
+                this.renderTimelineSettings(document.getElementById('main-container'));
+            }
+        });
+    },
+
+    addChapter() {
+        const num = this.data.chapters.length + 1;
+        const chapterId = 'ch-' + Date.now();
+        
+        this.data.chapters.push({
+            id: chapterId,
+            num: num,
+            title: `第${num}章`,
+            order: num
+        });
+        
+        this.data.synopsis.push({
+            id: 'syn-' + Date.now(),
+            chapterId: chapterId,
+            num: num,
+            title: `第${num}章`,
+            content: '',
+            image: null
+        });
+        
+        this.renderTimelineSettings(document.getElementById('main-container'));
+    },
+
+    saveTimelineSettings() {
+        this.saveData();
+        this.showToast('章节设置已保存', 'success');
+    },
+
+    renderGraph(container) {
+        const tpl = document.getElementById('tpl-graph');
+        if (!tpl) {
+            container.innerHTML = '<div class="p-8 text-center text-gray-400">关系图模板未找到</div>';
+            return;
+        }
+        
+        const clone = tpl.content.cloneNode(true);
+        container.appendChild(clone);
+        
+        const graphContainer = document.getElementById('graph-container');
+        if (graphContainer) {
+            const characters = this.data.entries.filter(e => e.type === 'character');
+            
+            if (characters.length === 0) {
+                graphContainer.innerHTML = '<div class="text-center text-gray-400 py-10">暂无角色数据</div>';
+                return;
+            }
+            
+            characters.forEach(entry => {
+                const version = this.getVisibleVersion(entry);
+                if (!version) return;
+                
+                const node = document.createElement('div');
+                node.className = 'absolute bg-white rounded-lg shadow-md border border-gray-200 p-3 cursor-pointer hover:shadow-lg transition';
+                node.style.left = `${Math.random() * 60 + 10}%`;
+                node.style.top = `${Math.random() * 60 + 10}%`;
+                node.innerHTML = `
+                    <div class="text-sm font-medium text-gray-800">${version.title}</div>
+                    <div class="text-xs text-gray-500">${entry.code}</div>
+                `;
+                node.onclick = () => this.openEntry(entry.id);
+                graphContainer.appendChild(node);
+            });
+        }
+    },
+
+    renderAnnouncementEdit(container) {
+        const tpl = document.getElementById('tpl-announcement-edit');
+        if (!tpl) {
+            container.innerHTML = '<div class="p-8 text-center text-gray-400">公告编辑模板未找到</div>';
+            return;
+        }
+        
+        const clone = tpl.content.cloneNode(true);
+        container.appendChild(clone);
+    },
+
+    saveAnnouncement() {
+        const title = document.getElementById('announcement-edit-title')?.value;
+        const author = document.getElementById('announcement-edit-author')?.value;
+        const content = document.getElementById('announcement-edit-content')?.value;
+
+        if (!title) {
+            this.showAlertDialog({
+                title: '信息不完整',
+                message: '请输入公告标题',
+                type: 'warning'
+            });
+            return;
+        }
+
+        const newAnn = {
+            id: 'ann-' + Date.now(),
+            title,
+            author,
+            content,
+            createdAt: Date.now(),
+            date: new Date().toLocaleDateString('zh-CN'),
+            isActive: true
+        };
+        
+        this.data.announcements.forEach(a => a.isActive = false);
+        this.data.announcements.unshift(newAnn);
+
+        this.saveData();
+        this.showToast('公告已发布', 'success');
+        this.router('home');
+    },
+
+    createAnnouncement() {
+        this.data.currentAnnouncement = null;
+        this.router('announcement-edit');
+    },
+
+    viewAnnouncement() {
+        const ann = this.data.announcements?.find(a => a.isActive);
+        if (!ann) {
+            this.showToast('当前没有生效的公告', 'info');
+            return;
+        }
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black/60 z-[99999] flex items-center justify-center p-4 fade-in';
+        overlay.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
+                <div class="p-4 border-b bg-gradient-to-r from-orange-50 to-amber-50 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-lg text-gray-800">${ann.title || '公告'}</h3>
+                        <p class="text-xs text-gray-500">${ann.author || '匿名'} · ${ann.date}</p>
+                    </div>
+                    <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6 overflow-y-auto prose prose-sm max-w-none">
+                    ${ann.content || ''}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    },
+
+    viewAnnouncementHistory() {
+        if (!this.data.announcements || this.data.announcements.length === 0) {
+            this.showToast('暂无历史公告', 'info');
+            return;
+        }
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black/60 z-[99999] flex items-center justify-center p-4 fade-in';
+        overlay.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden">
+                <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
+                    <h3 class="font-bold text-lg text-gray-800">历史公告</h3>
+                    <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-4 overflow-y-auto space-y-3">
+                    ${this.data.announcements.map(ann => `
+                        <div class="p-3 bg-gray-50 rounded-lg border ${ann.isActive ? 'border-orange-300 bg-orange-50' : 'border-gray-200'}">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-medium text-gray-800">${ann.title || '无标题'}</h4>
+                                ${ann.isActive ? '<span class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded">生效中</span>' : ''}
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">${ann.author || '匿名'} · ${ann.date}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    },
+
+    createEntryCard(entry, version) {
+        const div = document.createElement('div');
+        div.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 active:scale-95 flex flex-col w-full';
+        div.onclick = () => this.openEntry(entry.id);
+        
+        const img = version.images?.card || version.images?.avatar || version.image || '';
+        const hasImage = img && (img.startsWith('data:') || img.startsWith('http'));
+        
+        div.innerHTML = `
+            <div class="relative aspect-[3/4] overflow-hidden bg-gray-100 shrink-0">
+                ${hasImage ? 
+                    `<img src="${img}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" alt="${version.title}" loading="lazy">` :
+                    `<div class="w-full h-full flex items-center justify-center text-gray-300"><i class="fa-solid fa-user text-4xl"></i></div>`
+                }
+                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
+                    <div class="text-white font-bold text-sm truncate">${version.title}</div>
+                    <div class="text-white/80 text-xs font-mono truncate">${entry.code}</div>
+                </div>
+            </div>
+            <div class="p-3 flex-1 flex flex-col justify-between min-h-[60px]">
+                <p class="text-xs text-gray-500 line-clamp-2">${version.subtitle || ''}</p>
+            </div>
+        `;
+        
+        return div;
+    },
+
+    openEntry(id) {
+        this.data.editingId = id;
+        this.router('detail');
+    },
+
+    createEntry(type) {
+        this.data.editingType = type;
+        this.data.editingId = null;
+        this.router('edit');
+    },
+
+    createEntryFromList() {
+        const type = this.data.currentTarget === 'characters' ? 'character' : 'non-character';
+        this.createEntry(type);
+    },
+
+    editCurrentEntry() {
+        this.router('edit');
+    },
+
+    switchToVersion(entryId, versionId) {
+        this.data.editingId = entryId;
+        this.data.viewingVersionId = versionId;
+        this.router('detail', false);
+    },
+
+    async saveEntry() {
+        if (!this.tempEntry || !this.tempVersion) return;
+        
+        this.tempVersion.title = document.getElementById('edit-title')?.value?.trim() || '';
+        this.tempVersion.subtitle = document.getElementById('edit-subtitle')?.value?.trim() || '';
+        
+        if (!this.tempVersion.title) {
+            this.showAlertDialog({
+                title: '信息不完整',
+                message: '请输入版本名称',
+                type: 'warning'
+            });
+            return;
+        }
+        
+        const existingIndex = this.data.entries.findIndex(e => e.id === this.tempEntry.id);
+        if (existingIndex >= 0) {
+            this.data.entries[existingIndex] = this.tempEntry;
+        } else {
+            this.data.entries.push(this.tempEntry);
+        }
+        
+        try {
+            await this.githubStorage.saveWikiData(this.data);
+            this.showToast('保存成功', 'success');
+            this.editState.hasChanges = false;
+            this.unbindEditKeyboardShortcuts();
+            this.tempEntry = null;
+            this.tempVersion = null;
+            this.router('home');
+        } catch (error) {
+            console.error('保存失败:', error);
+            this.showAlertDialog({
+                title: '保存失败',
+                message: '无法保存到GitHub: ' + error.message,
+                type: 'error'
+            });
+        }
+    },
+
+    async cancelEdit() {
+        if (!this.editState.hasChanges && this.editState.undoStack.length === 0) {
+            this.unbindEditKeyboardShortcuts();
+            this.tempEntry = null;
+            this.tempVersion = null;
+            this.data.editingType = null;
+            this.router('home');
+            return;
+        }
+        
+        const confirmed = await this.showConfirmDialog({
+            title: '放弃编辑',
+            message: '确定放弃当前编辑？\n未保存的修改将丢失。',
+            confirmText: '放弃',
+            cancelText: '继续编辑',
+            type: 'warning'
+        });
+        
+        if (confirmed) {
+            this.unbindEditKeyboardShortcuts();
+            this.tempEntry = null;
+            this.tempVersion = null;
+            this.data.editingType = null;
+            this.editState.hasChanges = false;
+            this.editState.undoStack = [];
+            this.editState.redoStack = [];
+            this.router('home');
+        }
+    },
+
+    async deleteEntry(id) {
+        const index = this.data.entries.findIndex(e => e.id === id);
+        if (index >= 0) {
+            this.data.entries.splice(index, 1);
+            
+            try {
+                await this.githubStorage.saveWikiData(this.data);
+                this.showToast('删除成功', 'success');
+                this.router('home');
+            } catch (error) {
+                console.error('删除失败:', error);
+                this.showAlertDialog({
+                    title: '删除失败',
+                    message: '无法保存更改',
+                    type: 'error'
+                });
+            }
+        }
+    },
+
+    changeFont(font) {
+        this.data.fontFamily = font;
+        document.documentElement.style.setProperty('--custom-font', font);
+        this.applyFont();
+    },
+
+    applyFont() {
+        document.body.style.fontFamily = this.data.fontFamily;
+    },
+
+    disconnectGitHub() {
+        this.showConfirmDialog({
+            title: '断开连接',
+            message: '确定断开GitHub连接？',
+            type: 'warning'
+        }).then(confirmed => {
+            if (confirmed) {
+                this.githubStorage.clearConfig();
+                localStorage.removeItem('wiki_backend_login');
+                localStorage.removeItem('wiki_verified_sharecode');
+                this.backendLoggedIn = false;
+                this.runMode = 'frontend';
+                this.shareCodeVerified = false;
+                window.location.reload();
+            }
+        });
     }
 });
 
-console.log('GitHub Wiki Core v2.0 加载完成');
+console.log('GitHub Wiki Core v2.6 加载完成（修复导入与分享码逻辑）');
