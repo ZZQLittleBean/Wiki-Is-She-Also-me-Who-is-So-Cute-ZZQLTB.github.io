@@ -387,10 +387,28 @@ Object.assign(window.app, {
             if (data) {
                 // 处理不同格式的数据
                 if (data.data) {
-                    // 如果是嵌套格式 {data: {...}}
+                    // 格式2：嵌套格式 {data: {...}}
                     this.data = { ...this.data, ...data.data };
+                } else if (data.settings && Array.isArray(data.entries)) {
+                    // 【关键修复】格式3：截图所示的 {settings: {...}, entries: [...]} 结构
+                    this.data.entries = data.entries || [];
+                    this.data.chapters = data.chapters || [];
+                    this.data.camps = data.camps || ['主角团', '反派', '中立'];
+                    this.data.synopsis = data.synopsis || [];
+                    this.data.announcements = data.announcements || [];
+                    this.data.customFields = data.customFields || {};
+                    this.data.homeContent = data.homeContent || [];
+                    
+                    // 从 settings 对象提取配置（对应截图结构）
+                    if (data.settings) {
+                        this.data.wikiTitle = data.settings.name || '未命名 Wiki';
+                        this.data.wikiSubtitle = data.settings.subtitle || '';
+                        this.data.welcomeTitle = data.settings.welcomeTitle || '';
+                        this.data.welcomeSubtitle = data.settings.welcomeSubtitle || '';
+                        if (data.settings.customFont) this.data.fontFamily = data.settings.customFont;
+                    }
                 } else {
-                    // 如果是扁平格式
+                    // 格式1：扁平格式（旧版兼容）
                     this.data = { ...this.data, ...data };
                 }
                 
@@ -402,15 +420,8 @@ Object.assign(window.app, {
                 if (!this.data.announcements) this.data.announcements = [];
                 if (!this.data.customFields) this.data.customFields = {};
                 if (!this.data.homeContent) this.data.homeContent = [];
-            } else {
-                // 首次使用，创建空数据
-                this.data.entries = [];
-                this.data.chapters = [];
-                this.data.camps = ['主角团', '反派', '中立'];
-                this.data.synopsis = [];
-                this.data.announcements = [];
-                this.data.customFields = {};
-                this.data.homeContent = [];
+                
+                console.log('[Wiki] 数据加载成功，格式:', data.settings ? 'settings+entries' : (data.data ? 'nested' : 'flat'));
             }
             
             this.applyFont();
@@ -929,27 +940,21 @@ Object.assign(window.app, {
                 announcements = importedData.data.announcements;
                 wikiTitle = importedData.wikiTitle || importedData.data.wikiTitle;
                 wikiSubtitle = importedData.wikiSubtitle || importedData.data.wikiSubtitle;
-                // 【新增】格式3：包含 settings 对象的格式（匹配截图结构）
+            } else if (importedData.settings && importedData.entries && Array.isArray(importedData.entries)) {
+                // 【关键修复】格式3：{settings: {...}, entries: [...]} 截图格式
                 entries = importedData.entries;
                 chapters = importedData.chapters;
                 camps = importedData.camps;
                 synopsis = importedData.synopsis;
                 announcements = importedData.announcements;
                 
-                // 从 settings 对象提取配置（对应截图中的结构）
-                if (importedData.settings.name) wikiTitle = importedData.settings.name;
-                if (importedData.settings.subtitle) wikiSubtitle = importedData.settings.subtitle;
-                
-                // 可选：导入其他设置项到 this.data
-                if (importedData.settings.welcomeTitle) this.data.welcomeTitle = importedData.settings.welcomeTitle;
-                if (importedData.settings.welcomeSubtitle) this.data.welcomeSubtitle = importedData.settings.welcomeSubtitle;
-                if (importedData.settings.customFont) this.data.fontFamily = importedData.settings.customFont;
-                if (importedData.settings.homeCustomTitle) this.data.homeCustomTitle = importedData.settings.homeCustomTitle;
-            }
-
-            // 验证是否找到entries
-            if (!entries || !Array.isArray(entries)) {
-                this.showImportStatus('数据格式错误：未找到有效的 entries 数组。支持的格式：\n1. {entries: [...], ...}\n2. {data: {entries: [...], ...}}', 'error');
+                // 从 settings 提取标题等信息
+                if (importedData.settings) {
+                    wikiTitle = importedData.settings.name;
+                    wikiSubtitle = importedData.settings.subtitle;
+                }
+            } else {
+                this.showImportStatus('数据格式错误：未找到有效的 entries 数组。支持的格式：\n1. {entries: [...], ...}\n2. {data: {entries: [...], ...}}\n3. {settings: {...}, entries: [...]}', 'error');
                 return;
             }
 
