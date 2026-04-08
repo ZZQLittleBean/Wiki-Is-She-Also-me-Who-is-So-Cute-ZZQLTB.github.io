@@ -65,13 +65,23 @@
 
         // 获取文件内容
         async getFile(path) {
+            const url = `${this.getBaseUrl()}/contents/${this.config.dataPath}/${path}?ref=${this.config.branch}`;
+            console.log('[GitHub] 请求文件:', url);  // 添加调试日志
+            console.log('[GitHub] 当前配置:', {
+                owner: this.config.owner,
+                repo: this.config.repo,
+                branch: this.config.branch,
+                dataPath: this.config.dataPath
+            });
+            
             try {
-                const response = await fetch(`${this.getBaseUrl()}/contents/${this.config.dataPath}/${path}?ref=${this.config.branch}`, {
+                const response = await fetch(url, {
                     method: 'GET',
                     headers: this.getHeaders()
                 });
 
                 if (!response.ok) {
+                    console.error(`[GitHub] HTTP错误: ${response.status}`, await response.text());  // 显示详细错误
                     if (response.status === 404) {
                         return null;
                     }
