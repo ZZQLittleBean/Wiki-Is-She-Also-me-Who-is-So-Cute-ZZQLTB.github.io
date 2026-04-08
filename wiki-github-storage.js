@@ -191,15 +191,23 @@
                     return null;
                 }
 
-                const filenames = ['wiki-manifest.json', 'data.json'];
+                const filenames = ['data.json', 'wiki-manifest.json'];  // 优先检查 data.json
                 for (const name of filenames) {
                     try {
                         const file = await this.getFile(name);
                         if (file) {
+                            const parsed = JSON.parse(file.content);
+                            // 如果读取的是 wiki-manifest.json 且没有 entries，则跳过
+                            if (name === 'wiki-manifest.json' && !parsed.entries && parsed.mappings) {
+                                console.log('[GitHub] 跳过 manifest 文件，寻找 data.json');
+                                continue;
+                            }
                             console.log('[GitHub] 加载数据文件:', name);
-                            return JSON.parse(file.content);
+                            return parsed;
                         }
-                    } catch (e) {}
+                    } catch (e) {
+                        console.warn(`[GitHub] 加载 ${name} 失败:`, e);
+                    }
                 }
                 return null;
             } catch (error) {
