@@ -1,6 +1,6 @@
 /**
  * GitHub版 Wiki 核心系统 v2.6
- * 修复：确保 shareCodeSystem 在 Object.assign 内部正确定义，避免 undefined 错误
+ * 修复：数据导入格式兼容、分享码改为仅保护导出功能
  */
 
 // 确保 app 对象存在
@@ -8,9 +8,7 @@ if (typeof window.app === 'undefined') {
     window.app = {};
 }
 
-// ========== 核心修复：所有属性和方法必须在 Object.assign 内部定义 ==========
 Object.assign(window.app, {
-    // ========== 应用状态 ==========
     data: {
         entries: [],
         chapters: [],
@@ -53,6 +51,71 @@ Object.assign(window.app, {
         redoStack: []
     },
 
+    // 分享码系统 - 仅用于保护数据导出
+    shareCodeSystem: {
+        generateCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        },
+        
+        validateCode(code) {
+            return /^[A-Z0-9]{8}$/.test(code);
+        },
+        
+        // 验证分享码是否有效
+        async verifyCode(code) {
+            const codes = await this.loadShareCodes();
+            return codes.hasOwnProperty(code);
+        },
+        
+        // 加载所有分享码
+        async loadShareCodes() {
+            try {
+                const content = await window.WikiGitHubStorage.getFile('share-codes.json');
+                if (content) {
+                    return JSON.parse(content.content);
+                }
+            } catch (e) {
+                console.warn('无法加载分享码列表:', e);
+            }
+            return {};
+        },
+        
+        // 保存分享码
+        async saveShareCode(code, description = '') {
+            try {
+                const codes = await this.loadShareCodes();
+                codes[code] = {
+                    description,
+                    createdAt: Date.now(),
+                    createdBy: window.app.backendLoggedIn ? 'backend' : 'frontend'
+                };
+                await window.WikiGitHubStorage.putFile('share-codes.json', JSON.stringify(codes, null, 2), 'Add share code');
+                return true;
+            } catch (e) {
+                console.error('保存分享码失败:', e);
+                return false;
+            }
+        },
+        
+        // 删除分享码
+        async deleteCode(code) {
+            try {
+                const codes = await this.loadShareCodes();
+                delete codes[code];
+                await window.WikiGitHubStorage.putFile('share-codes.json', JSON.stringify(codes, null, 2), 'Delete share code');
+                return true;
+            } catch (e) {
+                console.error('删除分享码失败:', e);
+                return false;
+            }
+        }
+    },
+
     // ========== 初始化 ==========
     init() {
         this.githubStorage = window.WikiGitHubStorage;
@@ -73,20 +136,21 @@ Object.assign(window.app, {
         
         // 检查是否有保存的分享码（用于导出验证）
         const savedCode = localStorage.getItem('wiki_verified_sharecode');
-        if (savedCode && !this.backendLoggedIn) {
+        if (savedCode) {
             this.verifiedShareCode = savedCode;
             this.shareCodeVerified = true;
         }
         
         // 检查GitHub配置
         if (this.githubStorage && this.githubStorage.init()) {
+            // 直接加载数据，不再要求分享码验证
             this.loadDataFromGitHub();
         } else {
             this.showLoginPage();
         }
     },
 
-    // ========== 登录页面 ==========
+    // ========== 登录页面（仅用于后台模式） ==========
     showLoginPage() {
         const container = document.getElementById('main-container');
         if (!container) return;
@@ -98,65 +162,57 @@ Object.assign(window.app, {
         container.innerHTML = '';
         container.appendChild(clone);
         
-        // 修复：使用可选链和分离操作，避免单一失败阻断流程
-        const loginOptions = document.getElementById('login-options');
-        const shareCodeForm = document.getElementById('share-code-form');
+        // 默认显示前台模式入口（直接查看）
+        document.getElementById('login-options').classList.add('hidden');
+        document.getElementById('share-code-form').classList.remove('hidden');
         
-        if (loginOptions) loginOptions.classList.add('hidden');
-        if (shareCodeForm) shareCodeForm.classList.remove('hidden');
-        
-        // 修改提示文字
-        if (shareCodeForm) {
-            const descText = shareCodeForm.querySelector('p.text-gray-500');
-            if (descText) {
-                descText.textContent = '输入存档分享码以导出完整数据备份';
-            }
+        // 修改提示文字 - 分享码仅用于导出
+        const descText = document.querySelector('#share-code-form p.text-gray-500');
+        if (descText) {
+            descText.textContent = '输入分享码以导出完整数据备份';
         }
         
-        // 重建按钮布局
-        if (shareCodeForm) {
-            // 修复：安全地清空原有按钮
-            const existingButtons = shareCodeForm.querySelectorAll('button:not([onclick*="showLoginOptions"])');
-            existingButtons.forEach(btn => {
-                try { btn.remove(); } catch(e) { console.warn('按钮移除失败:', e); }
-            });
-            
-            const buttonContainer = document.createElement('div');
-            buttonContainer.className = 'space-y-3 mt-4';
-            buttonContainer.innerHTML = `
-                <button onclick="window.app.enterDirectView()" class="w-full py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition">
-                    <i class="fa-solid fa-book-open mr-2"></i>直接浏览 Wiki
-                </button>
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-200"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">或</span>
-                    </div>
+        // 添加"直接浏览"按钮
+        const shareForm = document.getElementById('share-code-form');
+        
+        // 清空原有按钮，重建布局
+        const existingButtons = shareForm.querySelectorAll('button:not([onclick*="showLoginOptions"])');
+        existingButtons.forEach(btn => btn.remove());
+        
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'space-y-3 mt-4';
+        buttonContainer.innerHTML = `
+            <button onclick="app.enterDirectView()" class="w-full py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition">
+                <i class="fa-solid fa-book-open mr-2"></i>直接浏览 Wiki
+            </button>
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-200"></div>
                 </div>
-                <button onclick="window.app.showExportCodeInput()" class="w-full py-3 bg-amber-100 text-amber-700 rounded-lg font-medium hover:bg-amber-200 transition">
-                    <i class="fa-solid fa-download mr-2"></i>导出数据（需分享码）
-                </button>
-                <button onclick="window.app.showBackendLogin()" class="w-full py-2 text-gray-400 hover:text-indigo-600 transition text-sm flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-lock text-xs"></i>
-                    后台模式登录
-                </button>
-            `;
-            
-            const returnBtn = shareCodeForm.querySelector('button[onclick*="showLoginOptions"]');
-            if (returnBtn) {
-                shareCodeForm.insertBefore(buttonContainer, returnBtn);
-            } else {
-                shareCodeForm.appendChild(buttonContainer);
-            }
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white text-gray-500">或</span>
+                </div>
+            </div>
+            <button onclick="app.showExportCodeInput()" class="w-full py-3 bg-amber-100 text-amber-700 rounded-lg font-medium hover:bg-amber-200 transition">
+                <i class="fa-solid fa-download mr-2"></i>导出数据（需分享码）
+            </button>
+            <button onclick="app.showBackendLogin()" class="w-full py-2 text-gray-400 hover:text-indigo-600 transition text-sm flex items-center justify-center gap-1">
+                <i class="fa-solid fa-lock text-xs"></i>
+                后台模式登录
+            </button>
+        `;
+        
+        // 插入到返回按钮之前
+        const returnBtn = shareForm.querySelector('button[onclick="app.showLoginOptions()"]');
+        if (returnBtn) {
+            shareForm.insertBefore(buttonContainer, returnBtn);
+        } else {
+            shareForm.appendChild(buttonContainer);
         }
         
-        // 修复：安全地隐藏输入框
+        // 隐藏原来的输入框和验证按钮（移到导出功能中）
         const input = document.getElementById('share-code-input');
-        if (input && input.parentElement) {
-            input.parentElement.classList.add('hidden');
-        }
+        if (input) input.parentElement.classList.add('hidden');
     },
 
     // 直接进入浏览模式（无需分享码）
@@ -164,6 +220,7 @@ Object.assign(window.app, {
         if (this.githubStorage.isConfigured()) {
             await this.loadDataFromGitHub();
         } else {
+            // 如果没有配置，提示需要配置GitHub
             this.showAlertDialog({
                 title: '未配置GitHub',
                 message: '请先配置GitHub仓库信息，或联系管理员获取访问链接。',
@@ -206,22 +263,8 @@ Object.assign(window.app, {
     },
 
     // 验证导出分享码
-    // 验证导出分享码
     async verifyExportCode() {
-        // 【诊断】检查 shareCodeSystem 是否存在
-        if (!this.shareCodeSystem) {
-            console.error('致命错误：shareCodeSystem 未定义。当前 app 对象:', this);
-            this.showAlertDialog({
-                title: '系统初始化错误',
-                message: '分享码系统未能正确加载，请检查浏览器控制台(F12)获取详细错误信息，并尝试刷新页面。',
-                type: 'error'
-            });
-            return;
-        }
-        
         const input = document.getElementById('export-code-input');
-        if (!input) return;
-        
         const code = input.value.trim().toUpperCase();
         
         if (!this.shareCodeSystem.validateCode(code)) {
@@ -239,8 +282,12 @@ Object.assign(window.app, {
             this.shareCodeVerified = true;
             this.verifiedShareCode = code;
             localStorage.setItem('wiki_verified_sharecode', code);
+            
+            // 关闭弹窗
             document.querySelector('.fixed.inset-0')?.remove();
             this.showToast('验证成功，现在可以导出数据', 'success');
+            
+            // 直接进入并打开设置页面
             await this.loadDataFromGitHub();
             setTimeout(() => this.router('settings'), 100);
         } else {
@@ -330,18 +377,24 @@ Object.assign(window.app, {
     // ========== 数据加载 ==========
     async loadDataFromGitHub() {
         try {
+            // 尝试加载 wiki-manifest.json 或 data.json
             let data = await this.githubStorage.loadWikiData('wiki-manifest.json');
+            
             if (!data) {
                 data = await this.githubStorage.loadWikiData('data.json');
             }
             
             if (data) {
+                // 处理不同格式的数据
                 if (data.data) {
+                    // 如果是嵌套格式 {data: {...}}
                     this.data = { ...this.data, ...data.data };
                 } else {
+                    // 如果是扁平格式
                     this.data = { ...this.data, ...data };
                 }
                 
+                // 确保所有必要字段存在
                 if (!this.data.entries) this.data.entries = [];
                 if (!this.data.chapters) this.data.chapters = [];
                 if (!this.data.camps) this.data.camps = ['主角团', '反派', '中立'];
@@ -350,6 +403,7 @@ Object.assign(window.app, {
                 if (!this.data.customFields) this.data.customFields = {};
                 if (!this.data.homeContent) this.data.homeContent = [];
             } else {
+                // 首次使用，创建空数据
                 this.data.entries = [];
                 this.data.chapters = [];
                 this.data.camps = ['主角团', '反派', '中立'];
@@ -374,6 +428,7 @@ Object.assign(window.app, {
 
     // ========== 根据模式更新UI ==========
     updateUIForMode() {
+        // 更新模式徽章
         const badge = document.getElementById('mode-badge');
         if (badge) {
             if (this.runMode === 'backend') {
@@ -385,25 +440,30 @@ Object.assign(window.app, {
             }
         }
         
+        // 显示/隐藏编辑相关元素
         document.querySelectorAll('.edit-only').forEach(el => {
             el.classList.toggle('hidden', this.runMode !== 'backend');
         });
         
+        // 显示/隐藏模式切换
         const modeSwitch = document.getElementById('mode-switch-container');
         if (modeSwitch) {
             modeSwitch.classList.toggle('hidden', this.runMode !== 'backend');
         }
         
+        // 显示/隐藏退出后台按钮
         const logoutBtn = document.getElementById('logout-backend-btn');
         if (logoutBtn) {
             logoutBtn.classList.toggle('hidden', this.runMode !== 'backend');
         }
         
+        // 更新标题
         const titleEl = document.getElementById('wiki-title-display');
         if (titleEl) {
             titleEl.textContent = this.data.wikiTitle || '未命名 Wiki';
         }
         
+        // 更新首页的后台入口显示
         const backendEntry = document.getElementById('backend-entry-section');
         if (backendEntry) {
             backendEntry.classList.toggle('hidden', this.runMode === 'backend');
@@ -417,6 +477,7 @@ Object.assign(window.app, {
         
         container.innerHTML = '';
         
+        // 更新导航状态
         document.querySelectorAll('.nav-btn').forEach(btn => {
             const isActive = btn.dataset.target === target;
             btn.classList.toggle('text-indigo-600', isActive);
@@ -599,16 +660,13 @@ Object.assign(window.app, {
     renderDetail(container) {
         const entry = this.data.entries.find(e => e.id === this.data.editingId);
         if (!entry) {
-            container.innerHTML = '<div class="p-4 text-red-600">条目不存在或已被删除</div>';
+            container.innerHTML = '<div class="p-4 text-red-600">条目不存在</div>';
             return;
         }
         
-        let version = entry.versions.find(v => v.vid === this.data.viewingVersionId) || 
-                    this.getVisibleVersion(entry) || 
-                    entry.versions[entry.versions.length - 1];
-        
+        const version = this.getVisibleVersion(entry) || entry.versions?.[entry.versions.length - 1];
         if (!version) {
-            container.innerHTML = '<div class="p-4 text-red-600">该条目没有内容版本</div>';
+            container.innerHTML = '<div class="p-4 text-red-600">该条目没有内容</div>';
             return;
         }
         
@@ -617,142 +675,70 @@ Object.assign(window.app, {
         
         const clone = tpl.content.cloneNode(true);
         
-        const codeEl = clone.getElementById('detail-code');
-        const versionBadge = clone.getElementById('detail-version-badge');
-        const versionName = clone.getElementById('detail-version-name');
+        clone.getElementById('detail-code').textContent = entry.code;
+        
+        clone.querySelectorAll('.edit-only').forEach(el => {
+            el.classList.toggle('hidden', this.runMode !== 'backend');
+        });
+        
         const contentEl = clone.getElementById('detail-content');
         
-        if (codeEl) codeEl.textContent = entry.code;
-        
-        if (versionBadge && versionName && entry.versions.length > 1) {
-            versionBadge.classList.remove('hidden');
-            const vIndex = entry.versions.findIndex(v => v.vid === version.vid);
-            versionName.textContent = `版本 ${vIndex + 1}/${entry.versions.length}`;
-        }
-        
-        // 处理图片引用（支持 {{IMG:filename}} 格式）
-        let cardImg = version.images?.card || version.images?.avatar || version.image;
-        if (cardImg && cardImg.startsWith('{{IMG:')) {
-            const match = cardImg.match(/\{\{IMG:(.+?)\}\}/);
-            if (match && this.storageManager) {
-                const cached = this.storageManager.memoryCache && this.storageManager.memoryCache.get(match[1]);
-                if (cached) cardImg = cached;
-            }
-        }
-        const hasImage = cardImg && (cardImg.startsWith('data:') || cardImg.startsWith('blob:') || cardImg.startsWith('http'));
-        
-        // 标题区域
-        let headerHtml = `
-            <div class="flex-1 min-w-0">
-                <h1 class="text-3xl font-bold text-gray-900 mb-3 leading-tight">${version.title}</h1>
-                ${version.subtitle ? `<div class="text-lg italic text-gray-600 border-l-4 border-indigo-300 pl-4 whitespace-pre-line leading-relaxed">${version.subtitle}</div>` : ''}
-            </div>
+        let contentHtml = `
+            <div class="flex flex-col md:flex-row gap-6 mb-6">
+                <div class="flex-1">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-3">${version.title}</h1>
+                    ${version.subtitle ? `<p class="text-lg italic text-gray-600 border-l-4 border-indigo-300 pl-4">${version.subtitle}</p>` : ''}
+                </div>
         `;
         
-        // 图片区域
-        const imageHtml = hasImage ? `
-            <div class="w-56 shrink-0">
-                <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-lg bg-gray-100 border border-gray-200 sticky top-24">
-                    <img src="${cardImg}" class="w-full h-full object-cover" 
-                        onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\\'w-full h-full flex items-center justify-center text-gray-300\\'><i class=\\'fa-solid fa-image text-4xl\\'></i></div>'" 
-                        alt="${version.title}">
-                </div>
-                ${entry.level <= 2 ? `
-                    <div class="text-center mt-3">
-                        <span class="inline-block px-4 py-1.5 ${entry.level === 1 ? 'bg-yellow-100 text-yellow-800 border-yellow-200' : 'bg-blue-100 text-blue-800 border-blue-200'} border rounded-full text-sm font-bold">
-                            ${entry.level === 1 ? '★ 主角' : '重要角色'}
-                        </span>
+        const img = version.images?.card || version.images?.avatar || version.image;
+        if (img) {
+            contentHtml += `
+                <div class="w-48 shrink-0">
+                    <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-lg bg-gray-100">
+                        <img src="${img}" class="w-full h-full object-cover" alt="${version.title}">
                     </div>
-                ` : ''}
-            </div>
-        ` : '';
-        
-        // 正文内容 - 支持角色引用和剧情梗概引用
-        let contentBlocksHtml = '<div class="prose prose-sm max-w-none mt-6">';
-        if (version.blocks && version.blocks.length > 0) {
-            version.blocks.forEach(block => {
-                if (block.type === 'h2') {
-                    contentBlocksHtml += `<h2 class="text-xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2">${block.text}</h2>`;
-                } else if (block.type === 'h3') {
-                    contentBlocksHtml += `<h3 class="text-lg font-bold text-gray-700 mt-6 mb-3">${block.text}</h3>`;
-                } else if (block.type === 'p') {
-                    let text = block.text || '';
-                    // 支持词条链接 [[名称]]
-                    text = text.replace(/\[\[(.*?)\]\]/g, '<a href="#" onclick="app.searchAndOpen(\'$1\'); return false;" class="text-indigo-600 hover:underline">$1</a>');
-                    // 支持剧情梗概引用 {{synopsis:chapterId:title}}
-                    text = text.replace(/\{\{synopsis:([^:]+):([^}]+)\}\}/g, (match, chapterId, title) => {
-                        return `<span class="synopsis-ref-inline cursor-pointer text-indigo-600 font-medium border-b-2 border-indigo-300 hover:bg-indigo-50 px-1 rounded transition" onclick="app.router('synopsis')"><i class="fa-solid fa-film text-xs mr-1"></i>${title}</span>`;
-                    });
-                    // 支持角色引用 @名称[代码]（通常在剧情梗概中使用，但词条内也可能引用）
-                    text = text.replace(/@([^\[]+)\[([^\]]+)\]/g, '<span class="synopsis-entry-ref" data-entry-code="$2" onclick="app.openEntryByCode(\'$2\')" onmouseenter="app.handleSynopsisRefHover(this)" onmouseleave="app.handleSynopsisRefLeave(this)"><i class="fa-solid fa-user"></i>$1</span>');
-                    
-                    // 关键修复：添加break-all实现长文本自动换行
-                    contentBlocksHtml += `<p class="text-gray-600 leading-relaxed mb-4 break-all" style="word-break: break-all; overflow-wrap: break-word;">${text}</p>`;
-                }
-            });
-        } else {
-            contentBlocksHtml += '<div class="text-gray-400 italic">暂无详细内容</div>';
-        }
-        contentBlocksHtml += '</div>';
-        
-        if (contentEl) {
-            contentEl.innerHTML = `
-                <div class="flex flex-col md:flex-row gap-6 mb-2">
-                    ${headerHtml}
-                    ${imageHtml}
                 </div>
-                ${contentBlocksHtml}
             `;
         }
         
-        // 相关角色
-        const relatedSection = clone.getElementById('related-characters-section');
-        const relatedList = clone.getElementById('related-characters-list');
-        if (relatedSection && relatedList && version.relatedCharacters && version.relatedCharacters.length > 0) {
-            relatedSection.classList.remove('hidden');
-            version.relatedCharacters.forEach(rc => {
-                const charEntry = this.data.entries.find(e => e.id === rc.charId);
-                if (!charEntry) return;
-                const charVersion = this.getVisibleVersion(charEntry);
-                const tag = document.createElement('span');
-                tag.className = 'inline-flex items-center gap-1 px-3 py-1 bg-gray-100 hover:bg-indigo-100 rounded-full text-xs cursor-pointer transition';
-                tag.innerHTML = `<span class="font-medium">${charVersion && charVersion.title ? charVersion.title : charEntry.code}</span><span class="text-gray-400">·${rc.relationName}</span>`;
-                tag.onclick = () => this.openEntry(charEntry.id);
-                relatedList.appendChild(tag);
+        contentHtml += '</div>';
+        
+        contentHtml += '<div class="prose prose-sm max-w-none">';
+        if (version.blocks && version.blocks.length > 0) {
+            version.blocks.forEach(block => {
+                if (block.type === 'h2') {
+                    contentHtml += `<h2 class="text-xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2">${block.text}</h2>`;
+                } else if (block.type === 'h3') {
+                    contentHtml += `<h3 class="text-lg font-bold text-gray-700 mt-6 mb-3">${block.text}</h3>`;
+                } else {
+                    let text = block.text || '';
+                    text = text.replace(/\[\[(.*?)\]\]/g, '<a href="#" onclick="app.searchAndOpen(\'$1\'); return false;" class="text-indigo-600 hover:underline">$1</a>');
+                    contentHtml += `<p class="text-gray-600 leading-relaxed mb-4 break-all">${text}</p>`;
+                }
             });
         }
+        contentHtml += '</div>';
         
-        // 版本切换提示
-        const versionHint = clone.getElementById('version-switch-hint');
-        const versionList = clone.getElementById('version-switch-list');
-        if (versionHint && versionList && entry.versions.length > 1) {
-            const otherVersions = entry.versions.filter(v => v.vid !== version.vid);
-            if (otherVersions.length > 0) {
-                versionHint.classList.remove('hidden');
-                otherVersions.forEach(v => {
-                    const vStatus = this.getVersionTimeStatus(entry, v);
-                    const btn = document.createElement('button');
-                    btn.className = `text-xs px-3 py-1 rounded-full border transition ${vStatus === 'current' ? 'bg-indigo-100 border-indigo-300 text-indigo-700' : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'}`;
-                    btn.innerHTML = `${v.title} ${vStatus !== 'current' ? `<span class="text-[10px] opacity-70">(${vStatus === 'past' ? '过去' : '未来'})</span>` : ''}`;
-                    btn.onclick = () => {
-                        if (vStatus === 'future') {
-                            const vConfirmKey = `${entry.id}_${v.vid}`;
-                            this.data.viewingVersionId = v.vid;
-                            if (this.confirmedFutureEntries && this.confirmedFutureEntries.has(vConfirmKey)) {
-                                this.router('detail', false);
-                            } else {
-                                this.showFutureConfirmDialog(entry, v, vConfirmKey);
-                            }
-                        } else {
-                            this.data.viewingVersionId = v.vid;
-                            this.router('detail', false);
-                        }
-                    };
-                    versionList.appendChild(btn);
-                });
-            }
+        if (entry.versions.length > 1) {
+            contentHtml += `
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <h3 class="text-sm font-bold text-gray-500 uppercase mb-3">版本切换</h3>
+                    <div class="flex flex-wrap gap-2">
+            `;
+            entry.versions.forEach((v, idx) => {
+                const isCurrent = v.vid === version.vid;
+                contentHtml += `
+                    <button onclick="app.switchToVersion('${entry.id}', '${v.vid}')" 
+                        class="px-3 py-1.5 rounded-lg text-sm ${isCurrent ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}">
+                        版本 ${idx + 1}: ${v.title}
+                    </button>
+                `;
+            });
+            contentHtml += '</div></div>';
         }
         
+        contentEl.innerHTML = contentHtml;
         container.appendChild(clone);
     },
 
@@ -834,12 +820,16 @@ Object.assign(window.app, {
             el.classList.toggle('hidden', this.runMode !== 'backend');
         });
         
+        // 前台模式：显示导出需要分享码的提示
         if (this.runMode === 'frontend') {
             const exportSection = clone.querySelector('.bg-white.rounded-xl.shadow-sm:has(.fa-database)');
             if (exportSection && !this.shareCodeVerified) {
                 const warningDiv = document.createElement('div');
                 warningDiv.className = 'mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800';
-                warningDiv.innerHTML = `<i class="fa-solid fa-info-circle mr-1"></i>导出数据需要分享码验证。如需导出，请返回登录页面选择"导出数据"。`;
+                warningDiv.innerHTML = `
+                    <i class="fa-solid fa-info-circle mr-1"></i>
+                    导出数据需要分享码验证。如需导出，请返回登录页面选择"导出数据"。
+                `;
                 exportSection.insertBefore(warningDiv, exportSection.firstChild);
             }
         }
@@ -849,11 +839,13 @@ Object.assign(window.app, {
             if (repoDisplay) {
                 repoDisplay.textContent = `${this.githubStorage.config.owner}/${this.githubStorage.config.repo}`;
             }
+            
             this.loadShareCodeList(clone.getElementById('share-code-list'));
         }
         
         container.appendChild(clone);
         
+        // 前台模式下，如果未验证分享码，禁用导出按钮
         if (this.runMode === 'frontend' && !this.shareCodeVerified) {
             const exportBtns = container.querySelectorAll('button[onclick^="app.export"]');
             exportBtns.forEach(btn => {
@@ -864,7 +856,741 @@ Object.assign(window.app, {
         }
     },
 
-    // ========== 剧情梗概查看（增强版） ==========
+    // ========== 数据导入（修复版） ==========
+    async handleImportFolder(input) {
+        const files = input.files;
+        if (!files || files.length === 0) {
+            this.showImportStatus('请选择文件夹', 'error');
+            return;
+        }
+
+        this.showImportStatus('正在读取文件...', 'info');
+
+        let dataFile = null;
+        const imageFiles = [];
+
+        for (const file of files) {
+            const path = file.webkitRelativePath || file.name;
+            // 支持多种路径格式
+            if ((path.endsWith('data.json') || path.endsWith('wiki-manifest.json')) && !path.includes('/wiki-images/')) {
+                dataFile = file;
+            }
+            if (path.includes('/wiki-images/') && file.type.startsWith('image/')) {
+                imageFiles.push(file);
+            }
+        }
+
+        if (!dataFile) {
+            this.showImportStatus('未找到数据文件（data.json 或 wiki-manifest.json），请确保选择了正确的文件夹', 'error');
+            return;
+        }
+
+        try {
+            const dataText = await dataFile.text();
+            let importedData;
+            
+            try {
+                importedData = JSON.parse(dataText);
+            } catch (e) {
+                this.showImportStatus('JSON解析失败：文件格式错误', 'error');
+                return;
+            }
+
+            // 修复：更健壮的数据验证逻辑
+            // 支持多种格式：
+            // 1. {entries: [...], chapters: [...]} - 扁平格式
+            // 2. {data: {entries: [...], ...}} - 嵌套格式
+            // 3. 只要有entries数组或data.entries数组即可
+            
+            let entries = null;
+            let chapters = null;
+            let camps = null;
+            let synopsis = null;
+            let announcements = null;
+            let wikiTitle = null;
+            let wikiSubtitle = null;
+
+            // 检查各种可能的格式
+            if (importedData.entries && Array.isArray(importedData.entries)) {
+                // 格式1：扁平格式
+                entries = importedData.entries;
+                chapters = importedData.chapters;
+                camps = importedData.camps;
+                synopsis = importedData.synopsis;
+                announcements = importedData.announcements;
+                wikiTitle = importedData.wikiTitle;
+                wikiSubtitle = importedData.wikiSubtitle;
+            } else if (importedData.data && importedData.data.entries && Array.isArray(importedData.data.entries)) {
+                // 格式2：嵌套格式
+                entries = importedData.data.entries;
+                chapters = importedData.data.chapters;
+                camps = importedData.data.camps;
+                synopsis = importedData.data.synopsis;
+                announcements = importedData.data.announcements;
+                wikiTitle = importedData.wikiTitle || importedData.data.wikiTitle;
+                wikiSubtitle = importedData.wikiSubtitle || importedData.data.wikiSubtitle;
+            }
+
+            // 验证是否找到entries
+            if (!entries || !Array.isArray(entries)) {
+                this.showImportStatus('数据格式错误：未找到有效的 entries 数组。支持的格式：\n1. {entries: [...], ...}\n2. {data: {entries: [...], ...}}', 'error');
+                return;
+            }
+
+            this.showImportStatus(`找到 ${entries.length} 个词条，${imageFiles.length} 张图片，正在导入...`, 'info');
+
+            // 合并数据
+            const existingIds = new Set(this.data.entries.map(e => e.id));
+            let addedCount = 0;
+            let skippedCount = 0;
+
+            for (const entry of entries) {
+                if (!existingIds.has(entry.id)) {
+                    this.data.entries.push(entry);
+                    addedCount++;
+                } else {
+                    skippedCount++;
+                }
+            }
+
+            // 合并其他数据（如果存在）
+            if (chapters && Array.isArray(chapters)) {
+                const existingChapterIds = new Set(this.data.chapters.map(c => c.id));
+                for (const chapter of chapters) {
+                    if (!existingChapterIds.has(chapter.id)) {
+                        this.data.chapters.push(chapter);
+                    }
+                }
+            }
+
+            if (camps && Array.isArray(camps)) {
+                for (const camp of camps) {
+                    if (!this.data.camps.includes(camp)) {
+                        this.data.camps.push(camp);
+                    }
+                }
+            }
+
+            if (synopsis && Array.isArray(synopsis)) {
+                const existingSynopsisIds = new Set(this.data.synopsis.map(s => s.id));
+                for (const syn of synopsis) {
+                    if (!existingSynopsisIds.has(syn.id)) {
+                        this.data.synopsis.push(syn);
+                    }
+                }
+            }
+
+            if (announcements && Array.isArray(announcements)) {
+                const existingAnnIds = new Set(this.data.announcements.map(a => a.id));
+                for (const ann of announcements) {
+                    if (!existingAnnIds.has(ann.id)) {
+                        this.data.announcements.push(ann);
+                    }
+                }
+            }
+
+            if (wikiTitle) this.data.wikiTitle = wikiTitle;
+            if (wikiSubtitle) this.data.wikiSubtitle = wikiSubtitle;
+
+            // 上传图片
+            let uploadedImages = 0;
+            if (imageFiles.length > 0) {
+                for (const imgFile of imageFiles) {
+                    try {
+                        const reader = new FileReader();
+                        const dataUrl = await new Promise((resolve, reject) => {
+                            reader.onload = () => resolve(reader.result);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(imgFile);
+                        });
+
+                        await this.githubStorage.saveImage(imgFile.name, dataUrl);
+                        uploadedImages++;
+                    } catch (e) {
+                        console.warn('图片上传失败:', imgFile.name, e);
+                    }
+                }
+            }
+
+            await this.githubStorage.saveWikiData(this.data);
+
+            this.showImportStatus(
+                `导入成功！新增 ${addedCount} 个词条${skippedCount > 0 ? `（跳过 ${skippedCount} 个重复）` : ''}，上传 ${uploadedImages}/${imageFiles.length} 张图片`,
+                'success'
+            );
+
+            this.updateUIForMode();
+            this.showToast('数据导入成功', 'success');
+
+        } catch (error) {
+            console.error('导入失败:', error);
+            this.showImportStatus('导入失败: ' + error.message, 'error');
+        }
+
+        input.value = '';
+    },
+
+    showImportStatus(message, type) {
+        const statusEl = document.getElementById('import-status');
+        if (!statusEl) return;
+
+        statusEl.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700', 'bg-blue-100', 'text-blue-700');
+        statusEl.classList.add('whitespace-pre-line'); // 支持换行
+
+        const colors = {
+            success: ['bg-green-100', 'text-green-700'],
+            error: ['bg-red-100', 'text-red-700'],
+            info: ['bg-blue-100', 'text-blue-700']
+        };
+
+        statusEl.classList.add(...(colors[type] || colors.info));
+        statusEl.textContent = message;
+    },
+
+    // ========== 分享码管理 ==========
+    async generateShareCode() {
+        const codeInput = document.getElementById('new-share-code');
+        const descInput = document.getElementById('share-code-desc');
+        
+        let code = codeInput.value.trim().toUpperCase();
+        if (!code) {
+            code = this.shareCodeSystem.generateCode();
+        }
+        
+        if (!this.shareCodeSystem.validateCode(code)) {
+            this.showAlertDialog({
+                title: '格式错误',
+                message: '分享码应为8位字母数字组合',
+                type: 'warning'
+            });
+            return;
+        }
+        
+        const success = await this.shareCodeSystem.saveShareCode(code, descInput.value);
+        
+        if (success) {
+            this.showToast('分享码已生成', 'success');
+            codeInput.value = '';
+            descInput.value = '';
+            this.loadShareCodeList(document.getElementById('share-code-list'));
+        } else {
+            this.showAlertDialog({
+                title: '生成失败',
+                message: '无法保存分享码',
+                type: 'error'
+            });
+        }
+    },
+
+    async loadShareCodeList(container) {
+        if (!container) return;
+        
+        const codes = await this.shareCodeSystem.loadShareCodes();
+        container.innerHTML = '';
+        
+        Object.entries(codes).forEach(([code, info]) => {
+            const item = document.createElement('div');
+            item.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
+            item.innerHTML = `
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <span class="font-mono font-bold text-amber-600 shrink-0">${code}</span>
+                    ${info.description ? `<span class="text-xs text-gray-500 truncate">${info.description}</span>` : ''}
+                </div>
+                <div class="flex gap-2 shrink-0">
+                    <button onclick="app.copyShareCode('${code}')" class="text-gray-500 hover:text-indigo-600 p-1" title="复制">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
+                    <button onclick="app.deleteShareCode('${code}')" class="text-gray-500 hover:text-red-600 p-1" title="删除">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+        
+        if (Object.keys(codes).length === 0) {
+            container.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">暂无分享码</p>';
+        }
+    },
+
+    async deleteShareCode(code) {
+        const confirmed = await this.showConfirmDialog({
+            title: '删除确认',
+            message: `确定删除分享码 ${code}？`,
+            confirmText: '删除',
+            cancelText: '取消',
+            type: 'danger'
+        });
+        
+        if (confirmed) {
+            await this.shareCodeSystem.deleteCode(code);
+            this.loadShareCodeList(document.getElementById('share-code-list'));
+        }
+    },
+
+    copyShareCode(code) {
+        navigator.clipboard.writeText(code).then(() => {
+            this.showToast('已复制到剪贴板', 'success');
+        });
+    },
+
+    // ========== 数据导出（前台模式需要分享码） ==========
+    async exportData() {
+        if (this.runMode === 'frontend' && !this.shareCodeVerified) {
+            this.showAlertDialog({
+                title: '需要分享码',
+                message: '前台模式导出数据需要输入有效的分享码。请在设置页面点击"输入分享码"进行验证。',
+                type: 'warning'
+            });
+            return;
+        }
+        
+        const dataStr = JSON.stringify(this.data, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `wiki-data-${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.showToast('数据已导出', 'success');
+    },
+
+    async exportZipBackup() {
+        if (this.runMode === 'frontend' && !this.shareCodeVerified) {
+            this.showAlertDialog({
+                title: '需要分享码',
+                message: '前台模式导出数据需要输入有效的分享码。请在设置页面点击"输入分享码"进行验证。',
+                type: 'warning'
+            });
+            return;
+        }
+        
+        const JSZip = window.JSZip;
+        if (!JSZip) {
+            this.showToast('ZIP库未加载', 'error');
+            return;
+        }
+        
+        const zip = new JSZip();
+        zip.file('wiki-manifest.json', JSON.stringify(this.data, null, 2));
+        
+        const imagesFolder = zip.folder('wiki-images');
+        const imageList = await this.githubStorage.getImageList();
+        
+        for (const filename of imageList) {
+            const imgUrl = await this.githubStorage.loadImage(filename);
+            if (imgUrl) {
+                try {
+                    const response = await fetch(imgUrl);
+                    const blob = await response.blob();
+                    imagesFolder.file(filename, blob);
+                } catch (e) {
+                    console.warn('无法下载图片:', filename);
+                }
+            }
+        }
+        
+        const content = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(content);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `wiki-backup-${Date.now()}.zip`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.showToast('备份已导出', 'success');
+    },
+
+    // 显示分享码输入框（在设置页面使用）
+    showShareCodeInput() {
+        this.showExportCodeInput();
+    },
+
+    // ========== 其他辅助函数 ==========
+    getVisibleVersion(entry) {
+        if (!entry || !entry.versions) return null;
+        
+        if (this.data.currentTimeline === 'latest') {
+            return entry.versions[entry.versions.length - 1];
+        }
+        
+        const currentCh = this.data.chapters.find(c => c.id === this.data.currentTimeline);
+        if (!currentCh) return entry.versions[entry.versions.length - 1];
+        
+        return entry.versions.find(v => {
+            const fromOrder = this.getChapterOrder(v.chapterFrom);
+            const toOrder = this.getChapterOrder(v.chapterTo);
+            return currentCh.order >= fromOrder && currentCh.order <= toOrder;
+        }) || entry.versions[entry.versions.length - 1];
+    },
+
+    getChapterOrder(chapterId) {
+        if (!chapterId) return -1;
+        const chapter = this.data.chapters.find(c => c.id === chapterId);
+        return chapter ? chapter.order : -1;
+    },
+
+    formatChapterNum(num) {
+        if (num === undefined || num === null) return '';
+        if (typeof num === 'string') return num;
+        return `第${num}章`;
+    },
+
+    generateCode(type) {
+        const prefix = type === 'character' ? 'C' : 'S';
+        const existing = this.data.entries.filter(e => e.type === type);
+        const maxNum = existing.reduce((max, e) => {
+            const match = e.code.match(/\d+/);
+            return match ? Math.max(max, parseInt(match[0])) : max;
+        }, 0);
+        return `${prefix}${String(maxNum + 1).padStart(3, '0')}`;
+    },
+
+    searchAndOpen(name) {
+        const entry = this.data.entries.find(e => {
+            const v = this.getVisibleVersion(e);
+            return v && v.title === name;
+        });
+        
+        if (entry) {
+            this.openEntry(entry.id);
+        } else {
+            this.showToast('未找到该词条', 'warning');
+        }
+    },
+
+    bindEditKeyboardShortcuts() {
+        const handler = (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                this.saveEntry();
+            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                this.undo();
+            }
+        };
+        
+        document.addEventListener('keydown', handler);
+        this._editKeyHandler = handler;
+    },
+
+    unbindEditKeyboardShortcuts() {
+        if (this._editKeyHandler) {
+            document.removeEventListener('keydown', this._editKeyHandler);
+            this._editKeyHandler = null;
+        }
+    },
+
+    undo() {
+        this.showToast('撤销功能开发中', 'info');
+    },
+
+    showConfirmDialog(options) {
+        return new Promise((resolve) => {
+            const { title = '确认', message, confirmText = '确认', cancelText = '取消', type = 'info' } = options;
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-black/60 z-[99999] flex items-center justify-center p-4 fade-in';
+            
+            const iconColors = {
+                info: 'text-blue-600 bg-blue-100',
+                warning: 'text-amber-600 bg-amber-100',
+                danger: 'text-red-600 bg-red-100',
+                success: 'text-green-600 bg-green-100'
+            };
+            
+            const icons = {
+                info: 'fa-circle-info',
+                warning: 'fa-triangle-exclamation',
+                danger: 'fa-circle-exclamation',
+                success: 'fa-check-circle'
+            };
+            
+            overlay.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 transform scale-100 transition-transform">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 ${iconColors[type]} rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fa-solid ${icons[type]} text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">${title}</h3>
+                        <p class="text-gray-600 text-sm whitespace-pre-wrap">${message}</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="confirm-cancel" class="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+                            ${cancelText}
+                        </button>
+                        <button id="confirm-ok" class="flex-1 py-2.5 ${type === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white rounded-lg transition font-medium shadow-lg">
+                            ${confirmText}
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            overlay.querySelector('#confirm-cancel').onclick = () => {
+                overlay.remove();
+                resolve(false);
+            };
+            
+            overlay.querySelector('#confirm-ok').onclick = () => {
+                overlay.remove();
+                resolve(true);
+            };
+            
+            overlay.onclick = (e) => {
+                if (e.target === overlay) {
+                    overlay.remove();
+                    resolve(false);
+                }
+            };
+        });
+    },
+
+    showAlertDialog(options) {
+        return new Promise((resolve) => {
+            const { title = '提示', message, confirmText = '确定', type = 'info' } = options;
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-black/60 z-[99999] flex items-center justify-center p-4 fade-in';
+            
+            const iconColors = {
+                info: 'text-blue-600 bg-blue-100',
+                warning: 'text-amber-600 bg-amber-100',
+                danger: 'text-red-600 bg-red-100',
+                success: 'text-green-600 bg-green-100'
+            };
+            
+            const icons = {
+                info: 'fa-circle-info',
+                warning: 'fa-triangle-exclamation',
+                danger: 'fa-circle-exclamation',
+                success: 'fa-check-circle'
+            };
+            
+            overlay.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 transform scale-100 transition-transform">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 ${iconColors[type]} rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fa-solid ${icons[type]} text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">${title}</h3>
+                        <p class="text-gray-600 text-sm whitespace-pre-wrap">${message}</p>
+                    </div>
+                    <button id="alert-ok" class="w-full py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium shadow-lg">
+                        ${confirmText}
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            overlay.querySelector('#alert-ok').onclick = () => {
+                overlay.remove();
+                resolve(true);
+            };
+            
+            overlay.onclick = (e) => {
+                if (e.target === overlay) {
+                    overlay.remove();
+                    resolve(true);
+                }
+            };
+        });
+    },
+
+    showToast(message, type = 'info', duration = 3000) {
+        const toast = document.createElement('div');
+        toast.className = `fixed top-20 left-1/2 transform -translate-x-1/2 z-[99999] px-4 py-2 rounded-lg shadow-lg text-white text-sm flex items-center gap-2 fade-in`;
+        
+        const colors = {
+            info: 'bg-blue-600',
+            success: 'bg-green-600',
+            warning: 'bg-amber-600',
+            error: 'bg-red-600'
+        };
+        
+        toast.classList.add(colors[type] || colors.info);
+        
+        const icons = {
+            info: 'fa-circle-info',
+            success: 'fa-check-circle',
+            warning: 'fa-triangle-exclamation',
+            error: 'fa-circle-exclamation'
+        };
+        
+        toast.innerHTML = `
+            <i class="fa-solid ${icons[type]}"></i>
+            <span>${message}</span>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) translateY(-10px)';
+            toast.style.transition = 'all 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    },
+
+    handleSearchInput(value) {
+        const dropdown = document.getElementById('search-dropdown');
+        if (!value.trim()) {
+            dropdown.classList.add('hidden');
+            return;
+        }
+        
+        const results = this.data.entries.filter(e => {
+            const v = this.getVisibleVersion(e);
+            return v && (e.code.toLowerCase().includes(value.toLowerCase()) || 
+                        v.title.toLowerCase().includes(value.toLowerCase()));
+        }).slice(0, 8);
+        
+        if (results.length === 0) {
+            dropdown.innerHTML = '<div class="p-3 text-center text-gray-400 text-sm">无结果</div>';
+        } else {
+            dropdown.innerHTML = results.map(e => {
+                const v = this.getVisibleVersion(e);
+                return `
+                    <div class="p-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3" onclick="app.openEntry('${e.id}'); app.hideSearchDropdown();">
+                        <span class="font-mono text-xs text-gray-400">${e.code}</span>
+                        <span class="text-sm text-gray-700">${v.title}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        dropdown.classList.remove('hidden');
+    },
+
+    showSearchDropdown() {
+        const dropdown = document.getElementById('search-dropdown');
+        const input = document.getElementById('global-search');
+        if (input && input.value.trim()) {
+            dropdown.classList.remove('hidden');
+        }
+    },
+
+    hideSearchDropdown() {
+        setTimeout(() => {
+            const dropdown = document.getElementById('search-dropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }, 200);
+    },
+
+    addHomeTextBox() {
+        if (!this.data.homeContent) this.data.homeContent = [];
+        this.data.homeContent.push({ type: 'text', content: '' });
+        this.renderHomeCustomContent();
+    },
+
+    addHomeEntryRef() {
+        this.showEntrySelectDialog((entry) => {
+            if (!entry) return;
+            const visibleVersion = this.getVisibleVersion(entry);
+            const title = visibleVersion ? visibleVersion.title : entry.code;
+            if (!this.data.homeContent) this.data.homeContent = [];
+            this.data.homeContent.push({ type: 'entry-ref', entryId: entry.id, title: title });
+            this.renderHomeCustomContent();
+        });
+    },
+
+    showEntrySelectDialog(callback) {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black/50 z-[99999] flex items-center justify-center p-4 fade-in';
+        overlay.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden">
+                <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
+                    <h3 class="font-bold text-lg text-gray-800">选择词条</h3>
+                    <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <input type="text" id="entry-search-input" placeholder="搜索词条名称或编号..." 
+                        class="w-full p-2 border border-gray-200 rounded-lg text-sm mb-4 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <div id="entry-select-list" class="space-y-1 max-h-[50vh] overflow-y-auto"></div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        
+        const list = overlay.querySelector('#entry-select-list');
+        const searchInput = overlay.querySelector('#entry-search-input');
+        
+        const renderEntries = (filter = '') => {
+            list.innerHTML = '';
+            this.data.entries.forEach(entry => {
+                const visibleVersion = this.getVisibleVersion(entry);
+                const title = visibleVersion ? visibleVersion.title : entry.code;
+                if (filter && !entry.code.toLowerCase().includes(filter.toLowerCase()) && !title.toLowerCase().includes(filter.toLowerCase())) return;
+                
+                const item = document.createElement('div');
+                item.className = 'p-3 hover:bg-indigo-50 cursor-pointer rounded-lg border-b border-gray-100 flex items-center gap-3 transition';
+                item.innerHTML = `
+                    <span class="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold">${entry.code}</span>
+                    <span class="text-sm text-gray-700">${title}</span>
+                `;
+                item.onclick = () => { overlay.remove(); callback(entry); };
+                list.appendChild(item);
+            });
+        };
+        
+        renderEntries();
+        searchInput.oninput = (e) => renderEntries(e.target.value);
+        searchInput.focus();
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    },
+
+    updateHomeText(idx, value) {
+        if (this.data.homeContent && this.data.homeContent[idx]) {
+            this.data.homeContent[idx].content = value;
+        }
+    },
+
+    removeHomeItem(idx) {
+        if (this.data.homeContent) {
+            this.data.homeContent.splice(idx, 1);
+            this.renderHomeCustomContent();
+        }
+    },
+
+    saveHomeContent() {
+        this.saveData();
+        this.showToast('首页内容已保存', 'success');
+    },
+
+    showVersionManager() {
+        this.showToast('版本管理器功能开发中', 'info');
+    },
+
+    async saveData() {
+        try {
+            await this.githubStorage.saveWikiData(this.data);
+        } catch (error) {
+            console.error('保存失败:', error);
+        }
+    },
+
+    setMode(mode) {
+        this.data.currentMode = mode;
+        const viewBtn = document.getElementById('btn-mode-view');
+        const editBtn = document.getElementById('btn-mode-edit');
+        
+        if (viewBtn) {
+            viewBtn.className = mode === 'view' 
+                ? 'px-3 py-1.5 rounded-md bg-white shadow-sm text-gray-800 transition-all'
+                : 'px-3 py-1.5 rounded-md text-gray-500 hover:text-gray-800 transition-all';
+        }
+        if (editBtn) {
+            editBtn.className = mode === 'edit'
+                ? 'px-3 py-1.5 rounded-md bg-white shadow-sm text-gray-800 transition-all'
+                : 'px-3 py-1.5 rounded-md text-gray-500 hover:text-gray-800 transition-all';
+        }
+    },
+
+    // 剧情梗概相关函数
     renderSynopsis(container) {
         const tpl = document.getElementById('tpl-synopsis-view');
         if (!tpl) {
@@ -894,168 +1620,6 @@ Object.assign(window.app, {
                 list.appendChild(item);
             });
         }
-    },
-
-    // Markdown转HTML（支持角色引用 @名称[代码]）
-    markdownToHtml(text) {
-        if (!text) return '';
-        
-        // 处理角色引用 @名称[代码] - 不显示代码，只显示名称
-        text = text.replace(/@([^\[]+)\[([^\]]+)\]/g, '<span class="synopsis-entry-ref" data-entry-code="$2" onclick="app.openEntryByCode(\'$2\')" onmouseenter="app.handleSynopsisRefHover(this)" onmouseleave="app.handleSynopsisRefLeave(this)"><i class="fa-solid fa-user"></i>$1</span>');
-        
-        // 处理粗体、斜体
-        text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
-        text = text.replace(/__(.+?)__/g, '<u>$1</u>');
-        
-        // 处理词条链接 [[名称]]
-        text = text.replace(/\[\[(.+?)\]\]/g, '<a href="#" onclick="app.searchAndOpen(\'$1\'); return false;" class="text-indigo-600 hover:underline">$1</a>');
-        
-        return text.replace(/\n/g, '<br>');
-    },
-
-    // 通过代码打开词条
-    openEntryByCode(code) {
-        // 清理转义字符
-        const cleanCode = code.replace(/\\/g, '');
-        const entry = this.data.entries.find(e => e.code === cleanCode);
-        if (entry) {
-            this.openEntry(entry.id);
-        } else {
-            this.showToast('未找到该角色: ' + cleanCode, 'warning');
-        }
-    },
-
-    // 处理角色引用悬停（显示预览弹窗）
-    handleSynopsisRefHover(element) {
-        const code = element.getAttribute('data-entry-code');
-        if (!code) return;
-        
-        const entry = this.data.entries.find(e => e.code === code.replace(/\\/g, ''));
-        if (!entry) return;
-        
-        const version = this.getVisibleVersion(entry);
-        if (!version) return;
-        
-        // 移除已存在的弹窗
-        this.closeSynopsisTooltip();
-        
-        // 创建弹窗
-        const popup = document.createElement('div');
-        popup.className = 'synopsis-hover-popup';
-        popup.id = 'synopsis-hover-popup';
-        
-        // 获取图片
-        let imgUrl = version.images?.avatar || version.images?.card || '';
-        if (imgUrl && imgUrl.startsWith('{{IMG:')) {
-            const match = imgUrl.match(/\{\{IMG:(.+?)\}\}/);
-            if (match) {
-                // 尝试从内存缓存获取
-                if (this.storageManager && this.storageManager.memoryCache.has(match[1])) {
-                    imgUrl = this.storageManager.memoryCache.get(match[1]);
-                }
-            }
-        }
-        
-        const hasImage = imgUrl && (imgUrl.startsWith('data:') || imgUrl.startsWith('blob:') || imgUrl.startsWith('http'));
-        
-        popup.innerHTML = `
-            <div class="flex gap-3">
-                ${hasImage ? `
-                    <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shrink-0">
-                        <img src="${imgUrl}" class="w-full h-full object-cover" onerror="this.style.display='none'">
-                    </div>
-                ` : ''}
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-xs font-mono text-gray-500">${entry.code}</span>
-                        ${entry.camp ? `<span class="text-[10px] px-2 py-0.5 bg-gray-100 rounded text-gray-600">${entry.camp}</span>` : ''}
-                    </div>
-                    <h4 class="font-bold text-gray-800 text-lg leading-tight mb-1">${version.title}</h4>
-                    <p class="text-xs text-gray-500 line-clamp-2">${version.subtitle || ''}</p>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(popup);
-        
-        // 定位弹窗（在元素上方居中）
-        const rect = element.getBoundingClientRect();
-        const popupRect = popup.getBoundingClientRect();
-        
-        let left = rect.left + (rect.width / 2) - (popupRect.width / 2);
-        let top = rect.top - popupRect.height - 10;
-        
-        // 边界检查
-        if (left < 10) left = 10;
-        if (left + popupRect.width > window.innerWidth - 10) {
-            left = window.innerWidth - popupRect.width - 10;
-        }
-        if (top < 10) top = rect.bottom + 10; // 如果上方空间不足，显示在下方
-        
-        popup.style.left = left + 'px';
-        popup.style.top = top + 'px';
-        popup.style.bottom = 'auto';
-        
-        // 显示动画
-        requestAnimationFrame(() => {
-            popup.classList.add('show');
-        });
-        
-        // 添加背景遮罩
-        document.body.classList.add('body-dimmed');
-    },
-
-    // 处理鼠标离开
-    handleSynopsisRefLeave(element) {
-        // 延迟关闭，以便鼠标可以移动到弹窗上
-        setTimeout(() => {
-            const popup = document.getElementById('synopsis-hover-popup');
-            if (popup && !popup.matches(':hover')) {
-                this.closeSynopsisTooltip();
-            }
-        }, 100);
-    },
-
-    // 关闭悬停提示
-    closeSynopsisTooltip() {
-        const popup = document.getElementById('synopsis-hover-popup');
-        if (popup) {
-            popup.remove();
-        }
-        document.body.classList.remove('body-dimmed');
-    },
-
-    // 同步剧情梗概与章节
-    syncSynopsisWithChapters() {
-        if (!this.data.synopsis) this.data.synopsis = [];
-        
-        const sortedChapters = [...this.data.chapters].sort((a, b) => a.order - b.order);
-        const existingSynopsis = {};
-        this.data.synopsis.forEach(s => { existingSynopsis[s.chapterId || s.id] = s; });
-        
-        const newSynopsis = [];
-        sortedChapters.forEach(ch => {
-            const key = ch.id;
-            if (existingSynopsis[key]) {
-                // 更新章节信息
-                const syn = existingSynopsis[key];
-                syn.num = ch.num;
-                syn.title = syn.title || ch.title;
-                newSynopsis.push(syn);
-            } else {
-                newSynopsis.push({
-                    id: 'syn-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
-                    chapterId: ch.id,
-                    num: ch.num,
-                    title: ch.title || `第${ch.num}章`,
-                    content: '',
-                    image: null
-                });
-            }
-        });
-        
-        this.data.synopsis = newSynopsis;
     },
 
     renderSynopsisEdit(container) {
@@ -1092,6 +1656,29 @@ Object.assign(window.app, {
                 list.appendChild(item);
             });
         }
+    },
+
+    syncSynopsisWithChapters() {
+        const sortedChapters = [...this.data.chapters].sort((a, b) => a.order - b.order);
+        const existingSynopsis = {};
+        this.data.synopsis.forEach(s => { existingSynopsis[s.chapterId] = s; });
+
+        const newSynopsis = [];
+        sortedChapters.forEach(ch => {
+            if (existingSynopsis[ch.id]) {
+                newSynopsis.push(existingSynopsis[ch.id]);
+            } else {
+                newSynopsis.push({
+                    id: 'syn-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+                    chapterId: ch.id,
+                    num: ch.num,
+                    title: ch.title || `第${ch.num}章`,
+                    content: '',
+                    image: null
+                });
+            }
+        });
+        this.data.synopsis = newSynopsis;
     },
 
     updateSynopsisTitle(chapterId, title) {
@@ -1398,7 +1985,6 @@ Object.assign(window.app, {
         overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     },
 
-    // ========== 词条操作 ==========
     createEntryCard(entry, version) {
         const div = document.createElement('div');
         div.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 active:scale-95 flex flex-col w-full';
@@ -1452,7 +2038,6 @@ Object.assign(window.app, {
         this.router('detail', false);
     },
 
-    // ========== 保存词条 ==========
     async saveEntry() {
         if (!this.tempEntry || !this.tempVersion) return;
         
@@ -1523,7 +2108,6 @@ Object.assign(window.app, {
         }
     },
 
-    // ========== 删除词条 ==========
     async deleteEntry(id) {
         const index = this.data.entries.findIndex(e => e.id === id);
         if (index >= 0) {
@@ -1544,302 +2128,6 @@ Object.assign(window.app, {
         }
     },
 
-    // ========== 数据导入 ==========
-    async handleImportFolder(input) {
-        const files = input.files;
-        if (!files || files.length === 0) {
-            this.showImportStatus('请选择文件夹', 'error');
-            return;
-        }
-
-        this.showImportStatus('正在读取文件...', 'info');
-
-        let dataFile = null;
-        const imageFiles = [];
-
-        for (const file of files) {
-            const path = file.webkitRelativePath || file.name;
-            if ((path.endsWith('data.json') || path.endsWith('wiki-manifest.json')) && !path.includes('/wiki-images/')) {
-                dataFile = file;
-            }
-            if (path.includes('/wiki-images/') && file.type.startsWith('image/')) {
-                imageFiles.push(file);
-            }
-        }
-
-        if (!dataFile) {
-            this.showImportStatus('未找到数据文件（data.json 或 wiki-manifest.json），请确保选择了正确的文件夹', 'error');
-            return;
-        }
-
-        try {
-            const dataText = await dataFile.text();
-            const importedData = JSON.parse(dataText);
-
-            if (!importedData.entries && !importedData.data) {
-                this.showImportStatus('数据格式不正确：缺少 entries 数组', 'error');
-                return;
-            }
-
-            const entries = importedData.entries || importedData.data?.entries || [];
-            const chapters = importedData.chapters || importedData.data?.chapters || [];
-            const camps = importedData.camps || importedData.data?.camps || [];
-            const synopsis = importedData.synopsis || importedData.data?.synopsis || [];
-            const announcements = importedData.announcements || importedData.data?.announcements || [];
-
-            this.showImportStatus(`找到 ${entries.length} 个词条，${imageFiles.length} 张图片，正在导入...`, 'info');
-
-            const existingIds = new Set(this.data.entries.map(e => e.id));
-            let addedCount = 0;
-            let skippedCount = 0;
-
-            for (const entry of entries) {
-                if (!existingIds.has(entry.id)) {
-                    this.data.entries.push(entry);
-                    addedCount++;
-                } else {
-                    skippedCount++;
-                }
-            }
-
-            const existingChapterIds = new Set(this.data.chapters.map(c => c.id));
-            for (const chapter of chapters) {
-                if (!existingChapterIds.has(chapter.id)) {
-                    this.data.chapters.push(chapter);
-                }
-            }
-
-            for (const camp of camps) {
-                if (!this.data.camps.includes(camp)) {
-                    this.data.camps.push(camp);
-                }
-            }
-
-            const existingSynopsisIds = new Set(this.data.synopsis.map(s => s.id));
-            for (const syn of synopsis) {
-                if (!existingSynopsisIds.has(syn.id)) {
-                    this.data.synopsis.push(syn);
-                }
-            }
-
-            const existingAnnIds = new Set(this.data.announcements.map(a => a.id));
-            for (const ann of announcements) {
-                if (!existingAnnIds.has(ann.id)) {
-                    this.data.announcements.push(ann);
-                }
-            }
-
-            if (importedData.wikiTitle) this.data.wikiTitle = importedData.wikiTitle;
-            if (importedData.wikiSubtitle) this.data.wikiSubtitle = importedData.wikiSubtitle;
-
-            let uploadedImages = 0;
-            if (imageFiles.length > 0) {
-                for (const imgFile of imageFiles) {
-                    try {
-                        const reader = new FileReader();
-                        const dataUrl = await new Promise((resolve, reject) => {
-                            reader.onload = () => resolve(reader.result);
-                            reader.onerror = reject;
-                            reader.readAsDataURL(imgFile);
-                        });
-                        await this.githubStorage.saveImage(imgFile.name, dataUrl);
-                        uploadedImages++;
-                    } catch (e) {
-                        console.warn('图片上传失败:', imgFile.name, e);
-                    }
-                }
-            }
-
-            await this.githubStorage.saveWikiData(this.data);
-
-            this.showImportStatus(
-                `导入成功！新增 ${addedCount} 个词条${skippedCount > 0 ? `（跳过 ${skippedCount} 个重复）` : ''}，上传 ${uploadedImages}/${imageFiles.length} 张图片`,
-                'success'
-            );
-
-            this.updateUIForMode();
-            this.showToast('数据导入成功', 'success');
-
-        } catch (error) {
-            console.error('导入失败:', error);
-            this.showImportStatus('导入失败: ' + error.message, 'error');
-        }
-
-        input.value = '';
-    },
-
-    showImportStatus(message, type) {
-        const statusEl = document.getElementById('import-status');
-        if (!statusEl) return;
-
-        statusEl.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700', 'bg-blue-100', 'text-blue-700');
-        statusEl.classList.add('whitespace-pre-line');
-
-        const colors = {
-            success: ['bg-green-100', 'text-green-700'],
-            error: ['bg-red-100', 'text-red-700'],
-            info: ['bg-blue-100', 'text-blue-700']
-        };
-
-        statusEl.classList.add(...(colors[type] || colors.info));
-        statusEl.textContent = message;
-    },
-
-    // ========== 分享码管理 ==========
-    async generateShareCode() {
-        const codeInput = document.getElementById('new-share-code');
-        const descInput = document.getElementById('share-code-desc');
-        
-        let code = codeInput.value.trim().toUpperCase();
-        if (!code) {
-            code = this.shareCodeSystem.generateCode();
-        }
-        
-        if (!this.shareCodeSystem.validateCode(code)) {
-            this.showAlertDialog({
-                title: '格式错误',
-                message: '分享码应为8位字母数字组合',
-                type: 'warning'
-            });
-            return;
-        }
-        
-        const success = await this.shareCodeSystem.saveShareCode(code, descInput.value);
-        
-        if (success) {
-            this.showToast('分享码已生成', 'success');
-            codeInput.value = '';
-            descInput.value = '';
-            this.loadShareCodeList(document.getElementById('share-code-list'));
-        } else {
-            this.showAlertDialog({
-                title: '生成失败',
-                message: '无法保存分享码',
-                type: 'error'
-            });
-        }
-    },
-
-    async loadShareCodeList(container) {
-        if (!container) return;
-        
-        const codes = await this.shareCodeSystem.loadShareCodes();
-        container.innerHTML = '';
-        
-        Object.entries(codes).forEach(([code, info]) => {
-            const item = document.createElement('div');
-            item.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
-            item.innerHTML = `
-                <div class="flex items-center gap-3 overflow-hidden">
-                    <span class="font-mono font-bold text-amber-600 shrink-0">${code}</span>
-                    ${info.description ? `<span class="text-xs text-gray-500 truncate">${info.description}</span>` : ''}
-                </div>
-                <div class="flex gap-2 shrink-0">
-                    <button onclick="app.copyShareCode('${code}')" class="text-gray-500 hover:text-indigo-600 p-1" title="复制">
-                        <i class="fa-solid fa-copy"></i>
-                    </button>
-                    <button onclick="app.deleteShareCode('${code}')" class="text-gray-500 hover:text-red-600 p-1" title="删除">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-            `;
-            container.appendChild(item);
-        });
-        
-        if (Object.keys(codes).length === 0) {
-            container.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">暂无分享码</p>';
-        }
-    },
-
-    async deleteShareCode(code) {
-        const confirmed = await this.showConfirmDialog({
-            title: '删除确认',
-            message: `确定删除分享码 ${code}？`,
-            confirmText: '删除',
-            cancelText: '取消',
-            type: 'danger'
-        });
-        
-        if (confirmed) {
-            await this.shareCodeSystem.deleteCode(code);
-            this.loadShareCodeList(document.getElementById('share-code-list'));
-        }
-    },
-
-    copyShareCode(code) {
-        navigator.clipboard.writeText(code).then(() => {
-            this.showToast('已复制到剪贴板', 'success');
-        });
-    },
-
-    // ========== 数据导出 ==========
-    exportData() {
-        if (this.runMode === 'frontend' && !this.shareCodeVerified) {
-            this.showAlertDialog({
-                title: '需要分享码',
-                message: '前台模式导出数据需要输入有效的分享码。请在设置页面点击"输入分享码"进行验证。',
-                type: 'warning'
-            });
-            return;
-        }
-        
-        const dataStr = JSON.stringify(this.data, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `wiki-data-${Date.now()}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        this.showToast('数据已导出', 'success');
-    },
-
-    async exportZipBackup() {
-        if (this.runMode === 'frontend' && !this.shareCodeVerified) {
-            this.showAlertDialog({
-                title: '需要分享码',
-                message: '前台模式导出数据需要输入有效的分享码。请在设置页面点击"输入分享码"进行验证。',
-                type: 'warning'
-            });
-            return;
-        }
-        
-        const JSZip = window.JSZip;
-        if (!JSZip) {
-            this.showToast('ZIP库未加载', 'error');
-            return;
-        }
-        
-        const zip = new JSZip();
-        zip.file('wiki-manifest.json', JSON.stringify(this.data, null, 2));
-        
-        const imagesFolder = zip.folder('wiki-images');
-        const imageList = await this.githubStorage.getImageList();
-        
-        for (const filename of imageList) {
-            const imgUrl = await this.githubStorage.loadImage(filename);
-            if (imgUrl) {
-                try {
-                    const response = await fetch(imgUrl);
-                    const blob = await response.blob();
-                    imagesFolder.file(filename, blob);
-                } catch (e) {
-                    console.warn('无法下载图片:', filename);
-                }
-            }
-        }
-        
-        const content = await zip.generateAsync({ type: 'blob' });
-        const url = URL.createObjectURL(content);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `wiki-backup-${Date.now()}.zip`;
-        a.click();
-        URL.revokeObjectURL(url);
-        this.showToast('备份已导出', 'success');
-    },
-
-    // ========== 字体设置 ==========
     changeFont(font) {
         this.data.fontFamily = font;
         document.documentElement.style.setProperty('--custom-font', font);
@@ -1867,468 +2155,26 @@ Object.assign(window.app, {
             }
         });
     },
-
-    // ========== 辅助函数 ==========
-    getVisibleVersion(entry) {
-        if (!entry || !entry.versions) return null;
-        
-        if (this.data.currentTimeline === 'latest') {
-            return entry.versions[entry.versions.length - 1];
-        }
-        
-        const currentCh = this.data.chapters.find(c => c.id === this.data.currentTimeline);
-        if (!currentCh) return entry.versions[entry.versions.length - 1];
-        
-        return entry.versions.find(v => {
-            const fromOrder = this.getChapterOrder(v.chapterFrom);
-            const toOrder = this.getChapterOrder(v.chapterTo);
-            return currentCh.order >= fromOrder && currentCh.order <= toOrder;
-        }) || entry.versions[entry.versions.length - 1];
-    },
-
-    getChapterOrder(chapterId) {
-        if (!chapterId) return -1;
-        const chapter = this.data.chapters.find(c => c.id === chapterId);
-        return chapter ? chapter.order : -1;
-    },
-
-    formatChapterNum(num) {
-        if (num === undefined || num === null) return '';
-        if (typeof num === 'string') return num;
-        return `第${num}章`;
-    },
-
-    generateCode(type) {
-        const prefix = type === 'character' ? 'C' : 'S';
-        const existing = this.data.entries.filter(e => e.type === type);
-        const maxNum = existing.reduce((max, e) => {
-            const match = e.code.match(/\d+/);
-            return match ? Math.max(max, parseInt(match[0])) : max;
-        }, 0);
-        return `${prefix}${String(maxNum + 1).padStart(3, '0')}`;
-    },
-
-    searchAndOpen(name) {
-        const entry = this.data.entries.find(e => {
-            const v = this.getVisibleVersion(e);
-            return v && v.title === name;
-        });
-        
-        if (entry) {
-            this.openEntry(entry.id);
-        } else {
-            this.showToast('未找到该词条', 'warning');
-        }
-    },
-
-    bindEditKeyboardShortcuts() {
-        const handler = (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-                e.preventDefault();
-                this.saveEntry();
-            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
-                e.preventDefault();
-                this.undo();
-            }
-        };
-        
-        document.addEventListener('keydown', handler);
-        this._editKeyHandler = handler;
-    },
-
-    unbindEditKeyboardShortcuts() {
-        if (this._editKeyHandler) {
-            document.removeEventListener('keydown', this._editKeyHandler);
-            this._editKeyHandler = null;
-        }
-    },
-
-    undo() {
-        this.showToast('撤销功能开发中', 'info');
-    },
-
-    // ========== 弹窗系统 ==========
-    showConfirmDialog(options) {
-        return new Promise((resolve) => {
-            const { title = '确认', message, confirmText = '确认', cancelText = '取消', type = 'info' } = options;
-            
-            const overlay = document.createElement('div');
-            overlay.className = 'fixed inset-0 bg-black/60 z-[99999] flex items-center justify-center p-4 fade-in';
-            
-            const iconColors = {
-                info: 'text-blue-600 bg-blue-100',
-                warning: 'text-amber-600 bg-amber-100',
-                danger: 'text-red-600 bg-red-100',
-                success: 'text-green-600 bg-green-100'
-            };
-            
-            const icons = {
-                info: 'fa-circle-info',
-                warning: 'fa-triangle-exclamation',
-                danger: 'fa-circle-exclamation',
-                success: 'fa-check-circle'
-            };
-            
-            overlay.innerHTML = `
-                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 transform scale-100 transition-transform">
-                    <div class="text-center mb-6">
-                        <div class="w-16 h-16 ${iconColors[type]} rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fa-solid ${icons[type]} text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">${title}</h3>
-                        <p class="text-gray-600 text-sm whitespace-pre-wrap">${message}</p>
-                    </div>
-                    <div class="flex gap-3">
-                        <button id="confirm-cancel" class="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
-                            ${cancelText}
-                        </button>
-                        <button id="confirm-ok" class="flex-1 py-2.5 ${type === 'danger' ? 'bg-red-600 hover:bg-red-700' : 'bg-indigo-600 hover:bg-indigo-700'} text-white rounded-lg transition font-medium shadow-lg">
-                            ${confirmText}
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(overlay);
-            
-            overlay.querySelector('#confirm-cancel').onclick = () => {
-                overlay.remove();
-                resolve(false);
-            };
-            
-            overlay.querySelector('#confirm-ok').onclick = () => {
-                overlay.remove();
-                resolve(true);
-            };
-            
-            overlay.onclick = (e) => {
-                if (e.target === overlay) {
-                    overlay.remove();
-                    resolve(false);
-                }
-            };
-        });
-    },
-
-    showAlertDialog(options) {
-        return new Promise((resolve) => {
-            const { title = '提示', message, confirmText = '确定', type = 'info' } = options;
-            
-            const overlay = document.createElement('div');
-            overlay.className = 'fixed inset-0 bg-black/60 z-[99999] flex items-center justify-center p-4 fade-in';
-            
-            const iconColors = {
-                info: 'text-blue-600 bg-blue-100',
-                warning: 'text-amber-600 bg-amber-100',
-                danger: 'text-red-600 bg-red-100',
-                success: 'text-green-600 bg-green-100'
-            };
-            
-            const icons = {
-                info: 'fa-circle-info',
-                warning: 'fa-triangle-exclamation',
-                danger: 'fa-circle-exclamation',
-                success: 'fa-check-circle'
-            };
-            
-            overlay.innerHTML = `
-                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 transform scale-100 transition-transform">
-                    <div class="text-center mb-6">
-                        <div class="w-16 h-16 ${iconColors[type]} rounded-full flex items-center justify-center mx-auto mb-4">
-                            <i class="fa-solid ${icons[type]} text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">${title}</h3>
-                        <p class="text-gray-600 text-sm whitespace-pre-wrap">${message}</p>
-                    </div>
-                    <button id="alert-ok" class="w-full py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium shadow-lg">
-                        ${confirmText}
-                    </button>
-                </div>
-            `;
-            
-            document.body.appendChild(overlay);
-            
-            overlay.querySelector('#alert-ok').onclick = () => {
-                overlay.remove();
-                resolve(true);
-            };
-            
-            overlay.onclick = (e) => {
-                if (e.target === overlay) {
-                    overlay.remove();
-                    resolve(true);
-                }
-            };
-        });
-    },
-
-    showToast(message, type = 'info', duration = 3000) {
-        const toast = document.createElement('div');
-        toast.className = `fixed top-20 left-1/2 transform -translate-x-1/2 z-[99999] px-4 py-2 rounded-lg shadow-lg text-white text-sm flex items-center gap-2 fade-in`;
-        
-        const colors = {
-            info: 'bg-blue-600',
-            success: 'bg-green-600',
-            warning: 'bg-amber-600',
-            error: 'bg-red-600'
-        };
-        
-        toast.classList.add(colors[type] || colors.info);
-        
-        const icons = {
-            info: 'fa-circle-info',
-            success: 'fa-check-circle',
-            warning: 'fa-triangle-exclamation',
-            error: 'fa-circle-exclamation'
-        };
-        
-        toast.innerHTML = `
-            <i class="fa-solid ${icons[type]}"></i>
-            <span>${message}</span>
-        `;
-        
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateX(-50%) translateY(-10px)';
-            toast.style.transition = 'all 0.3s ease';
-            setTimeout(() => toast.remove(), 300);
-        }, duration);
-    },
-
-    // ========== 搜索功能 ==========
-    handleSearchInput(value) {
-        const dropdown = document.getElementById('search-dropdown');
-        if (!value.trim()) {
-            dropdown.classList.add('hidden');
-            return;
-        }
-        
-        const results = this.data.entries.filter(e => {
-            const v = this.getVisibleVersion(e);
-            return v && (e.code.toLowerCase().includes(value.toLowerCase()) || 
-                        v.title.toLowerCase().includes(value.toLowerCase()));
-        }).slice(0, 8);
-        
-        if (results.length === 0) {
-            dropdown.innerHTML = '<div class="p-3 text-center text-gray-400 text-sm">无结果</div>';
-        } else {
-            dropdown.innerHTML = results.map(e => {
-                const v = this.getVisibleVersion(e);
-                return `
-                    <div class="p-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3" onclick="app.openEntry('${e.id}'); app.hideSearchDropdown();">
-                        <span class="font-mono text-xs text-gray-400">${e.code}</span>
-                        <span class="text-sm text-gray-700">${v.title}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        dropdown.classList.remove('hidden');
-    },
-
-    showSearchDropdown() {
-        const dropdown = document.getElementById('search-dropdown');
-        const input = document.getElementById('global-search');
-        if (input && input.value.trim()) {
-            dropdown.classList.remove('hidden');
-        }
-    },
-
-    hideSearchDropdown() {
-        setTimeout(() => {
-            const dropdown = document.getElementById('search-dropdown');
-            if (dropdown) dropdown.classList.add('hidden');
-        }, 200);
-    },
-
-    // ========== 首页自定义内容 ==========
-    addHomeTextBox() {
-        if (!this.data.homeContent) this.data.homeContent = [];
-        this.data.homeContent.push({ type: 'text', content: '' });
-        this.renderHomeCustomContent();
-    },
-
-    addHomeEntryRef() {
-        this.showEntrySelectDialog((entry) => {
-            if (!entry) return;
-            const visibleVersion = this.getVisibleVersion(entry);
-            const title = visibleVersion ? visibleVersion.title : entry.code;
-            if (!this.data.homeContent) this.data.homeContent = [];
-            this.data.homeContent.push({ type: 'entry-ref', entryId: entry.id, title: title });
-            this.renderHomeCustomContent();
-        });
-    },
-
-    showEntrySelectDialog(callback) {
-        const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 bg-black/50 z-[99999] flex items-center justify-center p-4 fade-in';
-        overlay.innerHTML = `
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden">
-                <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
-                    <h3 class="font-bold text-lg text-gray-800">选择词条</h3>
-                    <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fa-solid fa-times"></i>
-                    </button>
-                </div>
-                <div class="p-4">
-                    <input type="text" id="entry-search-input" placeholder="搜索词条名称或编号..." 
-                        class="w-full p-2 border border-gray-200 rounded-lg text-sm mb-4 focus:ring-2 focus:ring-indigo-500 outline-none">
-                    <div id="entry-select-list" class="space-y-1 max-h-[50vh] overflow-y-auto"></div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-        
-        const list = overlay.querySelector('#entry-select-list');
-        const searchInput = overlay.querySelector('#entry-search-input');
-        
-        const renderEntries = (filter = '') => {
-            list.innerHTML = '';
-            this.data.entries.forEach(entry => {
-                const visibleVersion = this.getVisibleVersion(entry);
-                const title = visibleVersion ? visibleVersion.title : entry.code;
-                if (filter && !entry.code.toLowerCase().includes(filter.toLowerCase()) && !title.toLowerCase().includes(filter.toLowerCase())) return;
-                
-                const item = document.createElement('div');
-                item.className = 'p-3 hover:bg-indigo-50 cursor-pointer rounded-lg border-b border-gray-100 flex items-center gap-3 transition';
-                item.innerHTML = `
-                    <span class="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold">${entry.code}</span>
-                    <span class="text-sm text-gray-700">${title}</span>
-                `;
-                item.onclick = () => { overlay.remove(); callback(entry); };
-                list.appendChild(item);
-            });
-        };
-        
-        renderEntries();
-        searchInput.oninput = (e) => renderEntries(e.target.value);
-        searchInput.focus();
-        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
-    },
-
-    updateHomeText(idx, value) {
-        if (this.data.homeContent && this.data.homeContent[idx]) {
-            this.data.homeContent[idx].content = value;
-        }
-    },
-
-    removeHomeItem(idx) {
-        if (this.data.homeContent) {
-            this.data.homeContent.splice(idx, 1);
-            this.renderHomeCustomContent();
-        }
-    },
-
-    saveHomeContent() {
-        this.saveData();
-        this.showToast('首页内容已保存', 'success');
-    },
-
-    showVersionManager() {
-        this.showToast('版本管理器功能开发中', 'info');
-    },
-
-    async saveData() {
-        try {
-            await this.githubStorage.saveWikiData(this.data);
-        } catch (error) {
-            console.error('保存失败:', error);
-        }
-    },
-
-    setMode(mode) {
-        this.data.currentMode = mode;
-        const viewBtn = document.getElementById('btn-mode-view');
-        const editBtn = document.getElementById('btn-mode-edit');
-        
-        if (viewBtn) {
-            viewBtn.className = mode === 'view' 
-                ? 'px-3 py-1.5 rounded-md bg-white shadow-sm text-gray-800 transition-all'
-                : 'px-3 py-1.5 rounded-md text-gray-500 hover:text-gray-800 transition-all';
-        }
-        if (editBtn) {
-            editBtn.className = mode === 'edit'
-                ? 'px-3 py-1.5 rounded-md bg-white shadow-sm text-gray-800 transition-all'
-                : 'px-3 py-1.5 rounded-md text-gray-500 hover:text-gray-800 transition-all';
-        }
-    },
-    
-    // 补充缺失的辅助函数
-    getVersionTimeStatus(entry, version) {
-        // 简单实现，返回当前状态
-        return 'current';
-    },
-    
-    confirmedFutureEntries: new Set(),
-    
-    showFutureConfirmDialog(entry, version, confirmKey) {
-        // 简化实现，直接确认
-        this.confirmedFutureEntries.add(confirmKey);
-        this.router('detail', false);
-    }
 });
-// ========== 【关键修复】将 shareCodeSystem 移出 Object.assign 独立定义，避免上下文丢失 ==========
-window.app.shareCodeSystem = {
-    generateCode() {
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        let code = '';
-        for (let i = 0; i < 8; i++) {
-            code += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return code;
-    },
-    
-    validateCode(code) {
-        return /^[A-Z0-9]{8}$/.test(code);
-    },
-    
-    async verifyCode(code) {
-        // 修复：使用 window.app.shareCodeSystem 替代 this，确保引用正确
-        const codes = await window.app.shareCodeSystem.loadShareCodes();
-        return codes.hasOwnProperty(code);
-    },
-    
-    async loadShareCodes() {
-        try {
-            const content = await window.WikiGitHubStorage.getFile('share-codes.json');
-            if (content) {
-                return JSON.parse(content.content);
-            }
-        } catch (e) {
-            console.warn('无法加载分享码列表:', e);
-        }
-        return {};
-    },
-    
-    async saveShareCode(code, description = '') {
-        try {
-            const codes = await window.app.shareCodeSystem.loadShareCodes();
-            codes[code] = {
-                description,
-                createdAt: Date.now(),
-                createdBy: window.app.backendLoggedIn ? 'backend' : 'frontend'
-            };
-            await window.WikiGitHubStorage.putFile('share-codes.json', JSON.stringify(codes, null, 2), 'Add share code');
-            return true;
-        } catch (e) {
-            console.error('保存分享码失败:', e);
-            return false;
-        }
-    },
-    
-    async deleteCode(code) {
-        try {
-            const codes = await window.app.shareCodeSystem.loadShareCodes();
-            delete codes[code];
-            await window.WikiGitHubStorage.putFile('share-codes.json', JSON.stringify(codes, null, 2), 'Delete share code');
-            return true;
-        } catch (e) {
-            console.error('删除分享码失败:', e);
-            return false;
-        }
-    }
-};
+// 如果 markdownToHtml 未定义，提供兼容实现
+if (!app.markdownToHtml) {
+    app.markdownToHtml = function(text) {
+        if (!text) return '';
+        return text
+            .replace(/@([^\[]+)\[([^\]]+)\]/g, '<span class="synopsis-entry-ref" data-entry-code="$2" onclick="app.openEntryByCode(\'$2\')"><i class="fa-solid fa-user"></i>$1</span>')
+            .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+            .replace(/\*(.+?)\*/g, '<i>$1</i>')
+            .replace(/__(.+?)__/g, '<u>$1</u>')
+            .replace(/\n/g, '<br>');
+    };
+}
 
-console.log('GitHub Wiki Core demov2.6 加载完成（完整修复版）');
+if (!app.openEntryByCode) {
+    app.openEntryByCode = function(code) {
+        const entry = app.data.entries.find(e => e.code === code);
+        if (entry) app.openEntry(entry.id);
+        else app.showToast('未找到该角色', 'warning');
+    };
+}
+
+console.log('GitHub Wiki Core v2.6 加载完成（修复导入与分享码逻辑）');
