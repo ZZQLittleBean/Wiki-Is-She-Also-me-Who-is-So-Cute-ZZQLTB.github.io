@@ -54,6 +54,7 @@ Object.assign(window.app, {
     },
 
     // ========== 【关键修复】分享码系统必须在 Object.assign 对象字面量内部定义 ==========
+    // ========== 【关键修复】shareCodeSystem：移除 this 依赖，使用显式引用 ==========
     shareCodeSystem: {
         generateCode() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -69,7 +70,8 @@ Object.assign(window.app, {
         },
         
         async verifyCode(code) {
-            const codes = await this.loadShareCodes();
+            // 修复：使用 window.app.shareCodeSystem 替代 this
+            const codes = await window.app.shareCodeSystem.loadShareCodes();
             return codes.hasOwnProperty(code);
         },
         
@@ -87,7 +89,8 @@ Object.assign(window.app, {
         
         async saveShareCode(code, description = '') {
             try {
-                const codes = await this.loadShareCodes();
+                // 修复：使用 window.app.shareCodeSystem 替代 this
+                const codes = await window.app.shareCodeSystem.loadShareCodes();
                 codes[code] = {
                     description,
                     createdAt: Date.now(),
@@ -103,7 +106,8 @@ Object.assign(window.app, {
         
         async deleteCode(code) {
             try {
-                const codes = await this.loadShareCodes();
+                // 修复：使用 window.app.shareCodeSystem 替代 this
+                const codes = await window.app.shareCodeSystem.loadShareCodes();
                 delete codes[code];
                 await window.WikiGitHubStorage.putFile('share-codes.json', JSON.stringify(codes, null, 2), 'Delete share code');
                 return true;
@@ -159,27 +163,33 @@ Object.assign(window.app, {
         container.innerHTML = '';
         container.appendChild(clone);
         
-        // 【修复】直接进入浏览模式，分享码仅用于导出
-        document.getElementById('login-options')?.classList.add('hidden');
-        document.getElementById('share-code-form')?.classList.remove('hidden');
+        // 修复：使用可选链和分离操作，避免单一失败阻断流程
+        const loginOptions = document.getElementById('login-options');
+        const shareCodeForm = document.getElementById('share-code-form');
         
-        // 修改提示文字 - 分享码仅用于导出
-        const descText = document.querySelector('#share-code-form p.text-gray-500');
-        if (descText) {
-            descText.textContent = '输入存档分享码以导出完整数据备份';
+        if (loginOptions) loginOptions.classList.add('hidden');
+        if (shareCodeForm) shareCodeForm.classList.remove('hidden');
+        
+        // 修改提示文字
+        if (shareCodeForm) {
+            const descText = shareCodeForm.querySelector('p.text-gray-500');
+            if (descText) {
+                descText.textContent = '输入存档分享码以导出完整数据备份';
+            }
         }
         
-        // 重建按钮布局：直接浏览 | 导出数据（需分享码） | 后台登录
-        const shareForm = document.getElementById('share-code-form');
-        if (shareForm) {
-            // 清空原有按钮（保留返回按钮）
-            const existingButtons = shareForm.querySelectorAll('button:not([onclick*="showLoginOptions"])');
-            existingButtons.forEach(btn => btn.remove());
+        // 重建按钮布局
+        if (shareCodeForm) {
+            // 修复：安全地清空原有按钮
+            const existingButtons = shareCodeForm.querySelectorAll('button:not([onclick*="showLoginOptions"])');
+            existingButtons.forEach(btn => {
+                try { btn.remove(); } catch(e) { console.warn('按钮移除失败:', e); }
+            });
             
             const buttonContainer = document.createElement('div');
             buttonContainer.className = 'space-y-3 mt-4';
             buttonContainer.innerHTML = `
-                <button onclick="app.enterDirectView()" class="w-full py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition">
+                <button onclick="window.app.enterDirectView()" class="w-full py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition">
                     <i class="fa-solid fa-book-open mr-2"></i>直接浏览 Wiki
                 </button>
                 <div class="relative">
@@ -190,26 +200,28 @@ Object.assign(window.app, {
                         <span class="px-2 bg-white text-gray-500">或</span>
                     </div>
                 </div>
-                <button onclick="app.showExportCodeInput()" class="w-full py-3 bg-amber-100 text-amber-700 rounded-lg font-medium hover:bg-amber-200 transition">
+                <button onclick="window.app.showExportCodeInput()" class="w-full py-3 bg-amber-100 text-amber-700 rounded-lg font-medium hover:bg-amber-200 transition">
                     <i class="fa-solid fa-download mr-2"></i>导出数据（需分享码）
                 </button>
-                <button onclick="app.showBackendLogin()" class="w-full py-2 text-gray-400 hover:text-indigo-600 transition text-sm flex items-center justify-center gap-1">
+                <button onclick="window.app.showBackendLogin()" class="w-full py-2 text-gray-400 hover:text-indigo-600 transition text-sm flex items-center justify-center gap-1">
                     <i class="fa-solid fa-lock text-xs"></i>
                     后台模式登录
                 </button>
             `;
             
-            const returnBtn = shareForm.querySelector('button[onclick="app.showLoginOptions()"]');
+            const returnBtn = shareCodeForm.querySelector('button[onclick*="showLoginOptions"]');
             if (returnBtn) {
-                shareForm.insertBefore(buttonContainer, returnBtn);
+                shareCodeForm.insertBefore(buttonContainer, returnBtn);
             } else {
-                shareForm.appendChild(buttonContainer);
+                shareCodeForm.appendChild(buttonContainer);
             }
         }
         
-        // 隐藏原来的输入框（仅导出时需要）
+        // 修复：安全地隐藏输入框
         const input = document.getElementById('share-code-input');
-        if (input) input.parentElement.classList.add('hidden');
+        if (input && input.parentElement) {
+            input.parentElement.classList.add('hidden');
+        }
     },
 
     // 直接进入浏览模式（无需分享码）
@@ -259,8 +271,22 @@ Object.assign(window.app, {
     },
 
     // 验证导出分享码
+    // 验证导出分享码
     async verifyExportCode() {
+        // 修复：添加防御性检查
+        if (!this.shareCodeSystem) {
+            console.error('shareCodeSystem 未定义');
+            this.showAlertDialog({
+                title: '系统错误',
+                message: '分享码系统初始化失败，请刷新页面重试',
+                type: 'error'
+            });
+            return;
+        }
+        
         const input = document.getElementById('export-code-input');
+        if (!input) return;
+        
         const code = input.value.trim().toUpperCase();
         
         if (!this.shareCodeSystem.validateCode(code)) {
