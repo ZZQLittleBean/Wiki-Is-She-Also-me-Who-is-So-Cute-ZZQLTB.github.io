@@ -7,7 +7,24 @@
 if (typeof window.app === 'undefined') {
     window.app = {};
 }
-
+// ========== 防御性修复：确保 shareCodeSystem 命名空间存在 ==========
+// 防止 Object.assign 失败或调用时序错误导致 undefined
+if (!window.app.shareCodeSystem) {
+    window.app.shareCodeSystem = {
+        generateCode: function() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+            return code;
+        },
+        validateCode: function(code) { return /^[A-Z0-9]{8}$/.test(code); },
+        verifyCode: async function() { return false; },      // 占位，将被 Object.assign 覆盖
+        loadShareCodes: async function() { return {}; },     // 占位
+        saveShareCode: async function() { return false; },  // 占位
+        deleteCode: async function() { return false; }      // 占位
+    };
+}
+// ===================================================================
 Object.assign(window.app, {
     data: {
         entries: [],
