@@ -2595,6 +2595,71 @@ if (!app.openEntryByCode) {
         else app.showToast('未找到该角色', 'warning');
     };
 }
+// ========== 确保 shareCodeSystem 存在（防止 Object.assign 失败） ==========
+if (!app.shareCodeSystem) {
+    app.shareCodeSystem = {
+        generateCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        },
+        
+        validateCode(code) {
+            return /^[A-Z0-9]{8}$/.test(code);
+        },
+        
+        // 验证分享码是否有效
+        async verifyCode(code) {
+            const codes = await this.loadShareCodes();
+            return codes.hasOwnProperty(code);
+        },
+        
+        // 加载所有分享码
+        async loadShareCodes() {
+            try {
+                const content = await window.WikiGitHubStorage.getFile('share-codes.json');
+                if (content) {
+                    return JSON.parse(content.content);
+                }
+            } catch (e) {
+                console.warn('无法加载分享码列表:', e);
+            }
+            return {};
+        },
+        
+        // 保存分享码
+        async saveShareCode(code, description = '') {
+            try {
+                const codes = await this.loadShareCodes();
+                codes[code] = {
+                    description,
+                    createdAt: Date.now(),
+                    createdBy: window.app.backendLoggedIn ? 'backend' : 'frontend'
+                };
+                await window.WikiGitHubStorage.putFile('share-codes.json', JSON.stringify(codes, null, 2), 'Add share code');
+                return true;
+            } catch (e) {
+                console.error('保存分享码失败:', e);
+                return false;
+            }
+        },
+        
+        // 删除分享码
+        async deleteCode(code) {
+            try {
+                const codes = await this.loadShareCodes();
+                delete codes[code];
+                await window.WikiGitHubStorage.putFile('share-codes.json', JSON.stringify(codes, null, 2), 'Delete share code');
+                return true;
+            } catch (e) {
+                console.error('删除分享码失败:', e);
+                return false;
+            }
+        }
+    };
+}
 
-
-console.log('GitHub Wiki Core v2.6 加载完成（修复导入与分享码逻辑）');
+console.log('GitHub Wiki Core demov2.6 加载完成（修复导入与分享码逻辑）');
