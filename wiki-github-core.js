@@ -102,6 +102,26 @@ const app = {
                     this.router('home');
                 }
                 break;
+            case 'announcement-edit':
+                this.showToast('公告编辑功能在GitHub版暂未开放', 'info');
+                this.router('home');
+                break;
+            case 'synopsis-edit':
+                this.showToast('剧情梗概编辑功能在GitHub版暂未开放', 'info');
+                this.router('home');
+                break;
+            case 'synopsis':
+                this.showToast('剧情梗概功能在GitHub版暂未开放', 'info');
+                this.router('home');
+                break;
+            case 'graph':
+                this.showToast('关系图功能在GitHub版暂未开放', 'info');
+                this.router('home');
+                break;
+            case 'timeline-settings':
+                this.showToast('章节管理功能在GitHub版暂未开放', 'info');
+                this.router('settings');
+                break;
             default:
                 this.renderHome(container);
         }
@@ -551,6 +571,7 @@ const app = {
             this.editState.hasChanges = false;
             this.tempEntry = null;
             this.tempVersion = null;
+            this.unbindEditKeyboardShortcuts();
             this.router('home');
         } catch (error) {
             console.error('保存失败:', error);
@@ -586,6 +607,7 @@ const app = {
     // ========== 取消编辑 ==========
     async cancelEdit() {
         if (!this.editState.hasChanges && this.editState.undoStack.length === 0) {
+            this.unbindEditKeyboardShortcuts();
             this.tempEntry = null;
             this.tempVersion = null;
             this.data.editingType = null;
@@ -602,6 +624,7 @@ const app = {
         });
         
         if (confirmed) {
+            this.unbindEditKeyboardShortcuts();
             this.tempEntry = null;
             this.tempVersion = null;
             this.data.editingType = null;
@@ -1219,6 +1242,13 @@ const app = {
         this._editKeyHandler = handler;
     },
 
+    unbindEditKeyboardShortcuts() {
+        if (this._editKeyHandler) {
+            document.removeEventListener('keydown', this._editKeyHandler);
+            this._editKeyHandler = null;
+        }
+    },
+
     undo() {
         this.showToast('撤销功能开发中', 'info');
     },
@@ -1265,6 +1295,53 @@ const app = {
 
     addHomeEntryRef() {
         this.showToast('首页自定义功能在GitHub版暂未开放', 'info');
+    },
+
+    showEntrySelectDialog(callback) {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black/50 z-[99999] flex items-center justify-center p-4 fade-in';
+        overlay.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden">
+                <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
+                    <h3 class="font-bold text-lg text-gray-800">选择词条</h3>
+                    <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-4">
+                    <input type="text" id="entry-search-input" placeholder="搜索词条名称或编号..." 
+                        class="w-full p-2 border border-gray-200 rounded-lg text-sm mb-4 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <div id="entry-select-list" class="space-y-1 max-h-[50vh] overflow-y-auto"></div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        
+        const list = overlay.querySelector('#entry-select-list');
+        const searchInput = overlay.querySelector('#entry-search-input');
+        
+        const renderEntries = (filter = '') => {
+            list.innerHTML = '';
+            this.data.entries.forEach(entry => {
+                const visibleVersion = this.getVisibleVersion(entry);
+                const title = visibleVersion ? visibleVersion.title : entry.code;
+                if (filter && !entry.code.toLowerCase().includes(filter.toLowerCase()) && !title.toLowerCase().includes(filter.toLowerCase())) return;
+                
+                const item = document.createElement('div');
+                item.className = 'p-3 hover:bg-indigo-50 cursor-pointer rounded-lg border-b border-gray-100 flex items-center gap-3 transition';
+                item.innerHTML = `
+                    <span class="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold">${entry.code}</span>
+                    <span class="text-sm text-gray-700">${title}</span>
+                `;
+                item.onclick = () => { overlay.remove(); callback(entry); };
+                list.appendChild(item);
+            });
+        };
+        
+        renderEntries();
+        searchInput.oninput = (e) => renderEntries(e.target.value);
+        searchInput.focus();
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
     },
 
     saveHomeContent() {
