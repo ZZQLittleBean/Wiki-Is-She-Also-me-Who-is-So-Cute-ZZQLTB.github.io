@@ -53,71 +53,6 @@ Object.assign(window.app, {
         redoStack: []
     },
 
-    // ========== 【关键修复】分享码系统必须在 Object.assign 对象字面量内部定义 ==========
-    // ========== 【关键修复】shareCodeSystem：移除 this 依赖，使用显式引用 ==========
-    shareCodeSystem: {
-        generateCode() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let code = '';
-            for (let i = 0; i < 8; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return code;
-        },
-        
-        validateCode(code) {
-            return /^[A-Z0-9]{8}$/.test(code);
-        },
-        
-        async verifyCode(code) {
-            // 修复：使用 window.app.shareCodeSystem 替代 this
-            const codes = await window.app.shareCodeSystem.loadShareCodes();
-            return codes.hasOwnProperty(code);
-        },
-        
-        async loadShareCodes() {
-            try {
-                const content = await window.WikiGitHubStorage.getFile('share-codes.json');
-                if (content) {
-                    return JSON.parse(content.content);
-                }
-            } catch (e) {
-                console.warn('无法加载分享码列表:', e);
-            }
-            return {};
-        },
-        
-        async saveShareCode(code, description = '') {
-            try {
-                // 修复：使用 window.app.shareCodeSystem 替代 this
-                const codes = await window.app.shareCodeSystem.loadShareCodes();
-                codes[code] = {
-                    description,
-                    createdAt: Date.now(),
-                    createdBy: window.app.backendLoggedIn ? 'backend' : 'frontend'
-                };
-                await window.WikiGitHubStorage.putFile('share-codes.json', JSON.stringify(codes, null, 2), 'Add share code');
-                return true;
-            } catch (e) {
-                console.error('保存分享码失败:', e);
-                return false;
-            }
-        },
-        
-        async deleteCode(code) {
-            try {
-                // 修复：使用 window.app.shareCodeSystem 替代 this
-                const codes = await window.app.shareCodeSystem.loadShareCodes();
-                delete codes[code];
-                await window.WikiGitHubStorage.putFile('share-codes.json', JSON.stringify(codes, null, 2), 'Delete share code');
-                return true;
-            } catch (e) {
-                console.error('删除分享码失败:', e);
-                return false;
-            }
-        }
-    },
-
     // ========== 初始化 ==========
     init() {
         this.githubStorage = window.WikiGitHubStorage;
@@ -273,12 +208,12 @@ Object.assign(window.app, {
     // 验证导出分享码
     // 验证导出分享码
     async verifyExportCode() {
-        // 修复：添加防御性检查
+        // 【诊断】检查 shareCodeSystem 是否存在
         if (!this.shareCodeSystem) {
-            console.error('shareCodeSystem 未定义');
+            console.error('致命错误：shareCodeSystem 未定义。当前 app 对象:', this);
             this.showAlertDialog({
-                title: '系统错误',
-                message: '分享码系统初始化失败，请刷新页面重试',
+                title: '系统初始化错误',
+                message: '分享码系统未能正确加载，请检查浏览器控制台(F12)获取详细错误信息，并尝试刷新页面。',
                 type: 'error'
             });
             return;
@@ -2334,5 +2269,66 @@ Object.assign(window.app, {
         this.router('detail', false);
     }
 });
+// ========== 【关键修复】将 shareCodeSystem 移出 Object.assign 独立定义，避免上下文丢失 ==========
+window.app.shareCodeSystem = {
+    generateCode() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let code = '';
+        for (let i = 0; i < 8; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return code;
+    },
+    
+    validateCode(code) {
+        return /^[A-Z0-9]{8}$/.test(code);
+    },
+    
+    async verifyCode(code) {
+        // 修复：使用 window.app.shareCodeSystem 替代 this，确保引用正确
+        const codes = await window.app.shareCodeSystem.loadShareCodes();
+        return codes.hasOwnProperty(code);
+    },
+    
+    async loadShareCodes() {
+        try {
+            const content = await window.WikiGitHubStorage.getFile('share-codes.json');
+            if (content) {
+                return JSON.parse(content.content);
+            }
+        } catch (e) {
+            console.warn('无法加载分享码列表:', e);
+        }
+        return {};
+    },
+    
+    async saveShareCode(code, description = '') {
+        try {
+            const codes = await window.app.shareCodeSystem.loadShareCodes();
+            codes[code] = {
+                description,
+                createdAt: Date.now(),
+                createdBy: window.app.backendLoggedIn ? 'backend' : 'frontend'
+            };
+            await window.WikiGitHubStorage.putFile('share-codes.json', JSON.stringify(codes, null, 2), 'Add share code');
+            return true;
+        } catch (e) {
+            console.error('保存分享码失败:', e);
+            return false;
+        }
+    },
+    
+    async deleteCode(code) {
+        try {
+            const codes = await window.app.shareCodeSystem.loadShareCodes();
+            delete codes[code];
+            await window.WikiGitHubStorage.putFile('share-codes.json', JSON.stringify(codes, null, 2), 'Delete share code');
+            return true;
+        } catch (e) {
+            console.error('删除分享码失败:', e);
+            return false;
+        }
+    }
+};
 
 console.log('GitHub Wiki Core demov2.6 加载完成（完整修复版）');
