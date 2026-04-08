@@ -377,33 +377,19 @@ Object.assign(window.app, {
     // ========== 数据加载 ==========
     async loadDataFromGitHub() {
         try {
-            // 尝试加载 wiki-manifest.json 或 data.json
-            let data = await this.githubStorage.loadWikiData('wiki-manifest.json');
-            
-            if (!data) {
-                data = await this.githubStorage.loadWikiData('data.json');
-            }
+            // 【修复】只从 data.json 加载数据，不再从 wiki-manifest.json 加载
+            // wiki-manifest.json 仅用于图片映射，不包含条目数据
+            let data = await this.githubStorage.loadWikiData('data.json');
             
             if (data) {
-                console.log('[Wiki] 加载到原始数据:', Object.keys(data));  // 调试日志
-                
-                // 检查是否是图片映射文件（错误的数据文件）
-                if (data.mappings && !data.entries && !data.data?.entries) {
-                    console.warn('[Wiki] 警告：这看起来是图片映射文件，不是数据文件');
-                    this.showAlertDialog({
-                        title: '数据文件错误',
-                        message: '当前 data.json 是图片映射文件（manifest），缺少词条数据。请上传包含 settings 和 entries 的数据文件。',
-                        type: 'error'
-                    });
-                    return;
-                }
+                console.log('[Wiki] 加载到数据文件:', Object.keys(data));
                 
                 // 处理不同格式的数据
                 if (data.data && Array.isArray(data.data.entries)) {
                     // 格式2：嵌套格式 {data: {...}}
                     this.data = { ...this.data, ...data.data };
                 } else if (data.settings && Array.isArray(data.entries)) {
-                    // 【修复】格式3：截图所示的 {settings: {...}, entries: [...]} 结构
+                    // 格式3：{settings: {...}, entries: [...], ...}
                     console.log('[Wiki] 识别到 settings+entries 格式');
                     this.data.entries = data.entries || [];
                     this.data.chapters = data.chapters || [];
@@ -413,11 +399,10 @@ Object.assign(window.app, {
                     this.data.customFields = data.customFields || {};
                     this.data.homeContent = data.homeContent || [];
                     
-                    // 从 settings 对象提取配置（对应截图结构）
+                    // 从 settings 提取配置
                     if (data.settings) {
                         this.data.wikiTitle = data.settings.name || data.settings.welcomeTitle || '未命名 Wiki';
                         this.data.wikiSubtitle = data.settings.subtitle || '';
-                        // 保存其他设置
                         this.data.welcomeTitle = data.settings.welcomeTitle || '';
                         this.data.welcomeSubtitle = data.settings.welcomeSubtitle || '';
                         if (data.settings.customFont) this.data.fontFamily = data.settings.customFont;
@@ -430,24 +415,14 @@ Object.assign(window.app, {
                     console.error('[Wiki] 无法识别的数据格式:', data);
                     this.showAlertDialog({
                         title: '数据格式错误',
-                        message: '无法识别数据文件格式。文件必须包含 entries 数组。',
+                        message: 'data.json 格式不正确，缺少 entries 数组。请确保上传了正确的数据文件。',
                         type: 'error'
                     });
                     return;
                 }
-                
-                // 确保所有必要字段存在
-                if (!this.data.entries) this.data.entries = [];
-                if (!this.data.chapters) this.data.chapters = [];
-                if (!this.data.camps) this.data.camps = ['主角团', '反派', '中立'];
-                if (!this.data.synopsis) this.data.synopsis = [];
-                if (!this.data.announcements) this.data.announcements = [];
-                if (!this.data.customFields) this.data.customFields = {};
-                if (!this.data.homeContent) this.data.homeContent = [];
-                
-                console.log('[Wiki] 数据加载成功，词条数:', this.data.entries.length);
             } else {
                 // 首次使用，创建空数据
+                console.log('[Wiki] 未找到数据文件，初始化空数据');
                 this.data.entries = [];
                 this.data.chapters = [];
                 this.data.camps = ['主角团', '反派', '中立'];
@@ -958,33 +933,19 @@ Object.assign(window.app, {
             console.log('[Import] 导入文件结构:', Object.keys(importedData));
 
             // 检查是否是图片映射文件（错误文件）
-            if (importedData.mappings && !importedData.entries) {
-                this.showImportStatus('错误：这是图片映射文件（manifest），不是Wiki数据文件。\n请上传包含 settings 和 entries 的数据文件。', 'error');
+            // 检查是否是图片映射文件（错误的数据文件）
+            if (importedData.mappings && !importedData.entries && !importedData.data?.entries && !importedData.settings) {
+                this.showImportStatus(
+                    '错误：这是图片映射文件（wiki-manifest.json），不是Wiki数据文件。\n' +
+                    '请上传包含 settings 和 entries 的 data.json 文件。',
+                    'error'
+                );
                 return;
             }
 
-            // 格式1：扁平格式 {entries: [...], chapters: [...], ...}
-            if (Array.isArray(importedData.entries)) {
-                entries = importedData.entries;
-                chapters = importedData.chapters;
-                camps = importedData.camps;
-                synopsis = importedData.synopsis;
-                announcements = importedData.announcements;
-                wikiTitle = importedData.wikiTitle;
-                wikiSubtitle = importedData.wikiSubtitle;
-            } 
-            // 格式2：嵌套格式 {data: {entries: [...], ...}}
-            else if (importedData.data && Array.isArray(importedData.data.entries)) {
-                entries = importedData.data.entries;
-                chapters = importedData.data.chapters;
-                camps = importedData.data.camps;
-                synopsis = importedData.data.synopsis;
-                announcements = importedData.data.announcements;
-                wikiTitle = importedData.wikiTitle || importedData.data.wikiTitle;
-                wikiSubtitle = importedData.wikiSubtitle || importedData.data.wikiSubtitle;
-            }
-            // 【修复】格式3：截图格式 {settings: {...}, entries: [...], ...}
-            else if (importedData.settings && Array.isArray(importedData.entries)) {
+            // 检查各种可能的格式
+            if (importedData.settings && Array.isArray(importedData.entries)) {
+                // 【优先】格式3：截图所示的 {settings: {...}, entries: [...]} 结构
                 console.log('[Import] 识别到 settings+entries 格式');
                 entries = importedData.entries;
                 chapters = importedData.chapters || [];
@@ -997,13 +958,31 @@ Object.assign(window.app, {
                     wikiTitle = importedData.settings.name;
                     wikiSubtitle = importedData.settings.subtitle;
                 }
+            } else if (importedData.data && Array.isArray(importedData.data.entries)) {
+                // 格式2：嵌套格式 {data: {...}}
+                entries = importedData.data.entries;
+                chapters = importedData.data.chapters;
+                camps = importedData.data.camps;
+                synopsis = importedData.data.synopsis;
+                announcements = importedData.data.announcements;
+                wikiTitle = importedData.wikiTitle || importedData.data.wikiTitle;
+                wikiSubtitle = importedData.wikiSubtitle || importedData.data.wikiSubtitle;
+            } else if (Array.isArray(importedData.entries)) {
+                // 格式1：扁平格式 {entries: [...], ...}
+                entries = importedData.entries;
+                chapters = importedData.chapters;
+                camps = importedData.camps;
+                synopsis = importedData.synopsis;
+                announcements = importedData.announcements;
+                wikiTitle = importedData.wikiTitle;
+                wikiSubtitle = importedData.wikiSubtitle;
             } else {
                 this.showImportStatus(
                     '数据格式错误：未找到有效的 entries 数组。\n' +
                     '支持的格式：\n' +
-                    '1. {entries: [...], chapters: [...]}\n' +
-                    '2. {data: {entries: [...], ...}}\n' +
-                    '3. {settings: {...}, entries: [...], ...}\n\n' +
+                    '1. {settings: {...}, entries: [...], ...}（推荐）\n' +
+                    '2. {entries: [...], chapters: [...]}\n' +
+                    '3. {data: {entries: [...], ...}}\n\n' +
                     '实际找到字段: ' + Object.keys(importedData).join(', '),
                     'error'
                 );

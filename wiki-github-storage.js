@@ -220,8 +220,27 @@
 
         // 保存Wiki数据
         async saveWikiData(data) {
-            const content = JSON.stringify(data, null, 2);
-            return await this.putFile('wiki-manifest.json', content, 'Update Wiki data');
+            // 【修复】构建标准格式的数据文件（包含 settings 和 entries，不包含图片映射）
+            const exportData = {
+                settings: {
+                    name: data.wikiTitle || '未命名 Wiki',
+                    subtitle: data.wikiSubtitle || '',
+                    welcomeTitle: data.welcomeTitle || '',
+                    welcomeSubtitle: data.welcomeSubtitle || '',
+                    customFont: data.fontFamily || "'Noto Sans SC', sans-serif",
+                    homeCustomTitle: data.homeCustomTitle || ''
+                },
+                entries: data.entries || [],
+                chapters: data.chapters || [],
+                camps: data.camps || ['主角团', '反派', '中立'],
+                synopsis: data.synopsis || [],
+                announcements: data.announcements || [],
+                customFields: data.customFields || {},
+                homeContent: data.homeContent || []
+            };
+            
+            const content = JSON.stringify(exportData, null, 2);
+            return await this.putFile('data.json', content, 'Update Wiki data');
         },
 
         // 保存图片
