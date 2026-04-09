@@ -98,20 +98,38 @@
             }
         },
 
-        async putFile(path, content, message = 'Update via Wiki', retryCount = 3) {
+        async putFile(path, content, message = 'Update via Wiki', isBinary = false, retryCount = 3) {
             try {
                 let sha = null;
                 try {
                     const existing = await this.getFile(path);
                     if (existing) sha = existing.sha;
-                } catch (e) {}
+                } catch (e) {
+                    // 文件可能不存在，这是正常的
+                }
+
+                let encodedContent;
+                if (isBinary) {
+                    // 对于已经是 base64 的内容（如图片），直接发送，不再二次编码
+                    // 移除可能的换行符（GitHub API 不接受带换行符的 base64）
+                    encodedContent = content.replace(/\s/g, '');
+                } else {
+                    // 对于文本内容（如 JSON），使用标准编码
+                    // 注意：先 utf-8 编码再 base64，避免中文乱码
+                    const utf8Bytes = new TextEncoder().encode(content);
+                    const binaryString = Array.from(utf8Bytes, byte => String.fromCharCode(byte)).join('');
+                    encodedContent = btoa(binaryString);
+                }
 
                 const body = {
                     message: message,
-                    content: btoa(unescape(encodeURIComponent(content))),
+                    content: encodedContent,
                     branch: this.config.branch
                 };
+                
                 if (sha) body.sha = sha;
+
+                console.log(`[GitHub] 正在保存 ${path}，大小: ${(encodedContent.length / 1024).toFixed(2)}KB，SHA: ${sha || '新建'}`);
 
                 const response = await fetch(`${this.getBaseUrl()}/contents/${this.config.dataPath}/${path}`, {
                     method: 'PUT',
@@ -120,19 +138,39 @@
                 });
 
                 if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error(`[GitHub] API 错误详情:`, errorData);
+                    
                     if (response.status === 409 && retryCount > 0) {
-                        console.warn(`[GitHub] 409 冲突，${retryCount} 秒后重试...`);
+                        console.warn(`[GitHub] 409 冲突，获取最新 SHA 后重试...`);
+                        // 重新获取最新 SHA
                         await new Promise(resolve => setTimeout(resolve, 1000));
-                        return this.putFile(path, content, message, retryCount - 1);
+                        const latest = await this.getFile(path).catch(() => null);
+                        if (latest && latest.sha !== sha) {
+                            console.log(`[GitHub] 获取到新 SHA: ${latest.sha}`);
+                            // 递归重试，但不再次获取 SHA，避免无限循环
+                            return this.putFile(path, content, message, isBinary, retryCount - 1);
+                        }
+                        throw new Error(`GitHub API错误: 409 - 内容冲突，请刷新后重试`);
                     }
-                    throw new Error(`GitHub API错误: ${response.status}`);
+                    
+                    if (response.status === 422) {
+                        const size = (encodedContent.length / 1024 / 1024).toFixed(2);
+                        throw new Error(`GitHub API错误: 422 - 内容格式错误或过大(${size}MB)。单文件限制100MB。`);
+                    }
+                    
+                    throw new Error(`GitHub API错误: ${response.status} ${errorData.message || ''}`);
                 }
-                return await response.json();
+                
+                const result = await response.json();
+                console.log(`[GitHub] ✅ 成功保存 ${path}，新 SHA: ${result.content?.sha?.substring(0, 8)}`);
+                return result;
             } catch (error) {
-                console.error('[GitHub] 保存文件失败:', error);
+                console.error(`[GitHub] 保存文件 ${path} 失败:`, error.message);
                 throw error;
             }
         },
+
 
         async deleteFile(path, message = 'Delete via Wiki') {
             try {
@@ -231,15 +269,20 @@
 
         async saveImage(filename, dataUrl) {
             try {
-                // 处理 DataURL，提取 base64 部分
+                // 提取 base64 部分
                 let base64 = dataUrl;
                 if (dataUrl.includes(',')) {
                     base64 = dataUrl.split(',')[1];
                 }
-                await this.putFile(`images/${filename}`, base64, `Add image: ${filename}`);
+                
+                // 移除 dataUrl 前缀可能残留的空白
+                base64 = base64.trim();
+                
+                // 使用 isBinary=true 模式，避免二次 base64 编码
+                await this.putFile(`images/${filename}`, base64, `Add image: ${filename}`, true);
                 return true;
             } catch (error) {
-                console.error('[GitHub] 保存图片失败:', error);
+                console.error('[GitHub] 保存图片失败:', filename, error.message);
                 throw error;
             }
         },
