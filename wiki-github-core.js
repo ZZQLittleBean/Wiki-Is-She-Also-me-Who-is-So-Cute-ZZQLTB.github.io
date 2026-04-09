@@ -524,36 +524,51 @@ Object.assign(window.app, {
         if (!tpl) return;
         
         const clone = tpl.content.cloneNode(true);
+        container.appendChild(clone);  // 【关键】先添加到 DOM
         
-        // 【修复】正确绑定欢迎语到首页大蓝框 - 从 settings 读取
-        const welcomeTitleEl = clone.getElementById('welcome-title');
-        const welcomeSubtitleEl = clone.getElementById('welcome-subtitle');
+        // 【修复】在 DOM 插入后通过 document 获取元素，确保正确绑定
+        const welcomeTitleEl = document.getElementById('welcome-title');
+        const welcomeSubtitleEl = document.getElementById('welcome-subtitle');
         
-        // 优先使用 settings.welcomeTitle/welcomeSubtitle
+        // 【关键】优先使用 settings 中的字段（根据 data.json 结构）
+        const welcomeTitle = this.data.settings?.welcomeTitle || '欢迎来到 Wiki';
+        const welcomeSubtitle = this.data.settings?.welcomeSubtitle || '探索角色、世界观与错综复杂的关系网。';
+        
         if (welcomeTitleEl) {
-            welcomeTitleEl.textContent = this.data.settings?.welcomeTitle || this.data.welcomeTitle || '欢迎来到 Wiki';
+            welcomeTitleEl.textContent = welcomeTitle;
         }
         if (welcomeSubtitleEl) {
-            welcomeSubtitleEl.textContent = this.data.settings?.welcomeSubtitle || this.data.welcomeSubtitle || '探索角色、世界观与错综复杂的关系网。';
+            welcomeSubtitleEl.textContent = welcomeSubtitle;
         }
         
-        // 显示/隐藏编辑按钮（确保 edit-only 类正确处理）
-        clone.querySelectorAll('.edit-only').forEach(el => {
+        // 【修复】同时确保左上角工具栏同步更新（避免显示旧数据）
+        const headerTitleEl = document.getElementById('wiki-title-display');
+        const headerSubEl = document.getElementById('wiki-subtitle-display');
+        
+        if (headerTitleEl) {
+            headerTitleEl.textContent = this.data.settings?.name || this.data.wikiTitle || '未命名 Wiki';
+        }
+        if (headerSubEl) {
+            const subtitle = this.data.settings?.subtitle || '';
+            headerSubEl.textContent = subtitle;
+            headerSubEl.classList.toggle('hidden', !subtitle);
+        }
+        
+        // 显示/隐藏编辑相关元素
+        document.querySelectorAll('.edit-only').forEach(el => {
             el.classList.toggle('hidden', this.runMode !== 'backend');
         });
         
         // 【修复】后台入口区域显示逻辑
-        const backendEntry = clone.getElementById('backend-entry-section');
+        const backendEntry = document.getElementById('backend-entry-section');
         if (backendEntry) {
             backendEntry.classList.toggle('hidden', this.runMode === 'backend');
         }
         
-        container.appendChild(clone);
-        
-        // 【修复】渲染首页自定义内容（任意模式都显示）
+        // 【修复】渲染首页自定义内容
         this.renderHomeCustomContent();
         
-        // 【修复】显示公告（带背景框）
+        // 【修复】显示公告
         this.renderAnnouncementBanner();
     },
 
