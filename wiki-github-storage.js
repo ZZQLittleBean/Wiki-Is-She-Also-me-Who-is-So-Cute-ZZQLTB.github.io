@@ -58,78 +58,97 @@
 
         async getFile(path) {
             try {
-                const response = await fetch(`${this.getBaseUrl()}/contents/${this.config.dataPath}/${path}?ref=${this.config.branch}`, {
+                const url = `${this.getBaseUrl()}/contents/${this.config.dataPath}/${path}?ref=${this.config.branch}`;
+                const response = await fetch(url, {
                     method: 'GET',
                     headers: this.getHeaders()
                 });
 
+                if (response.status === 404) {
+                    console.log(`[GitHub] 文件 ${path} 不存在（404），将创建新文件`);
+                    return null; // 文件不存在，返回 null 表示新建
+                }
+
                 if (!response.ok) {
-                    if (response.status === 404) {
-                        console.log(`[GitHub] 文件 ${path} 不存在（404）`);
-                        return null;
-                    }
-                    throw new Error(`GitHub API错误: ${response.status}`);
+                    throw new Error(`GitHub API ${response.status}`);
                 }
 
                 const data = await response.json();
                 
-                // 【修复】更精确的空内容检测
                 if (!data.content) {
                     console.warn(`[GitHub] 文件 ${path} 无 content 字段`);
                     return null;
                 }
                 
-                if (data.content.trim() === '') {
-                    console.warn(`[GitHub] 文件 ${path} content 为空字符串`);
-                    return null;
-                }
+                // 清理 base64 并解码
+                const cleanBase64 = data.content.replace(/\s/g, '');
+                const content = atob(cleanBase64);
                 
-                try {
-                    const content = atob(data.content.replace(/\s/g, ''));
-                    console.log(`[GitHub] 成功读取 ${path}，内容长度: ${content.length}`);
-                    return { content, sha: data.sha };
-                } catch (decodeError) {
-                    console.error(`[GitHub] Base64 解码 ${path} 失败:`, decodeError);
-                    return null;
-                }
+                return { 
+                    content, 
+                    sha: data.sha,
+                    size: data.size 
+                };
+                
             } catch (error) {
-                console.error('[GitHub] 获取文件失败:', error);
+                console.error(`[GitHub] 获取文件 ${path} 失败:`, error.message);
+                // 对于 404 返回 null，其他错误抛出
+                if (error.message.includes('404')) return null;
                 throw error;
             }
         },
 
         async putFile(path, content, message = 'Update via Wiki', isBinary = false, retryCount = 3) {
             try {
+                // 【关键】严格获取 SHA，区分新建和更新
                 let sha = null;
+                let isNewFile = false;
+                
                 try {
                     const existing = await this.getFile(path);
-                    if (existing) sha = existing.sha;
+                    if (existing && existing.sha) {
+                        sha = existing.sha;
+                        console.log(`[GitHub] 更新现有文件 ${path}, SHA: ${sha.substring(0, 8)}`);
+                    } else {
+                        isNewFile = true;
+                        console.log(`[GitHub] 创建新文件 ${path}`);
+                    }
                 } catch (e) {
-                    // 文件可能不存在，这是正常的
+                    // 如果 getFile 报错（非 404），可能是网络问题，保守起见尝试更新
+                    console.warn(`[GitHub] 获取 ${path} SHA 时出错，假设为更新:`, e.message);
                 }
 
+                // 编码内容
                 let encodedContent;
                 if (isBinary) {
-                    // 对于已经是 base64 的内容（如图片），直接发送，不再二次编码
-                    // 移除可能的换行符（GitHub API 不接受带换行符的 base64）
+                    // 清理已有的 base64
                     encodedContent = content.replace(/\s/g, '');
                 } else {
-                    // 对于文本内容（如 JSON），使用标准编码
-                    // 注意：先 utf-8 编码再 base64，避免中文乱码
+                    // UTF-8 转 base64
                     const utf8Bytes = new TextEncoder().encode(content);
                     const binaryString = Array.from(utf8Bytes, byte => String.fromCharCode(byte)).join('');
                     encodedContent = btoa(binaryString);
                 }
 
+                // 检查大小（GitHub 硬限制 100MB）
+                const sizeInMB = (encodedContent.length * 0.75) / 1024 / 1024;
+                if (sizeInMB > 99) {
+                    throw new Error(`文件过大: ${sizeInMB.toFixed(2)}MB，超过 GitHub 100MB 限制`);
+                }
+
+                // 构建请求体
                 const body = {
                     message: message,
                     content: encodedContent,
                     branch: this.config.branch
                 };
                 
-                if (sha) body.sha = sha;
+                // 【关键】只有确认是更新且获取到 SHA 时才添加 sha 字段
+                if (!isNewFile && sha) {
+                    body.sha = sha;
+                }
 
-                console.log(`[GitHub] 正在保存 ${path}，大小: ${(encodedContent.length / 1024).toFixed(2)}KB，SHA: ${sha || '新建'}`);
+                console.log(`[GitHub] 正在 ${isNewFile ? '创建' : '更新'} ${path} (${sizeInMB.toFixed(2)}MB)`);
 
                 const response = await fetch(`${this.getBaseUrl()}/contents/${this.config.dataPath}/${path}`, {
                     method: 'PUT',
@@ -137,36 +156,42 @@
                     body: JSON.stringify(body)
                 });
 
-                if (!response.ok) {
+                // 处理 422 错误（通常是 SHA 不匹配或内容问题）
+                if (response.status === 422) {
                     const errorData = await response.json().catch(() => ({}));
-                    console.error(`[GitHub] API 错误详情:`, errorData);
+                    console.error('[GitHub] 422 错误详情:', errorData);
                     
-                    if (response.status === 409 && retryCount > 0) {
-                        console.warn(`[GitHub] 409 冲突，获取最新 SHA 后重试...`);
-                        // 重新获取最新 SHA
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                        const latest = await this.getFile(path).catch(() => null);
-                        if (latest && latest.sha !== sha) {
-                            console.log(`[GitHub] 获取到新 SHA: ${latest.sha}`);
-                            // 递归重试，但不再次获取 SHA，避免无限循环
+                    // 如果是 SHA 问题且还有重试次数
+                    if (errorData.message && errorData.message.includes('sha') && retryCount > 0) {
+                        console.warn(`[GitHub] SHA 不匹配，重新获取后重试 (${retryCount})...`);
+                        await new Promise(r => setTimeout(r, 1500));
+                        // 强制重新获取 SHA
+                        const fresh = await this.getFile(path).catch(() => null);
+                        if (fresh && fresh.sha) {
                             return this.putFile(path, content, message, isBinary, retryCount - 1);
                         }
-                        throw new Error(`GitHub API错误: 409 - 内容冲突，请刷新后重试`);
                     }
                     
-                    if (response.status === 422) {
-                        const size = (encodedContent.length / 1024 / 1024).toFixed(2);
-                        throw new Error(`GitHub API错误: 422 - 内容格式错误或过大(${size}MB)。单文件限制100MB。`);
-                    }
-                    
-                    throw new Error(`GitHub API错误: ${response.status} ${errorData.message || ''}`);
+                    throw new Error(`GitHub 422: ${errorData.message || '内容格式错误或 SHA 无效'}`);
                 }
-                
+
+                // 处理 409 冲突
+                if (response.status === 409 && retryCount > 0) {
+                    console.warn(`[GitHub] 409 冲突，延迟后重试...`);
+                    await new Promise(r => setImmediate(r, 2000));
+                    return this.putFile(path, content, message, isBinary, retryCount - 1);
+                }
+
+                if (!response.ok) {
+                    throw new Error(`GitHub API ${response.status}`);
+                }
+
                 const result = await response.json();
-                console.log(`[GitHub] ✅ 成功保存 ${path}，新 SHA: ${result.content?.sha?.substring(0, 8)}`);
+                console.log(`[GitHub] ✅ ${path} 保存成功`);
                 return result;
+                
             } catch (error) {
-                console.error(`[GitHub] 保存文件 ${path} 失败:`, error.message);
+                console.error(`[GitHub] 保存 ${path} 失败:`, error.message);
                 throw error;
             }
         },
