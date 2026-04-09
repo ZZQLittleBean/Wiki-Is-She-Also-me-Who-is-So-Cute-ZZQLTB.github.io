@@ -1771,11 +1771,14 @@ async importZipFile(zipFile, mode = 'ask') {
 
         // 步骤 3：模式选择（如果是询问模式）
         if (mode === 'ask') {
-            progress.close();
+            progress.hide(); // 隐藏但不删除
             const userChoice = await this.showImportModeDialog();
-            if (userChoice === 'cancel') return;
+            if (userChoice === 'cancel') {
+                progress.close(); // 取消则彻底关闭
+                return;
+            }
             mode = userChoice;
-            progress.show(); // 重新显示进度条
+            progress.show(); // 重新显示
         }
 
         // 步骤 4：清空或准备数据
@@ -2062,8 +2065,21 @@ showProgressDialog: function(title = '处理中') {
                 setTimeout(() => el.remove(), 300);
             }
         },
+        // 【新增】show 方法，用于重新显示（如果之前只是隐藏）
         show: () => {
-            overlay.style.opacity = '1';
+            const el = document.getElementById('global-progress-overlay');
+            if (el) {
+                el.style.display = 'flex';
+                el.style.opacity = '1';
+            }
+        },
+        // 【新增】hide 方法，用于临时隐藏（不删除元素）
+        hide: () => {
+            const el = document.getElementById('global-progress-overlay');
+            if (el) {
+                el.style.opacity = '0';
+                setTimeout(() => { if(el.style.opacity === '0') el.style.display = 'none'; }, 300);
+            }
         }
     };
 },
@@ -3070,41 +3086,6 @@ showImportModeDialog: function() {
     // ========== 版本管理器（占位）==========
     showVersionManager() {
         this.showToast('版本管理器功能开发中', 'info');
-    },
-
-    // 【新增】进度条弹窗系统
-    showProgressDialog: function(title = '处理中') {
-        const overlay = document.createElement('div');
-        overlay.id = 'global-progress-overlay';
-        overlay.className = 'fixed inset-0 bg-black/50 z-[100000] flex items-center justify-center p-4';
-        overlay.innerHTML = `
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-                <h3 id="progress-title" class="text-lg font-bold text-gray-800 mb-4">${title}</h3>
-                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
-                    <div id="progress-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-                </div>
-                <div class="flex justify-between text-sm text-gray-500">
-                    <span id="progress-text">准备中...</span>
-                    <span id="progress-percent">0%</span>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-        
-        return {
-            update: (percent, text) => {
-                const bar = document.getElementById('progress-bar');
-                const percentText = document.getElementById('progress-percent');
-                const descText = document.getElementById('progress-text');
-                if (bar) bar.style.width = percent + '%';
-                if (percentText) percentText.textContent = Math.round(percent) + '%';
-                if (descText && text) descText.textContent = text;
-            },
-            close: () => {
-                const el = document.getElementById('global-progress-overlay');
-                if (el) el.remove();
-            }
-        };
     },
 
     // 【替换】saveData 方法 - 实现分片保存
