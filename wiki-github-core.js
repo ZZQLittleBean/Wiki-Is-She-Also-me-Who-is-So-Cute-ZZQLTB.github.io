@@ -312,36 +312,32 @@ Object.assign(window.app, {
     // ========== 数据加载 ==========
     async loadDataFromGitHub() {
         try {
-            // 尝试加载 data.json（优先）
+            // 优先加载 data.json
             let data = await this.githubStorage.loadWikiData('data.json');
             
-            // 如果没有，尝试 wiki-manifest.json（兼容旧版）
+            // 兼容旧版 wiki-manifest.json
             if (!data) {
                 data = await this.githubStorage.loadWikiData('wiki-manifest.json');
             }
             
             if (data) {
-                // 【修复】深度合并，保留现有 settings 默认值，避免 undefined 覆盖
-                const defaultSettings = {
-                    name: '未命名 Wiki',
-                    subtitle: '',
-                    welcomeTitle: '欢迎来到 Wiki',
-                    welcomeSubtitle: '探索角色、世界观与错综复杂的关系网。',
-                    customFont: null,
-                    homeCustomTitle: '首页自定义内容'
-                };
-                
-                // 合并数据
+                // 【关键】深拷贝合并，确保 settings 独立对象不被覆盖
                 this.data = { 
                     ...this.data, 
-                    ...data,
-                    // 【关键】确保 settings 对象完整合并，而非简单替换
-                    settings: {
-                        ...defaultSettings,
-                        ...(this.data.settings || {}),
-                        ...(data.settings || {})
-                    }
+                    ...data 
                 };
+                
+                // 【关键】如果 data 中有 settings，完全替换 this.data.settings
+                if (data.settings) {
+                    this.data.settings = { ...data.settings };
+                }
+                
+                // 确保基础字段存在（使用 data.json 中的值作为后备）
+                if (!this.data.settings) this.data.settings = {};
+                if (!this.data.settings.name) this.data.settings.name = data.wikiTitle || '未命名 Wiki';
+                if (!this.data.settings.subtitle) this.data.settings.subtitle = data.wikiSubtitle || '';
+                if (!this.data.settings.welcomeTitle) this.data.settings.welcomeTitle = data.welcomeTitle || '欢迎来到 Wiki';
+                if (!this.data.settings.welcomeSubtitle) this.data.settings.welcomeSubtitle = data.welcomeSubtitle || '探索角色、世界观与错综复杂的关系网。';
                 
                 // 确保数组字段存在
                 if (!this.data.entries) this.data.entries = [];
@@ -352,25 +348,18 @@ Object.assign(window.app, {
                 if (!this.data.customFields) this.data.customFields = {};
                 if (!this.data.homeContent) this.data.homeContent = [];
                 
-                console.log('[Wiki Data] 加载成功，settings:', this.data.settings);
+                console.log('[Wiki] 数据加载成功:', {
+                    name: this.data.settings.name,
+                    subtitle: this.data.settings.subtitle,
+                    welcomeTitle: this.data.settings.welcomeTitle
+                });
             } else {
-                // 首次使用，创建默认数据
-                this.data = {
-                    entries: [],
-                    chapters: [],
-                    camps: ['主角团', '反派', '中立'],
-                    synopsis: [],
-                    announcements: [],
-                    customFields: {},
-                    homeContent: [],
-                    settings: {
-                        name: '未命名 Wiki',
-                        subtitle: '',
-                        welcomeTitle: '欢迎来到 Wiki',
-                        welcomeSubtitle: '探索角色、世界观与错综复杂的关系网。',
-                        customFont: null,
-                        homeCustomTitle: '首页自定义内容'
-                    }
+                // 初始化默认数据
+                this.data.settings = {
+                    name: '未命名 Wiki',
+                    subtitle: '',
+                    welcomeTitle: '欢迎来到 Wiki',
+                    welcomeSubtitle: '探索角色、世界观与错综复杂的关系网。'
                 };
             }
             
@@ -422,9 +411,10 @@ Object.assign(window.app, {
     },
     // ========== 根据模式更新UI ==========
     updateUIForMode() {
+        // 【关键】统一从 settings 读取
         const settings = this.data.settings || {};
         
-        // 【修复】左上角工具栏 - 使用 settings.name 和 settings.subtitle
+        // 左上角工具栏（对应图2中的"示例Wiki名称"和"全局声明内容..."）
         const headerTitleEl = document.getElementById('wiki-title-display');
         const headerSubEl = document.getElementById('wiki-subtitle-display');
         
@@ -432,15 +422,19 @@ Object.assign(window.app, {
             headerTitleEl.textContent = settings.name || '未命名 Wiki';
         }
         
-        // 【修复】显示全局声明（subtitle）在左上角
+        // 全局声明（subtitle）显示在左上角标题下方
         if (headerSubEl) {
             const subtitle = settings.subtitle || '';
             const hasSubtitle = !!(subtitle && subtitle.trim());
             headerSubEl.textContent = subtitle;
             headerSubEl.classList.toggle('hidden', !hasSubtitle);
+            // 确保样式正确
+            headerSubEl.className = hasSubtitle ? 
+                'text-[10px] text-gray-500 truncate mt-0.5' : 
+                'hidden';
         }
         
-        // 更新模式徽章（仅后台模式显示）
+        // 模式徽章（仅后台模式显示）
         const badge = document.getElementById('mode-badge');
         if (badge) {
             if (this.runMode === 'backend') {
@@ -452,7 +446,7 @@ Object.assign(window.app, {
             }
         }
         
-        // 显示/隐藏编辑相关元素
+        // 显示/隐藏编辑相关元素（保留添加角色/设定/批量导入按钮）
         document.querySelectorAll('.edit-only').forEach(el => {
             el.classList.toggle('hidden', this.runMode !== 'backend');
         });
@@ -548,7 +542,6 @@ Object.assign(window.app, {
         }
     },
 
-    // ========== 页面渲染函数 ==========
     renderHome(container) {
         const tpl = document.getElementById('tpl-home');
         if (!tpl) return;
@@ -556,10 +549,10 @@ Object.assign(window.app, {
         const clone = tpl.content.cloneNode(true);
         container.appendChild(clone);
         
-        // 【修复】确保从 this.data.settings 读取（非 this.data 根级）
+        // 【关键】强制从 this.data.settings 读取（不再兼容旧字段）
         const settings = this.data.settings || {};
         
-        // 大蓝框欢迎语
+        // 修复大蓝框欢迎语（对应图2中的"欢迎标题内容"和"欢迎副标题内容"）
         const welcomeTitleEl = document.getElementById('welcome-title');
         const welcomeSubtitleEl = document.getElementById('welcome-subtitle');
         
@@ -570,12 +563,12 @@ Object.assign(window.app, {
             welcomeSubtitleEl.textContent = settings.welcomeSubtitle || '探索角色、世界观与错综复杂的关系网。';
         }
         
-        // 显示/隐藏编辑相关元素
+        // 【保留按钮】显示/隐藏编辑按钮（确保批量导入按钮也不被删除）
         document.querySelectorAll('.edit-only').forEach(el => {
             el.classList.toggle('hidden', this.runMode !== 'backend');
         });
         
-        // 后台入口区域
+        // 后台入口区域显示逻辑
         const backendEntry = document.getElementById('backend-entry-section');
         if (backendEntry) {
             backendEntry.classList.toggle('hidden', this.runMode === 'backend');
