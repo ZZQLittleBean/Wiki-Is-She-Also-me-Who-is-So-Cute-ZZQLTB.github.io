@@ -19,12 +19,12 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
-
         :root {
             --color-primary: #4f46e5;
             --color-bg: #f3f4f6;
-            --custom-font: 'Noto Sans SC', sans-serif;
+            /* 使用系统字体栈，确保跨平台兼容性 */
+            --custom-font: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            --serif-font: 'Noto Serif SC', 'Songti SC', 'SimSun', 'STSong', serif;
         }
 
         body {
@@ -32,12 +32,35 @@
             background-color: var(--color-bg);
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
+            /* 优化字体渲染 */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 当选择宋体模式时的类 */
+        .font-serif {
+            font-family: var(--serif-font);
         }
 
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        /* 打印时隐藏水印 */
+        @media print {
+            #global-watermark, #mobile-watermark {
+                display: none !important;
+            }
+        }
+        
+        /* 水印动画效果（可选，添加微动效提升体验） */
+        #global-watermark, #mobile-watermark {
+            transition: opacity 0.3s ease;
+        }
+        
+        #global-watermark:hover, #mobile-watermark:hover {
+            opacity: 0.6;
         }
 
         /* 搜索下拉框 */
@@ -165,6 +188,19 @@
 
     <!-- 主内容区 -->
     <main id="main-container" class="flex-1 overflow-hidden relative bg-gray-50"></main>
+    <!-- 全局水印 -->
+    <div id="global-watermark" class="fixed bottom-16 right-2 z-40 opacity-40 pointer-events-none select-none hidden sm:block">
+        <p class="text-[10px] text-gray-500 italic transform -rotate-6 origin-bottom-right whitespace-nowrap">
+            完整功能请移步GitHub仓库：Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB-Local
+        </p>
+    </div>
+    
+    <!-- 移动端简化水印（横屏时显示） -->
+    <div id="mobile-watermark" class="fixed bottom-16 right-1 z-40 opacity-30 pointer-events-none select-none sm:hidden">
+        <p class="text-[8px] text-gray-400 italic transform -rotate-6 origin-bottom-right whitespace-nowrap">
+            GitHub: Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB-Local
+        </p>
+    </div>
 
     <!-- 底部导航 -->
     <nav class="bg-white border-t border-gray-200 shrink-0 z-50">

@@ -497,6 +497,10 @@ Object.assign(window.app, {
     router(target, pushState = true) {
         const container = document.getElementById('main-container');
         if (!container) return;
+        // 【新增】如果离开详情页，重置手动版本选择，避免影响其他词条
+        if (target !== 'detail' && target !== 'edit') {
+            this.data.viewingVersionId = null;
+        }
         
         container.innerHTML = '';
         
@@ -1361,9 +1365,16 @@ Object.assign(window.app, {
     },
 
     switchToVersion(entryId, versionId) {
-        this.data.editingId = entryId;
-        this.data.viewingVersionId = versionId;
-        this.router('detail', false);
+        try {
+            this.data.editingId = entryId;
+            this.data.viewingVersionId = versionId;
+            // 使用 setTimeout 避免阻塞主线程，解决 Promise 回调问题
+            setTimeout(() => {
+                this.router('detail', false);
+            }, 0);
+        } catch (e) {
+            console.error('[switchToVersion] 错误:', e);
+        }
     },
 
     // ========== 保存词条 ==========
@@ -2272,18 +2283,45 @@ Object.assign(window.app, {
     // ========== 字体设置 ==========
     changeFont(font) {
         this.data.fontFamily = font;
+        this.data.settings = this.data.settings || {};
+        this.data.settings.customFont = font;
+        
+        // 切换字体类而非直接修改CSS变量（避免CORS问题）
+        if (font.includes('Serif')) {
+            document.body.classList.add('font-serif');
+        } else {
+            document.body.classList.remove('font-serif');
+        }
+        
+        // 同时更新CSS变量作为后备
         document.documentElement.style.setProperty('--custom-font', font);
-        this.applyFont();
     },
 
     applyFont() {
-        document.body.style.fontFamily = this.data.fontFamily;
+        const font = this.data.settings?.customFont || this.data.fontFamily || "'Noto Sans SC', sans-serif";
+        
+        // 应用字体设置
+        if (font && font.includes('Serif')) {
+            document.body.classList.add('font-serif');
+        } else {
+            document.body.classList.remove('font-serif');
+        }
+        
+        document.documentElement.style.setProperty('--custom-font', font);
+        document.body.style.fontFamily = font;
     },
 
     // ========== 辅助函数 ==========
     getVisibleVersion(entry) {
-        if (!entry || !entry.versions) return null;
+        if (!entry || !entry.versions || entry.versions.length === 0) return null;
         
+        // 【关键修复】优先返回手动切换的版本（viewingVersionId）
+        if (this.data.viewingVersionId) {
+            const specificVersion = entry.versions.find(v => v.vid === this.data.viewingVersionId);
+            if (specificVersion) return specificVersion;
+        }
+        
+        // 时间线模式逻辑保持不变
         if (this.data.currentTimeline === 'latest') {
             return entry.versions[entry.versions.length - 1];
         }
