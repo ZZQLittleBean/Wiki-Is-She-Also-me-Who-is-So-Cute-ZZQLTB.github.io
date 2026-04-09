@@ -353,9 +353,61 @@ Object.assign(window.app, {
             });
         }
     },
-
+    renderAnnouncementBanner() {
+        const activeAnn = this.data.announcements?.find(a => a.isActive);
+        const annSection = document.getElementById('announcement-section');
+        
+        if (!annSection) return;
+        
+        if (activeAnn) {
+            annSection.classList.remove('hidden');
+            
+            const annTitle = document.getElementById('announcement-title');
+            const annPreview = document.getElementById('announcement-preview');
+            const annMeta = document.getElementById('announcement-meta');
+            
+            if (annTitle) annTitle.textContent = activeAnn.title || '最新公告';
+            
+            if (annPreview) {
+                // 去除HTML标签获取纯文本预览
+                const temp = document.createElement('div');
+                temp.innerHTML = activeAnn.content || '';
+                const text = temp.textContent || '';
+                annPreview.textContent = text.substring(0, 100) + (text.length > 100 ? '...' : '');
+            }
+            
+            if (annMeta) {
+                annMeta.innerHTML = `
+                    <i class="fa-solid fa-user-pen mr-1"></i>${activeAnn.author || '匿名'} 
+                    <span class="mx-2">•</span> 
+                    <i class="fa-regular fa-calendar mr-1"></i>${activeAnn.date || new Date(activeAnn.createdAt).toLocaleDateString('zh-CN')}
+                `;
+            }
+        } else {
+            annSection.classList.add('hidden');
+        }
+    },
     // ========== 根据模式更新UI ==========
     updateUIForMode() {
+        // 【修复】更新左上角工具栏 - 使用唯一变量名避免冲突
+        const headerTitleEl = document.getElementById('wiki-title-display');
+        const headerSubEl = document.getElementById('wiki-subtitle-display');
+        
+        if (headerTitleEl) {
+            headerTitleEl.textContent = this.data.wikiTitle || '未命名 Wiki';
+        }
+        
+        // 【修复】显示全局声明（subtitle）在左上角
+        if (headerSubEl) {
+            const hasSubtitle = !!(this.data.wikiSubtitle && this.data.wikiSubtitle.trim());
+            headerSubEl.textContent = this.data.wikiSubtitle || '';
+            headerSubEl.classList.toggle('hidden', !hasSubtitle);
+            // 确保样式正确：小字体、灰色、不换行截断
+            headerSubEl.className = hasSubtitle ? 
+                'text-[10px] text-gray-500 truncate mt-0.5' : 
+                'text-[10px] text-gray-500 truncate hidden';
+        }
+        
         // 更新模式徽章（仅后台模式显示）
         const badge = document.getElementById('mode-badge');
         if (badge) {
@@ -383,12 +435,6 @@ Object.assign(window.app, {
         const logoutBtn = document.getElementById('logout-backend-btn');
         if (logoutBtn) {
             logoutBtn.classList.toggle('hidden', this.runMode !== 'backend');
-        }
-        
-        // 更新标题
-        const titleEl = document.getElementById('wiki-title-display');
-        if (titleEl) {
-            titleEl.textContent = this.data.wikiTitle || '未命名 Wiki';
         }
     },
 
@@ -477,18 +523,24 @@ Object.assign(window.app, {
         
         const clone = tpl.content.cloneNode(true);
         
-        // 更新欢迎信息
-        const titleEl = clone.getElementById('welcome-title');
-        const subtitleEl = clone.getElementById('welcome-subtitle');
-        if (titleEl) titleEl.textContent = this.data.wikiTitle || '欢迎来到 Wiki';
-        if (subtitleEl) subtitleEl.textContent = this.data.wikiSubtitle || '探索角色、世界观与错综复杂的关系网。';
+        // 【修复】正确绑定欢迎语到首页大蓝框（使用唯一变量名）
+        const welcomeTitleEl = clone.getElementById('welcome-title');
+        const welcomeSubtitleEl = clone.getElementById('welcome-subtitle');
+        
+        // 优先使用 welcomeTitle/welcomeSubtitle，回退到 wikiTitle/wikiSubtitle
+        if (welcomeTitleEl) {
+            welcomeTitleEl.textContent = this.data.welcomeTitle || this.data.settings?.welcomeTitle || this.data.wikiTitle || '欢迎来到 Wiki';
+        }
+        if (welcomeSubtitleEl) {
+            welcomeSubtitleEl.textContent = this.data.welcomeSubtitle || this.data.settings?.welcomeSubtitle || this.data.wikiSubtitle || '探索角色、世界观与错综复杂的关系网。';
+        }
         
         // 显示/隐藏编辑按钮
         clone.querySelectorAll('.edit-only').forEach(el => {
             el.classList.toggle('hidden', this.runMode !== 'backend');
         });
         
-        // 显示/隐藏后台入口区域（仅前台模式显示）
+        // 【修复】后台入口区域显示逻辑
         const backendEntry = clone.getElementById('backend-entry-section');
         if (backendEntry) {
             backendEntry.classList.toggle('hidden', this.runMode === 'backend');
@@ -496,51 +548,77 @@ Object.assign(window.app, {
         
         container.appendChild(clone);
         
-        // 渲染首页自定义内容
+        // 【修复】渲染首页自定义内容（任意模式都显示）
         this.renderHomeCustomContent();
+        
+        // 【修复】显示公告
+        this.renderAnnouncementBanner();
     },
 
     renderHomeCustomContent() {
-        const container = document.getElementById('home-custom-content');
+        const container = document.getElementById('home-custom-content') || document.getElementById('home-text-boxes');
         if (!container) return;
         
         container.innerHTML = '';
         
+        // 【修复】移除 "暂无自定义内容" 的占位提示，保持区域干净
         if (!this.data.homeContent || this.data.homeContent.length === 0) {
-            container.innerHTML = '<p class="text-gray-400 text-center py-4">暂无自定义内容</p>';
+            // 编辑模式下显示提示，查看模式下保持空白
+            if (this.runMode === 'backend') {
+                container.innerHTML = '<p class="text-gray-400 text-center py-4 text-sm">点击上方按钮添加自定义内容</p>';
+            }
             return;
         }
         
         this.data.homeContent.forEach((item, idx) => {
             if (item.type === 'text') {
-                const div = document.createElement('div');
-                div.className = 'bg-white p-4 rounded-xl shadow-sm border border-gray-100';
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative group';
+                
                 if (this.runMode === 'backend') {
-                    div.innerHTML = `
-                        <textarea class="w-full p-2 border border-gray-200 rounded-lg text-sm resize-none" rows="3"
-                            placeholder="输入文本内容..."
-                            onchange="app.updateHomeText(${idx}, this.value)" data-idx="${idx}">${item.content || ''}</textarea>
-                        <button onclick="app.removeHomeItem(${idx})" class="mt-2 text-red-500 text-xs hover:text-red-700">
-                            <i class="fa-solid fa-trash"></i> 删除
+                    // 编辑模式：显示可编辑文本框和删除按钮
+                    wrapper.innerHTML = `
+                        <button onclick="app.removeHomeItem(${idx})" class="absolute top-2 right-2 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition z-10 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow">
+                            <i class="fa-solid fa-times"></i>
                         </button>
+                        <textarea class="w-full p-3 border border-gray-200 rounded-lg text-sm min-h-[100px] resize-y focus:ring-2 focus:ring-indigo-500 outline-none" 
+                            placeholder="输入文本内容..."
+                            onchange="app.updateHomeText(${idx}, this.value)">${item.content || ''}</textarea>
                     `;
                 } else {
-                    div.innerHTML = `<p class="text-gray-700">${item.content || ''}</p>`;
+                    // 查看模式：只显示纯文本
+                    wrapper.className = 'bg-white p-4 rounded-lg border border-gray-100 shadow-sm';
+                    wrapper.innerHTML = `<p class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">${item.content || ''}</p>`;
                 }
-                container.appendChild(div);
+                container.appendChild(wrapper);
+                
             } else if (item.type === 'entry-ref') {
                 const entry = this.data.entries.find(e => e.id === item.entryId);
                 if (!entry) return;
                 
+                const version = this.getVisibleVersion(entry);
+                const displayTitle = item.title || version?.title || entry.code;
+                
                 const div = document.createElement('div');
-                div.className = 'bg-indigo-50 p-4 rounded-xl border border-indigo-100 cursor-pointer hover:bg-indigo-100 transition';
+                div.className = 'bg-indigo-50 p-3 rounded-xl border border-indigo-100 cursor-pointer hover:bg-indigo-100 transition flex items-center gap-3';
                 div.onclick = () => this.openEntry(entry.id);
-                div.innerHTML = `
-                    <div class="flex items-center gap-3">
+                
+                if (this.runMode === 'backend') {
+                    // 编辑模式：显示标题和删除按钮
+                    div.innerHTML = `
                         <i class="fa-solid fa-book text-indigo-500"></i>
-                        <span class="font-medium text-indigo-700">${item.title || entry.code}</span>
-                    </div>
-                `;
+                        <span class="font-medium text-indigo-700 flex-1 truncate">${displayTitle}</span>
+                        <button onclick="event.stopPropagation(); app.removeHomeItem(${idx})" class="text-gray-400 hover:text-red-500 w-6 h-6 flex items-center justify-center rounded-full hover:bg-white transition">
+                            <i class="fa-solid fa-times text-xs"></i>
+                        </button>
+                    `;
+                } else {
+                    // 查看模式：简洁显示
+                    div.innerHTML = `
+                        <i class="fa-solid fa-book text-indigo-500"></i>
+                        <span class="font-medium text-indigo-700 truncate">${displayTitle}</span>
+                    `;
+                }
                 container.appendChild(div);
             }
         });
