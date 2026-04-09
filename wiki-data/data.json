@@ -1,7 +1,7 @@
 {
   "version": "2.7.0-batch",
-  "lastUpdate": 1775760487994,
-  "currentBatch": 2,
+  "lastUpdate": 1775760550254,
+  "currentBatch": 3,
   "settings": {
     "name": "我的小说 Wiki",
     "subtitle": "By ZZQLittleBean\n（Powered by Kimi AI）",
@@ -1772,6 +1772,416 @@
             {
               "type": "p",
               "text": "这是张桥的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-guldb",
+      "type": "character",
+      "code": "C-029",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-z13mr",
+          "title": "杨克妙",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是杨克妙的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-fhkpf",
+      "type": "character",
+      "code": "C-030",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-onbek",
+          "title": "马四季",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是马四季的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-6hef5",
+      "type": "character",
+      "code": "C-031",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-qp5qe",
+          "title": "代氪",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是代氪的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-snrlt",
+      "type": "character",
+      "code": "C-032",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-v5lz0",
+          "title": "刘璺薪",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是刘璺薪的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-2oqs0",
+      "type": "character",
+      "code": "C-033",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-rchqd",
+          "title": "易谟戟",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是易谟戟的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-g322r",
+      "type": "character",
+      "code": "C-034",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-3sgaj",
+          "title": "翊",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是翊的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-f70cb",
+      "type": "character",
+      "code": "C-035",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-4kjo6",
+          "title": "翎",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是翎的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-v4ch0",
+      "type": "character",
+      "code": "C-036",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-cgjwd",
+          "title": "曦芷",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是曦芷的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-pi7t0",
+      "type": "character",
+      "code": "C-037",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-i5tfo",
+          "title": "楚山本",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是楚山本的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-5thlx",
+      "type": "character",
+      "code": "C-038",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-g6b1g",
+          "title": "张破军",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是张破军的角色词条。"
             }
           ],
           "relatedVersions": [],
