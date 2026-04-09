@@ -136,28 +136,57 @@ Object.assign(window.app, {
                 if (loginData.expires > Date.now()) {
                     this.backendLoggedIn = true;
                     this.runMode = 'backend';
+                    // 恢复GitHub配置
+                    if (this.githubStorage.init()) {
+                        this.loadDataFromGitHub();
+                        return;
+                    }
+                } else {
+                    localStorage.removeItem('wiki_backend_login');
                 }
             } catch (e) {
                 localStorage.removeItem('wiki_backend_login');
             }
         }
         
-        // 检查是否有保存的分享码
-        const savedCode = localStorage.getItem('wiki_verified_sharecode');
-        if (savedCode && !this.backendLoggedIn) {
-            this.verifiedShareCode = savedCode;
-            this.shareCodeVerified = true;
-        }
-        
-        // 检查GitHub配置
-        if (this.githubStorage && this.githubStorage.init()) {
+        // 【关键修改】无配置时默认进入前台模式，不强制登录
+        if (this.githubStorage.init() && this.githubStorage.isConfigured()) {
+            // 有配置，尝试加载数据
             this.loadDataFromGitHub();
         } else {
-            this.showLoginPage();
+            // 无配置，进入前台模式（只读模式）
+            console.log('[Wiki] 无GitHub配置，进入前台模式');
+            this.runMode = 'frontend';
+            this.backendLoggedIn = false;
+            
+            // 初始化默认空数据
+            this.data = {
+                entries: [],
+                chapters: [],
+                camps: ['主角团', '反派', '中立'],
+                synopsis: [],
+                announcements: [],
+                homeContent: [],
+                customFields: {},
+                currentTimeline: 'latest',
+                currentMode: 'view',
+                settings: {
+                    name: '未命名 Wiki',
+                    subtitle: '',
+                    welcomeTitle: '欢迎来到 Wiki',
+                    welcomeSubtitle: '探索角色、世界观与错综复杂的关系网。',
+                    customFont: null
+                }
+            };
+            
+            // 直接进入主页（不显示登录页）
+            this.updateUIForMode();
+            this.router('home');
         }
     },
 
     // ========== 登录页面 ==========
+    // 修改 showLoginPage 函数（约第 175-210 行）- 允许直接进入前台模式
     showLoginPage() {
         const container = document.getElementById('main-container');
         if (!container) return;
@@ -169,27 +198,25 @@ Object.assign(window.app, {
         container.innerHTML = '';
         container.appendChild(clone);
         
-        // 直接显示分享码登录表单（前台模式）
-        document.getElementById('login-options').classList.add('hidden');
-        document.getElementById('share-code-form').classList.remove('hidden');
+        // 【修改】显示登录选项，允许直接进入前台模式
+        document.getElementById('login-options').classList.remove('hidden');
+        document.getElementById('share-code-form').classList.add('hidden');
+        document.getElementById('backend-login-form').classList.add('hidden');
         
-        // 添加后台入口链接
-        const shareForm = document.getElementById('share-code-form');
-        const backendLink = document.createElement('div');
-        backendLink.className = 'text-center mt-4 pt-4 border-t border-gray-100';
-        backendLink.innerHTML = `
-            <button onclick="app.showBackendLogin()" class="text-sm text-gray-400 hover:text-indigo-600 transition flex items-center justify-center gap-1 mx-auto">
-                <i class="fa-solid fa-lock text-xs"></i>
-                后台模式登录
-            </button>
-        `;
-        shareForm.appendChild(backendLink);
-        
-        // 聚焦输入框
-        setTimeout(() => {
-            const input = document.getElementById('share-code-input');
-            if (input) input.focus();
-        }, 100);
+        // 绑定前台模式进入按钮
+        const frontendBtn = document.getElementById('frontend-login-btn');
+        if (frontendBtn) {
+            frontendBtn.onclick = () => this.enterFrontendModeDirectly();
+        }
+    },
+
+    // 【新增】直接进入前台模式（无需分享码）
+    enterFrontendModeDirectly() {
+        this.runMode = 'frontend';
+        this.shareCodeVerified = true; // 标记为已验证，允许访问
+        this.showToast('已进入前台模式（只读）', 'success');
+        this.router('home');
+        this.updateUIForMode();
     },
 
     // 从主页进入后台登录
@@ -411,10 +438,10 @@ Object.assign(window.app, {
     },
     // ========== 根据模式更新UI ==========
     updateUIForMode() {
-        // 【关键】统一从 settings 读取
+        // 【关键】统一从 settings 读取，增加空值保护
         const settings = this.data.settings || {};
         
-        // 左上角工具栏（对应图2中的"示例Wiki名称"和"全局声明内容..."）
+        // 左上角工具栏标题
         const headerTitleEl = document.getElementById('wiki-title-display');
         const headerSubEl = document.getElementById('wiki-subtitle-display');
         
@@ -422,16 +449,11 @@ Object.assign(window.app, {
             headerTitleEl.textContent = settings.name || '未命名 Wiki';
         }
         
-        // 全局声明（subtitle）显示在左上角标题下方
+        // 全局声明（subtitle）
         if (headerSubEl) {
             const subtitle = settings.subtitle || '';
-            const hasSubtitle = !!(subtitle && subtitle.trim());
             headerSubEl.textContent = subtitle;
-            headerSubEl.classList.toggle('hidden', !hasSubtitle);
-            // 确保样式正确
-            headerSubEl.className = hasSubtitle ? 
-                'text-[10px] text-gray-500 truncate mt-0.5' : 
-                'hidden';
+            headerSubEl.classList.toggle('hidden', !subtitle.trim());
         }
         
         // 模式徽章（仅后台模式显示）
@@ -461,6 +483,13 @@ Object.assign(window.app, {
         const logoutBtn = document.getElementById('logout-backend-btn');
         if (logoutBtn) {
             logoutBtn.classList.toggle('hidden', this.runMode !== 'backend');
+        }
+        // 【新增】主页后台入口区域控制
+        const backendEntry = document.getElementById('backend-entry-section');
+        if (backendEntry) {
+            // 仅在前台模式且未登录时显示
+            const shouldShow = this.runMode === 'frontend' && !this.backendLoggedIn;
+            backendEntry.classList.toggle('hidden', !shouldShow);
         }
     },
 
@@ -552,7 +581,7 @@ Object.assign(window.app, {
         // 【关键】强制从 this.data.settings 读取（不再兼容旧字段）
         const settings = this.data.settings || {};
         
-        // 修复大蓝框欢迎语（对应图2中的"欢迎标题内容"和"欢迎副标题内容"）
+        // 修复大蓝框欢迎语
         const welcomeTitleEl = document.getElementById('welcome-title');
         const welcomeSubtitleEl = document.getElementById('welcome-subtitle');
         
@@ -1701,8 +1730,16 @@ Object.assign(window.app, {
     
     // 在 importZipFile 函数开头添加模式选择
     async importZipFile(zipFile, mode = 'ask') {
-        // mode: 'merge' (合并), 'replace' (覆盖), 'ask' (询问)
-        
+        if (!window.JSZip) {
+            this.showAlertDialog({
+                title: '缺少依赖',
+                message: 'JSZip 库未加载，无法解析ZIP文件',
+                type: 'error'
+            });
+            return;
+        }
+
+        // 如果未指定模式，询问用户
         if (mode === 'ask') {
             const userChoice = await this.showImportModeDialog();
             if (userChoice === 'cancel') return;
@@ -1713,10 +1750,14 @@ Object.assign(window.app, {
             this.showToast('正在解析ZIP文件...', 'info');
             const zip = await window.JSZip.loadAsync(zipFile);
             
-            // 1. 读取 data.json
+            // 1. 读取 data.json（必需）
             const dataFile = zip.file('data.json');
-            if (!dataFile) throw new Error('ZIP中缺少 data.json 文件');
-            const importedData = JSON.parse(await dataFile.async('string'));
+            if (!dataFile) {
+                throw new Error('ZIP中缺少 data.json 文件');
+            }
+            
+            const dataText = await dataFile.async('string');
+            const importedData = JSON.parse(dataText);
             
             // 验证数据结构
             if (!importedData.entries && !importedData.data?.entries) {
@@ -1735,121 +1776,173 @@ Object.assign(window.app, {
                     customFields: {},
                     currentTimeline: 'latest',
                     currentMode: 'view',
-                    wikiTitle: '未命名 Wiki',
-                    wikiSubtitle: '',
-                    fontFamily: "'Noto Sans SC', sans-serif",
-                    // 保留登录状态和配置
-                    ...this.getSystemConfig()
+                    settings: {
+                        name: '未命名 Wiki',
+                        subtitle: '',
+                        welcomeTitle: '欢迎来到 Wiki',
+                        welcomeSubtitle: '探索角色、世界观与错综复杂的关系网。',
+                        customFont: null
+                    }
                 };
                 this.showToast('已清空现有数据，准备导入...', 'info');
             }
 
-            // 2. 处理图片（保持原有逻辑）
-            const imageFiles = Object.keys(zip.files).filter(name => 
-                name.startsWith('images/') && 
-                !zip.files[name].dir &&
-                (name.endsWith('.jpg') || name.endsWith('.png') || name.endsWith('.jpeg'))
-            );
+            // 2. 处理图片 - 【关键修复】支持 wiki-images/ (本地版) 和 images/ (GitHub版) 两种路径
+            const possibleImagePaths = ['wiki-images/', 'images/'];
+            let imageFiles = [];
+            
+            possibleImagePaths.forEach(prefix => {
+                const files = Object.keys(zip.files).filter(name => 
+                    name.startsWith(prefix) && 
+                    !zip.files[name].dir &&
+                    (name.endsWith('.jpg') || name.endsWith('.png') || name.endsWith('.jpeg') || name.endsWith('.gif'))
+                );
+                imageFiles = imageFiles.concat(files);
+            });
+
+            // 去重
+            imageFiles = [...new Set(imageFiles)];
+            
+            console.log(`[Import] ZIP中找到 ${imageFiles.length} 张图片`);
             
             let uploadedImages = 0;
+            const failedImages = [];
+            const imageNameMap = {}; // 用于记录本地文件名到GitHub文件名的映射
+            
             for (const imgPath of imageFiles) {
-                const filename = imgPath.replace('images/', '');
+                // 提取文件名（去掉路径前缀）
+                const filename = imgPath.replace(/^wiki-images\//, '').replace(/^images\//, '');
+                
                 try {
                     const arrayBuffer = await zip.file(imgPath).async('arraybuffer');
                     const blob = new Blob([arrayBuffer]);
+                    
                     const dataUrl = await new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onload = (e) => resolve(e.target.result);
                         reader.readAsDataURL(blob);
                     });
+                    
                     await this.githubStorage.saveImage(filename, dataUrl);
                     uploadedImages++;
+                    imageNameMap[filename] = filename; // 记录成功上传的图片
+                    console.log(`[Import] 成功上传图片: ${filename}`);
                 } catch (e) {
-                    console.warn(`[Import] 处理图片失败 ${filename}:`, e);
+                    console.error(`[Import] 处理图片失败 ${filename}:`, e);
+                    failedImages.push(filename);
                 }
             }
-
-            // 3. 【关键修复】智能合并/覆盖数据
+            
+            // 3. 合并数据
             const entries = importedData.entries || importedData.data?.entries || [];
-            const chapters = importedData.chapters || importedData.data?.chapters || [];
-            const camps = importedData.camps || importedData.data?.camps || [];
-            const synopsis = importedData.synopsis || importedData.data?.synopsis || [];
-            const announcements = importedData.announcements || importedData.data?.announcements || [];
-            const homeContent = importedData.homeContent || importedData.data?.homeContent || [];
-            const customFields = importedData.customFields || importedData.data?.customFields || {};
-            const settings = importedData.settings || (importedData.data ? {
-                name: importedData.wikiTitle,
-                subtitle: importedData.wikiSubtitle,
-                customFont: importedData.fontFamily
-            } : {});
-
-            // Entries 处理：覆盖模式下直接替换，合并模式下智能更新
-            if (mode === 'replace') {
-                this.data.entries = entries;
-            } else {
-                // 合并模式：更新已存在的，添加新的
-                const existingMap = new Map(this.data.entries.map(e => [e.id, e]));
-                let updatedCount = 0;
-                let addedCount = 0;
-                
-                for (const entry of entries) {
-                    if (existingMap.has(entry.id)) {
-                        // 更新现有条目
-                        const idx = this.data.entries.findIndex(e => e.id === entry.id);
-                        if (idx !== -1) {
-                            this.data.entries[idx] = entry;
-                            updatedCount++;
+            const existingIds = new Set(this.data.entries.map(e => e.id));
+            let addedCount = 0;
+            let updatedCount = 0;
+            
+            for (const entry of entries) {
+                // 【关键修复】处理条目中的图片引用，将 {{IMG:filename}} 转换为可用的引用
+                if (entry.versions) {
+                    entry.versions.forEach(version => {
+                        if (version.images) {
+                            Object.keys(version.images).forEach(key => {
+                                const imgRef = version.images[key];
+                                if (imgRef && imgRef.startsWith('{{IMG:') && imgRef.endsWith('}}')) {
+                                    const imgName = imgRef.slice(6, -2); // 提取文件名
+                                    // 如果图片已上传，更新为GitHub路径格式（通过loadImage加载时会自动处理）
+                                    if (imageNameMap[imgName]) {
+                                        version.images[key] = `{{IMG:${imgName}}}`; // 保持占位符，加载时会解析
+                                    }
+                                }
+                            });
                         }
+                        // 处理旧版单个image字段
+                        if (version.image && version.image.startsWith('{{IMG:')) {
+                            const imgName = version.image.slice(6, -2);
+                            if (imageNameMap[imgName]) {
+                                // 如果已上传到GitHub，这里暂时保持原样，getVisibleVersion会处理
+                            }
+                        }
+                    });
+                }
+
+                if (mode === 'replace') {
+                    this.data.entries.push(entry);
+                    addedCount++;
+                } else {
+                    // 合并模式
+                    const existingIndex = this.data.entries.findIndex(e => e.id === entry.id);
+                    if (existingIndex >= 0) {
+                        this.data.entries[existingIndex] = entry;
+                        updatedCount++;
                     } else {
                         this.data.entries.push(entry);
                         addedCount++;
                     }
                 }
-                this.showToast(`更新 ${updatedCount} 个词条，新增 ${addedCount} 个`, 'success');
             }
-
-            // 【关键修复】确保所有数组字段都被处理（不再使用简单的 mergeArray）
-            this.mergeOrReplaceArray('chapters', chapters, mode);
-            this.mergeOrReplaceArray('camps', camps, mode, true); // true 表示去重
-            this.mergeOrReplaceArray('synopsis', synopsis, mode);
-            this.mergeOrReplaceArray('announcements', announcements, mode);
-            this.mergeOrReplaceArray('homeContent', homeContent, mode);
-
-            // 【关键修复】处理自定义字段（对象合并）
-            if (mode === 'replace') {
-                this.data.customFields = customFields;
-            } else {
-                this.data.customFields = { ...this.data.customFields, ...customFields };
-            }
-
-            // 【关键修复】处理设置（合并或覆盖）
-            if (settings) {
+            
+            // 合并其他数据
+            const mergeArray = (target, source, key = 'id') => {
+                if (!source) return;
+                const existing = new Set(target.map(i => i[key]));
+                source.forEach(item => {
+                    if (!existing.has(item[key])) target.push(item);
+                });
+            };
+            
+            mergeArray(this.data.chapters, importedData.chapters || importedData.data?.chapters);
+            mergeArray(this.data.synopsis, importedData.synopsis || importedData.data?.synopsis);
+            mergeArray(this.data.announcements, importedData.announcements || importedData.data?.announcements);
+            mergeArray(this.data.homeContent, importedData.homeContent || importedData.data?.homeContent);
+            
+            // 合并阵营（去重）
+            (importedData.camps || importedData.data?.camps || []).forEach(camp => {
+                if (!this.data.camps.includes(camp)) this.data.camps.push(camp);
+            });
+            
+            // 【关键修复】处理设置字段 - 确保所有设置字段都被正确导入
+            const importedSettings = importedData.settings || (importedData.data ? importedData.data.settings : null);
+            if (importedSettings) {
                 if (mode === 'replace') {
-                    this.data.wikiTitle = settings.name || importedData.wikiTitle || '未命名 Wiki';
-                    this.data.wikiSubtitle = settings.subtitle || importedData.wikiSubtitle || '';
-                    this.data.fontFamily = settings.customFont || importedData.fontFamily || "'Noto Sans SC', sans-serif";
+                    this.data.settings = { 
+                        ...this.data.settings, 
+                        ...importedSettings 
+                    };
                 } else {
-                    // 合并模式：仅当新值存在且不为空时更新
-                    if (settings.name || importedData.wikiTitle) {
-                        this.data.wikiTitle = settings.name || importedData.wikiTitle || this.data.wikiTitle;
-                    }
-                    if (settings.subtitle !== undefined || importedData.wikiSubtitle !== undefined) {
-                        this.data.wikiSubtitle = settings.subtitle ?? importedData.wikiSubtitle ?? this.data.wikiSubtitle;
-                    }
+                    // 合并模式：只更新非空值
+                    Object.keys(importedSettings).forEach(key => {
+                        if (importedSettings[key] !== null && importedSettings[key] !== undefined && importedSettings[key] !== '') {
+                            this.data.settings[key] = importedSettings[key];
+                        }
+                    });
                 }
+                console.log('[Import] 导入的设置:', this.data.settings);
             }
-
+            
+            // 兼容旧版字段（如果新版settings不存在但旧版字段存在）
+            if (importedData.wikiTitle && !this.data.settings.name) {
+                this.data.settings.name = importedData.wikiTitle;
+            }
+            if (importedData.wikiSubtitle !== undefined && !this.data.settings.subtitle) {
+                this.data.settings.subtitle = importedData.wikiSubtitle;
+            }
+            if (importedData.welcomeTitle && !this.data.settings.welcomeTitle) {
+                this.data.settings.welcomeTitle = importedData.welcomeTitle;
+            }
+            if (importedData.welcomeSubtitle && !this.data.settings.welcomeSubtitle) {
+                this.data.settings.welcomeSubtitle = importedData.welcomeSubtitle;
+            }
+            
             // 4. 保存到 GitHub
             await this.saveData();
-
-            // 5. 显示结果
+            
+            // 5. 显示结果并更新UI
             const msg = [
                 `导入成功！模式：${mode === 'replace' ? '完全覆盖' : '智能合并'}`,
-                `词条：${this.data.entries.length} 个`,
-                `章节：${this.data.chapters.length} 个`,
-                `公告：${this.data.announcements.length} 个`,
-                `上传 ${uploadedImages}/${imageFiles.length} 张图片`
-            ].join('\n');
+                `词条：${addedCount} 个新增${updatedCount > 0 ? `，${updatedCount} 个更新` : ''}`,
+                `上传 ${uploadedImages}/${imageFiles.length} 张图片`,
+                failedImages.length > 0 ? `失败 ${failedImages.length} 张` : ''
+            ].filter(Boolean).join('\n');
             
             this.showAlertDialog({
                 title: '导入完成',
@@ -1857,9 +1950,10 @@ Object.assign(window.app, {
                 type: 'success'
             });
 
+            // 【关键修复】强制刷新UI以显示新导入的设置
             this.updateUIForMode();
-            if (this.router) this.router('home');
-
+            this.router('home');
+            
         } catch (error) {
             console.error('[Import] ZIP导入失败:', error);
             this.showAlertDialog({

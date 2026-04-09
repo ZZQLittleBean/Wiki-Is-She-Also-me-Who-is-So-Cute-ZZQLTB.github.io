@@ -1,14 +1,13 @@
 /**
- * GitHub 存储管理器 v2.0
+ * GitHub 存储管理器 v2.6
  * 功能：通过GitHub API读取和修改仓库中的Wiki数据
+ * 修复：添加空内容检查，防止 JSON 解析错误
  */
 
 (function() {
     'use strict';
 
-    // 创建全局存储管理器对象
     window.WikiGitHubStorage = {
-        // 配置
         config: {
             owner: '',
             repo: '',
@@ -17,7 +16,6 @@
             token: ''
         },
 
-        // 初始化
         init() {
             const savedConfig = localStorage.getItem('wiki_github_config');
             if (savedConfig) {
@@ -32,29 +30,24 @@
             return false;
         },
 
-        // 检查是否已配置
         isConfigured() {
             return !!(this.config.owner && this.config.repo && this.config.token);
         },
 
-        // 保存配置
         saveConfig(owner, repo, token, branch = 'main', dataPath = 'wiki-data') {
             this.config = { owner, repo, token, branch, dataPath };
             localStorage.setItem('wiki_github_config', JSON.stringify(this.config));
         },
 
-        // 清除配置
         clearConfig() {
             this.config = { owner: '', repo: '', branch: 'main', dataPath: 'wiki-data', token: '' };
             localStorage.removeItem('wiki_github_config');
         },
 
-        // 获取GitHub API基础URL
         getBaseUrl() {
             return `https://api.github.com/repos/${this.config.owner}/${this.config.repo}`;
         },
 
-        // 获取请求头
         getHeaders() {
             return {
                 'Authorization': `token ${this.config.token}`,
@@ -63,7 +56,6 @@
             };
         },
 
-        // 获取文件内容
         async getFile(path) {
             try {
                 const response = await fetch(`${this.getBaseUrl()}/contents/${this.config.dataPath}/${path}?ref=${this.config.branch}`, {
@@ -72,46 +64,39 @@
                 });
 
                 if (!response.ok) {
-                    if (response.status === 404) {
-                        return null;
-                    }
+                    if (response.status === 404) return null;
                     throw new Error(`GitHub API错误: ${response.status}`);
                 }
 
                 const data = await response.json();
+                // 【修复】检查 content 是否存在且不为空
+                if (!data.content || data.content.trim() === '') {
+                    console.warn(`[GitHub] 文件 ${path} 内容为空`);
+                    return null;
+                }
+                
                 const content = atob(data.content.replace(/\s/g, ''));
-                return {
-                    content: content,
-                    sha: data.sha
-                };
+                return { content, sha: data.sha };
             } catch (error) {
                 console.error('[GitHub] 获取文件失败:', error);
                 throw error;
             }
         },
 
-        // 创建或更新文件（添加重试机制避免 409 冲突）
         async putFile(path, content, message = 'Update via Wiki', retryCount = 3) {
             try {
                 let sha = null;
                 try {
                     const existing = await this.getFile(path);
-                    if (existing) {
-                        sha = existing.sha;
-                    }
-                } catch (e) {
-                    // 文件不存在，无需 SHA
-                }
+                    if (existing) sha = existing.sha;
+                } catch (e) {}
 
                 const body = {
                     message: message,
                     content: btoa(unescape(encodeURIComponent(content))),
                     branch: this.config.branch
                 };
-
-                if (sha) {
-                    body.sha = sha;
-                }
+                if (sha) body.sha = sha;
 
                 const response = await fetch(`${this.getBaseUrl()}/contents/${this.config.dataPath}/${path}`, {
                     method: 'PUT',
@@ -120,16 +105,13 @@
                 });
 
                 if (!response.ok) {
-                    // 【修复】409 冲突时重试
                     if (response.status === 409 && retryCount > 0) {
                         console.warn(`[GitHub] 409 冲突，${retryCount} 秒后重试...`);
                         await new Promise(resolve => setTimeout(resolve, 1000));
-                        // 重新获取最新 SHA
                         return this.putFile(path, content, message, retryCount - 1);
                     }
                     throw new Error(`GitHub API错误: ${response.status}`);
                 }
-
                 return await response.json();
             } catch (error) {
                 console.error('[GitHub] 保存文件失败:', error);
@@ -137,13 +119,10 @@
             }
         },
 
-        // 删除文件
         async deleteFile(path, message = 'Delete via Wiki') {
             try {
                 const existing = await this.getFile(path);
-                if (!existing) {
-                    return true;
-                }
+                if (!existing) return true;
 
                 const response = await fetch(`${this.getBaseUrl()}/contents/${this.config.dataPath}/${path}`, {
                     method: 'DELETE',
@@ -154,11 +133,7 @@
                         branch: this.config.branch
                     })
                 });
-
-                if (!response.ok) {
-                    throw new Error(`GitHub API错误: ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error(`GitHub API错误: ${response.status}`);
                 return true;
             } catch (error) {
                 console.error('[GitHub] 删除文件失败:', error);
@@ -166,7 +141,6 @@
             }
         },
 
-        // 获取目录内容
         async getDirectory(path = '') {
             try {
                 const fullPath = path ? `${this.config.dataPath}/${path}` : this.config.dataPath;
@@ -174,14 +148,10 @@
                     method: 'GET',
                     headers: this.getHeaders()
                 });
-
                 if (!response.ok) {
-                    if (response.status === 404) {
-                        return [];
-                    }
+                    if (response.status === 404) return [];
                     throw new Error(`GitHub API错误: ${response.status}`);
                 }
-
                 return await response.json();
             } catch (error) {
                 console.error('[GitHub] 获取目录失败:', error);
@@ -189,33 +159,47 @@
             }
         },
 
-        // 加载Wiki数据
+        // 【关键修复】添加空内容检查和健壮的错误处理
         async loadWikiData(filename = null) {
             try {
                 if (filename) {
                     const file = await this.getFile(filename);
-                    if (file) {
-                        return JSON.parse(file.content);
+                    // 【修复】检查文件和内容是否存在且不为空
+                    if (file && file.content && typeof file.content === 'string' && file.content.trim() !== '') {
+                        try {
+                            return JSON.parse(file.content);
+                        } catch (parseError) {
+                            console.warn(`[GitHub] 解析 ${filename} 失败:`, parseError.message);
+                            // 【新增】如果解析失败，尝试删除损坏的文件或备份
+                            return null;
+                        }
                     }
                     return null;
                 }
 
-                const filenames = ['data.json', 'wiki-manifest.json'];  // 优先检查 data.json
+                const filenames = ['data.json', 'wiki-manifest.json'];
                 for (const name of filenames) {
                     try {
                         const file = await this.getFile(name);
-                        if (file) {
-                            const parsed = JSON.parse(file.content);
-                            // 如果读取的是 wiki-manifest.json 且没有 entries，则跳过
-                            if (name === 'wiki-manifest.json' && !parsed.entries && parsed.mappings) {
-                                console.log('[GitHub] 跳过 manifest 文件，寻找 data.json');
+                        // 【修复】检查文件和内容是否存在且不为空
+                        if (file && file.content && typeof file.content === 'string' && file.content.trim() !== '') {
+                            try {
+                                const parsed = JSON.parse(file.content);
+                                // 【关键修复】如果读取的是 wiki-manifest.json 且没有 entries，则跳过（这是映射文件不是数据文件）
+                                if (name === 'wiki-manifest.json' && !parsed.entries && !parsed.data && parsed.mappings) {
+                                    console.log('[GitHub] 跳过 manifest 文件，继续寻找 data.json');
+                                    continue;
+                                }
+                                console.log('[GitHub] 成功加载数据文件:', name);
+                                return parsed;
+                            } catch (parseError) {
+                                console.warn(`[GitHub] 解析 ${name} 失败:`, parseError.message);
                                 continue;
                             }
-                            console.log('[GitHub] 加载数据文件:', name);
-                            return parsed;
                         }
                     } catch (e) {
-                        console.warn(`[GitHub] 加载 ${name} 失败:`, e);
+                        console.warn(`[GitHub] 加载 ${name} 失败:`, e.message);
+                        continue;
                     }
                 }
                 return null;
@@ -225,16 +209,18 @@
             }
         },
 
-        // 保存Wiki数据
         async saveWikiData(data) {
             const content = JSON.stringify(data, null, 2);
-            return await this.putFile('wiki-manifest.json', content, 'Update Wiki data');
+            return await this.putFile('data.json', content, 'Update Wiki data');
         },
 
-        // 保存图片
         async saveImage(filename, dataUrl) {
             try {
-                const base64 = dataUrl.split(',')[1];
+                // 处理 DataURL，提取 base64 部分
+                let base64 = dataUrl;
+                if (dataUrl.includes(',')) {
+                    base64 = dataUrl.split(',')[1];
+                }
                 await this.putFile(`images/${filename}`, base64, `Add image: ${filename}`);
                 return true;
             } catch (error) {
@@ -243,11 +229,17 @@
             }
         },
 
-        // 加载图片
         async loadImage(filename) {
             try {
+                // 【新增】处理 {{IMG:filename}} 格式
+                if (filename.startsWith('{{IMG:') && filename.endsWith('}}')) {
+                    filename = filename.slice(6, -2);
+                }
+                
+                // 检查文件是否存在于GitHub
                 const file = await this.getFile(`images/${filename}`);
                 if (file) {
+                    // 返回 GitHub raw 内容 URL
                     return `https://raw.githubusercontent.com/${this.config.owner}/${this.config.repo}/${this.config.branch}/${this.config.dataPath}/images/${filename}`;
                 }
                 return null;
@@ -257,7 +249,6 @@
             }
         },
 
-        // 获取所有图片列表
         async getImageList() {
             try {
                 const items = await this.getDirectory('images');
@@ -268,110 +259,24 @@
             }
         },
 
-        // 测试连接
         async testConnection() {
             try {
                 const response = await fetch(`${this.getBaseUrl()}`, {
                     method: 'GET',
                     headers: this.getHeaders()
                 });
-
                 if (!response.ok) {
-                    if (response.status === 401) {
-                        return { success: false, error: 'Token无效或已过期' };
-                    }
-                    if (response.status === 404) {
-                        return { success: false, error: '仓库不存在' };
-                    }
+                    if (response.status === 401) return { success: false, error: 'Token无效或已过期' };
+                    if (response.status === 404) return { success: false, error: '仓库不存在' };
                     return { success: false, error: `HTTP ${response.status}` };
                 }
-
                 const data = await response.json();
-                return {
-                    success: true,
-                    repo: data.name,
-                    owner: data.owner.login,
-                    private: data.private
-                };
+                return { success: true, repo: data.name, owner: data.owner.login, private: data.private };
             } catch (error) {
                 return { success: false, error: error.message };
             }
         }
     };
 
-    // 分享码系统
-    window.WikiShareCode = {
-        generateCode() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let code = '';
-            for (let i = 0; i < 8; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return code;
-        },
-
-        validateCode(code) {
-            return /^[A-HJ-NP-Z2-9]{8}$/.test(code);
-        },
-
-        async saveShareCode(code, description = '') {
-            try {
-                const shareCodes = await this.loadShareCodes();
-                shareCodes[code] = {
-                    createdAt: Date.now(),
-                    description: description,
-                    active: true
-                };
-
-                await window.WikiGitHubStorage.putFile('share-codes.json',
-                    JSON.stringify(shareCodes, null, 2),
-                    'Update share codes'
-                );
-                return true;
-            } catch (error) {
-                console.error('[ShareCode] 保存分享码失败:', error);
-                return false;
-            }
-        },
-
-        async loadShareCodes() {
-            try {
-                const file = await window.WikiGitHubStorage.getFile('share-codes.json');
-                if (file) {
-                    return JSON.parse(file.content);
-                }
-            } catch (e) {}
-            return {};
-        },
-
-        async verifyCode(code) {
-            if (!this.validateCode(code)) {
-                return false;
-            }
-
-            try {
-                const shareCodes = await this.loadShareCodes();
-                return shareCodes[code] && shareCodes[code].active === true;
-            } catch (error) {
-                return false;
-            }
-        },
-
-        async deleteCode(code) {
-            try {
-                const shareCodes = await this.loadShareCodes();
-                delete shareCodes[code];
-
-                await window.WikiGitHubStorage.putFile('share-codes.json',
-                    JSON.stringify(shareCodes, null, 2),
-                    'Delete share code'
-                );
-                return true;
-            } catch (error) {
-                return false;
-            }
-        }
-    };
-
-    console.log('GitHub Storage Manager v2.6 加载完成');
+    console.log('GitHub Storage Manager v2.6 加载完成（已修复JSON解析错误）');
 })();
