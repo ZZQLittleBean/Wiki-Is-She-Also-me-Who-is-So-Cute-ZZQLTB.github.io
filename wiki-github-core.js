@@ -1379,94 +1379,84 @@ Object.assign(window.app, {
     },
 
     // ========== 剧情梗概 ==========
-    renderSynopsis(container) {
-        const tpl = document.getElementById('tpl-synopsis-view');
+    renderSynopsis: function(container) {
+        var self = this;
+        var tpl = document.getElementById('tpl-synopsis-view');
         if (!tpl) {
             container.innerHTML = '<div class="p-8 text-center text-gray-400">剧情梗概模板未找到</div>';
             return;
         }
         
-        const clone = tpl.content.cloneNode(true);
+        var clone = tpl.content.cloneNode(true);
         container.appendChild(clone);
         
-        const list = document.getElementById('synopsis-view-list');
+        var list = document.getElementById('synopsis-view-list');
         if (list) {
-            this.data.synopsis.forEach(chapter => {
-                const item = document.createElement('div');
+            this.data.synopsis.forEach(function(chapter) {
+                var item = document.createElement('div');
                 item.className = 'synopsis-chapter-item p-6 border-b border-gray-200';
                 
-                // 构建图片HTML（如果有）
-                let imageHtml = '';
+                var imageHtml = '';
                 if (chapter.image && chapter.image.startsWith('http')) {
                     imageHtml = '<div class="mb-4 rounded-xl overflow-hidden shadow-md">' +
                         '<img src="' + chapter.image + '" class="w-full max-h-64 object-cover" alt="' + (chapter.title || '') + '" onerror="this.style.display=\'none\'">' +
                     '</div>';
                 }
                 
-                // 内容处理：支持@姓名[编号]格式和换行
-                let content = chapter.content || '';
+                var content = chapter.content || '';
                 
-                // 【关键】使用纯字符串操作代替正则，彻底避免语法错误
-                let result = '';
-                let i = 0;
-                while (i < content.length) {
-                    const atIndex = content.indexOf('@', i);
-                    if (atIndex === -1) {
-                        result += content.substring(i);
+                // 处理 @姓名[编号] - 纯字符串处理，零正则
+                var result = '';
+                var pos = 0;
+                while (pos < content.length) {
+                    var atPos = content.indexOf('@', pos);
+                    if (atPos === -1) {
+                        result += content.substring(pos);
                         break;
                     }
                     
-                    // 添加@之前的文本
-                    result += content.substring(i, atIndex);
+                    result += content.substring(pos, atPos);
                     
-                    // 查找[和]
-                    const bracketOpen = content.indexOf('[', atIndex);
-                    const bracketClose = content.indexOf(']', atIndex);
+                    var openBracket = content.indexOf('[', atPos);
+                    var closeBracket = content.indexOf(']', atPos);
                     
-                    // 验证格式：@姓名[C-001]
-                    if (bracketOpen > atIndex && bracketClose > bracketOpen) {
-                        const name = content.substring(atIndex + 1, bracketOpen);
-                        const code = content.substring(bracketOpen + 1, bracketClose);
+                    if (openBracket > atPos && closeBracket > openBracket) {
+                        var name = content.substring(atPos + 1, openBracket);
+                        var code = content.substring(openBracket + 1, closeBracket);
                         
-                        // 验证编号格式（如C-001, N-002）
-                        const isValidCode = code.length === 5 && 
-                                        code.charAt(1) === '-' && 
-                                        code.charAt(0) >= 'A' && code.charAt(0) <= 'Z' &&
-                                        !isNaN(code.substr(2));
+                        // 简单验证：C-001, N-002 格式
+                        var isValid = code.length === 5 && 
+                                    code.charAt(1) === '-' && 
+                                    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(code.charAt(0)) !== -1 &&
+                                    '0123456789'.indexOf(code.charAt(2)) !== -1 &&
+                                    '0123456789'.indexOf(code.charAt(3)) !== -1 &&
+                                    '0123456789'.indexOf(code.charAt(4)) !== -1;
                         
-                        if (isValidCode) {
-                            const entry = this.data.entries.find(e => e.code === code);
+                        if (isValid) {
+                            var entry = self.data.entries.find(function(e) { return e.code === code; });
                             if (entry) {
-                                // 匹配成功，生成标签
                                 result += '<span class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2 py-1 rounded-md text-sm font-medium cursor-pointer hover:bg-indigo-100 transition border border-indigo-100" onclick="app.openEntry(\'' + entry.id + '\')">' +
                                     '<i class="fa-solid fa-user text-xs text-indigo-500"></i>' +
                                     '<span class="font-semibold">' + name + '</span>' +
                                     '<span class="text-indigo-400 text-xs font-mono bg-white/50 px-1 rounded">' + code + '</span>' +
                                 '</span>';
-                                i = bracketClose + 1;
+                                pos = closeBracket + 1;
                                 continue;
                             }
                         }
                     }
                     
-                    // 不匹配，保留@并继续搜索
                     result += '@';
-                    i = atIndex + 1;
+                    pos = atPos + 1;
                 }
                 content = result;
                 
-                // 处理换行符（不使用正则）
+                // 换行处理（不使用正则）
                 content = content.split('\n').join('<br>');
-                
-                // 支持基础HTML格式（使用 split/join 代替正则）
-                content = content.split('&lt;b&gt;').join('<b>').split('&lt;/b&gt;').join('</b>');
-                content = content.split('&lt;i&gt;').join('<i>').split('&lt;/i&gt;').join('</i>');
-                content = content.split('&lt;u&gt;').join('<u>').split('&lt;/u&gt;').join('</u>');
-                content = content.split('&lt;br&gt;').join('<br>').split('&lt;br /&gt;').join('<br>');
                 
                 item.innerHTML = 
                     '<h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">' +
-                        '<span class="bg-indigo-600 text-white text-sm px-2 py-1 rounded-md font-mono">' + this.formatChapterNum(chapter.num) + '</span>' +
+                        '<span class="bg-indigo-600 text-white text-sm px-2 py-1 rounded-md font-mono">' + self.formatChapterNum(chapter.num) + '</span>' +
                         '<span>' + (chapter.title || '第' + chapter.num + '章') + '</span>' +
                     '</h3>' +
                     imageHtml +
