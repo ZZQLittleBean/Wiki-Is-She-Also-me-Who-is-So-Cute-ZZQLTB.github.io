@@ -1,13 +1,12 @@
 {
   "version": "2.7.0-sharded",
-  "lastUpdate": 1775797662386,
+  "lastUpdate": 1775798140015,
   "totalEntries": 74,
   "entryFiles": [
     "entries-0.json",
     "entries-1.json",
     "entries-2.json",
-    "entries-3.json",
-    "entries-4.json"
+    "entries-3.json"
   ],
   "settings": {
     "name": "我的小说 Wiki",
@@ -619,9 +618,17 @@
       "image": null
     }
   ],
-  "announcements": [],
+  "announcements": [
+    {
+      "id": "ann-1775798140000",
+      "title": "试验公告",
+      "author": "ZZQ小豆同学",
+      "content": "这里测试公告内容。",
+      "createdAt": 1775798140000,
+      "date": "2026/4/10",
+      "isActive": true
+    }
+  ],
   "homeContent": [],
-  "customFields": {},
-  "importCompleted": true,
-  "entries": []
+  "customFields": {}
 }
