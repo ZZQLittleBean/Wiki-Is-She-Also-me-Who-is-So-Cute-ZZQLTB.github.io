@@ -460,42 +460,54 @@ Object.assign(window.app, {
         const baseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${dataPath}/images/`;
         
         let resolvedCount = 0;
-        let missingCount = 0;
+        let skippedCount = 0;
         
         console.log(`[Resolve] 开始解析图片引用，基础URL: ${baseUrl}`);
-        
-        // 辅助函数：安全解析引用
-        const resolveImageRef = (value) => {
+        console.log(`[Resolve] 条目数量: ${this.data.entries?.length || 0}`);
+
+        // 辅助函数：解析各种格式的引用
+        const resolveImageValue = (value) => {
             if (!value || typeof value !== 'string') return null;
             
-            // 已经是完整URL
-            if (value.startsWith('http')) return value;
+            // 已经是完整URL，无需处理
+            if (value.startsWith('http')) {
+                skippedCount++;
+                return value;
+            }
             
-            // 处理 {{IMG:filename}} 格式
+            // 标准格式 {{IMG:filename}}
             if (value.startsWith('{{IMG:') && value.endsWith('}}')) {
                 const filename = value.slice(6, -2);
                 return baseUrl + encodeURIComponent(filename);
             }
             
-            // 处理旧格式或纯文件名
-            if (!value.includes('/') && !value.startsWith('data:')) {
+            // 处理可能的双花括号内嵌格式 {{{IMG:...}}}（容错）
+            const match = value.match(/\{\{IMG:([^}]+)\}\}/);
+            if (match) {
+                const filename = match[1];
+                return baseUrl + encodeURIComponent(filename);
+            }
+            
+            // 如果是纯文件名（如 xxx.jpg），也尝试解析
+            if (!value.includes('/') && !value.startsWith('data:') && value.includes('.')) {
+                console.log(`[Resolve] 检测到纯文件名: ${value}`);
                 return baseUrl + encodeURIComponent(value);
             }
             
             return null;
         };
-        
+
         // 1. 解析条目图片
         if (this.data.entries && Array.isArray(this.data.entries)) {
-            this.data.entries.forEach((entry, eIdx) => {
+            this.data.entries.forEach((entry) => {
                 if (!entry.versions || !Array.isArray(entry.versions)) return;
                 
-                entry.versions.forEach((version, vIdx) => {
+                entry.versions.forEach((version) => {
                     // 处理旧版单个image字段
-                    if (version.image && version.image.startsWith('{{IMG:')) {
-                        const newUrl = resolveImageRef(version.image);
-                        if (newUrl) {
-                            console.log(`[Resolve] Entry ${entry.code} image: ${newUrl}`);
+                    if (version.image) {
+                        const newUrl = resolveImageValue(version.image);
+                        if (newUrl && newUrl !== version.image) {
+                            console.log(`[Resolve] ${entry.code} image: ${version.image.substring(0, 30)}... -> ${newUrl.substring(0, 50)}...`);
                             version.image = newUrl;
                             resolvedCount++;
                         }
@@ -505,10 +517,10 @@ Object.assign(window.app, {
                     if (version.images && typeof version.images === 'object') {
                         ['avatar', 'card', 'cover'].forEach(type => {
                             const value = version.images[type];
-                            if (value && value.startsWith('{{IMG:')) {
-                                const newUrl = resolveImageRef(value);
-                                if (newUrl) {
-                                    console.log(`[Resolve] Entry ${entry.code} images.${type}: ${newUrl}`);
+                            if (value) {
+                                const newUrl = resolveImageValue(value);
+                                if (newUrl && newUrl !== value) {
+                                    console.log(`[Resolve] ${entry.code} images.${type}: ${value.substring(0, 30)}... -> ...`);
                                     version.images[type] = newUrl;
                                     resolvedCount++;
                                 }
@@ -518,8 +530,42 @@ Object.assign(window.app, {
                 });
             });
         }
+
+        // 2. 【新增】解析剧情梗概图片
+        if (this.data.synopsis && Array.isArray(this.data.synopsis)) {
+            this.data.synopsis.forEach((syn, idx) => {
+                if (syn.image) {
+                    const newUrl = resolveImageValue(syn.image);
+                    if (newUrl && newUrl !== syn.image) {
+                        console.log(`[Resolve] Synopsis[${idx}]: ${syn.image.substring(0, 30)}... -> ...`);
+                        syn.image = newUrl;
+                        resolvedCount++;
+                    }
+                }
+            });
+        }
+
+        // 3. 【新增】解析公告图片（如果有）
+        if (this.data.announcements && Array.isArray(this.data.announcements)) {
+            this.data.announcements.forEach((ann, idx) => {
+                if (ann.image) {
+                    const newUrl = resolveImageValue(ann.image);
+                    if (newUrl && newUrl !== ann.image) {
+                        ann.image = newUrl;
+                        resolvedCount++;
+                    }
+                }
+            });
+        }
+
+        console.log(`[Resolve] 完成: ${resolvedCount} 个引用已解析, ${skippedCount} 个已跳过`);
         
-        console.log(`[Resolve] 完成: ${resolvedCount} 个引用已解析`);
+        // 如果没有解析到任何图片，可能是URL构建问题，打印警告
+        if (resolvedCount === 0 && this.data.entries?.length > 0) {
+            console.warn('[Resolve] 警告: 未解析到任何图片引用，请检查:');
+            console.warn('1. 数据中的图片引用格式是否为 {{IMG:filename}}');
+            console.warn('2. GitHub配置是否正确:', this.githubStorage.config);
+        }
     },
 
     // 【完整替换】renderHome 函数 - 修复显示逻辑
@@ -2188,7 +2234,7 @@ async importZipFile(zipFile, mode = 'ask', resumeFromShard = 0) {
             progress.show();
         }
 
-        // 步骤 4: 初始化数据
+        // 步骤 4: 初始化数据（仅首次）
         if (!isResuming) {
             progress.update(10, mode === 'replace' ? '清空现有数据...' : '准备合并...');
             
@@ -2207,35 +2253,33 @@ async importZipFile(zipFile, mode = 'ask', resumeFromShard = 0) {
             };
             this.data.settings = { ...this.data.settings, ...settings };
 
-            // 【修复】智能合并：正确合并 chapters，保留现有
-            const importedChapters = importedData.chapters || importedData.data?.chapters || [];
+            // 【关键修复】强制合并 homeContent，无论模式如何
+            const importedHomeContent = importedData.homeContent || importedData.data?.homeContent || [];
+            console.log(`[Import] 发现 homeContent: ${importedHomeContent.length} 项`);
+            
             if (mode === 'replace') {
-                this.data.chapters = importedChapters;
+                this.data.homeContent = importedHomeContent;
             } else {
-                // 合并模式：智能更新现有章节，添加新章节
-                const existingChMap = {};
-                this.data.chapters.forEach(c => { if(c.id) existingChMap[c.id] = c; });
-                
-                importedChapters.forEach(ch => {
-                    if (!ch.id) return;
-                    if (!existingChMap[ch.id]) {
-                        this.data.chapters.push(ch);
-                        existingChMap[ch.id] = ch;
-                    } else {
-                        // 更新现有章节（保留已有数据）
-                        const existing = existingChMap[ch.id];
-                        existing.title = ch.title || existing.title;
-                        existing.num = ch.num !== undefined ? ch.num : existing.num;
-                        existing.order = ch.order !== undefined ? ch.order : existing.order;
+                // 智能合并：保留现有，添加新的（基于 id 或内容去重）
+                const existingKeys = new Set(this.data.homeContent.map(i => 
+                    i.entryId || i.content?.substring(0, 20) || Math.random()
+                ));
+                importedHomeContent.forEach(item => {
+                    const key = item.entryId || item.content?.substring(0, 20);
+                    if (!existingKeys.has(key)) {
+                        this.data.homeContent.push(item);
+                        existingKeys.add(key);
                     }
                 });
             }
-            
-            // 【修复】智能合并：正确合并 synopsis，保留内容
+            console.log(`[Import] 合并后 homeContent: ${this.data.homeContent.length} 项`);
+
+            // 【关键修复】强制合并 synopsis（剧情梗概）
             const importedSynopsis = importedData.synopsis || importedData.data?.synopsis || [];
             if (mode === 'replace') {
                 this.data.synopsis = importedSynopsis;
             } else {
+                // 智能合并：保留现有内容，添加新的
                 const existingSynMap = {};
                 this.data.synopsis.forEach(s => { if(s.chapterId) existingSynMap[s.chapterId] = s; });
                 
@@ -2246,38 +2290,22 @@ async importZipFile(zipFile, mode = 'ask', resumeFromShard = 0) {
                         this.data.synopsis.push(syn);
                         existingSynMap[syn.chapterId] = syn;
                     } else {
+                        // 更新时保留非空内容
                         const existing = existingSynMap[syn.chapterId];
-                        // 智能更新：仅当导入数据非空时才更新
-                        if (syn.content && syn.content.trim() && syn.content.trim() !== '<p class="text-gray-400 italic">暂无内容</p>') {
+                        if (syn.content?.trim() && !syn.content.includes('暂无内容')) {
                             existing.content = syn.content;
                         }
-                        if (syn.image && syn.image.startsWith('{{IMG:')) {
+                        if (syn.image && syn.image.includes('IMG:')) {
                             existing.image = syn.image;
                         }
-                        if (syn.title && syn.title.trim() && !syn.title.startsWith('第')) {
+                        if (syn.title?.trim() && !syn.title.startsWith('第')) {
                             existing.title = syn.title;
                         }
                     }
                 });
             }
-            // 合并首页自定义内容（智能合并）
-            const importedHomeContent = importedData.homeContent || importedData.data?.homeContent || [];
-            if (mode === 'replace') {
-                this.data.homeContent = importedHomeContent;
-                console.log(`[Import] 替换 homeContent: ${importedHomeContent.length} 项`);
-            } else {
-                // 合并模式：去重合并（基于 entryId 或内容）
-                const existingIds = new Set(this.data.homeContent.map(i => i.entryId || i.content));
-                importedHomeContent.forEach(item => {
-                    const itemKey = item.entryId || item.content;
-                    if (!existingIds.has(itemKey)) {
-                        this.data.homeContent.push(item);
-                    }
-                });
-                console.log(`[Import] 合并 homeContent: 现有 ${this.data.homeContent.length} 项, 导入 ${importedHomeContent.length} 项`);
-            }
-            
-            // 合并其他数据
+
+            // 合并其他数据...
             const mergeArray = (target, source, key = 'id') => {
                 if (!source) return;
                 const existing = new Set(target.map(i => i[key]));
@@ -2286,14 +2314,12 @@ async importZipFile(zipFile, mode = 'ask', resumeFromShard = 0) {
                 });
             };
             
+            mergeArray(this.data.chapters, importedData.chapters || importedData.data?.chapters);
             mergeArray(this.data.camps, importedData.camps || importedData.data?.camps);
             mergeArray(this.data.announcements, importedData.announcements || importedData.data?.announcements);
-            mergeArray(this.data.homeContent, importedData.homeContent || importedData.data?.homeContent);
-            
-            // 【修复】合并自定义字段
-            if (importedData.customFields) {
-                this.data.customFields = { ...this.data.customFields, ...importedData.customFields };
-            }
+
+            // 【关键】导入后立即同步剧情梗概与章节
+            this.syncSynopsisWithChapters();
         }
 
         // 步骤 5: 处理图片（带并发控制）
