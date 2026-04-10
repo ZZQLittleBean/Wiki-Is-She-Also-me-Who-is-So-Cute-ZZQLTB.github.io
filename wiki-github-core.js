@@ -28,7 +28,12 @@ Object.assign(window.app, {
         // 自定义字段支持
         customFields: {},
         // 首页自定义内容
-        homeContent: []
+        homeContent: [],
+        // 【新增】手动时间轴数据
+        timelineNodes: [], // 时间节点列表
+        newReaderNodeId: null, // 新读者节点ID
+        latestNodeId: null, // 最新时间节点ID
+        currentTimelineNode: 'latest' // 当前激活的节点ID，'latest'表示"最新节点"，'all'表示全量
     },
     
     // 运行模式：'backend'(后台/编辑) 或 'frontend'(前台/只读)
@@ -155,7 +160,27 @@ Object.assign(window.app, {
                 localStorage.removeItem('wiki_backend_login');
             }
         }
-        
+        // 初始化时间节点
+        if (!this.data.timelineNodes) {
+            this.data.timelineNodes = [];
+        }
+        // 确保存在"全量节点"（虚拟节点，不保存在数据中，但在UI中显示）
+        this.ensureDefaultNodes();
+
+        // 恢复读者上次选择的时间节点（仅前台模式）
+        if (this.runMode === 'frontend') {
+            const savedNode = localStorage.getItem('wiki_current_timeline_node');
+            if (savedNode) {
+                this.data.currentTimelineNode = savedNode;
+            } else {
+                // 首次访问，默认进入"最新节点"
+                this.data.currentTimelineNode = 'latest';
+            }
+            
+            // 检查是否有新读者引导
+            const hasSeenGuide = localStorage.getItem('wiki_seen_reader_guide');
+            this.data.showNewReaderGuide = !hasSeenGuide && this.data.newReaderNodeId;
+        }
         // 【关键修复】只要有硬编码配置，就加载数据（前台模式不需要Token）
         if (hasHardcodedConfig && this.githubStorage.config.owner && this.githubStorage.config.repo) {
             console.log('[Wiki] 使用硬编码配置，正在加载仓库数据...');
@@ -174,6 +199,34 @@ Object.assign(window.app, {
         
                 // 延迟执行自检
         setTimeout(() => this.periodicDataCheck(), 3000);
+    },
+    // 确保默认节点存在
+    ensureDefaultNodes() {
+        // 如果没有设置最新节点，自动选择order最大的节点
+        if (!this.data.latestNodeId && this.data.timelineNodes.length > 0) {
+            const sorted = [...this.data.timelineNodes].sort((a, b) => b.order - a.order);
+            this.data.latestNodeId = sorted[0].id;
+        }
+        // 如果没有设置新读者节点，默认使用第一个节点
+        if (!this.data.newReaderNodeId && this.data.timelineNodes.length > 0) {
+            const sorted = [...this.data.timelineNodes].sort((a, b) => a.order - b.order);
+            this.data.newReaderNodeId = sorted[0].id;
+        }
+    },
+
+    // 获取当前应显示的节点ID
+    getCurrentNodeId() {
+        if (this.data.currentTimelineNode === 'latest') {
+            return this.data.latestNodeId || 'all';
+        }
+        return this.data.currentTimelineNode;
+    },
+
+    // 获取当前节点对象
+    getCurrentNode() {
+        const nodeId = this.getCurrentNodeId();
+        if (nodeId === 'all') return null;
+        return this.data.timelineNodes.find(n => n.id === nodeId);
     },
 
     // ========== 登录页面 ==========
@@ -655,6 +708,14 @@ Object.assign(window.app, {
         container.appendChild(clone);
         
         const settings = this.data.settings || {};
+        // 【新增】初始化时间轴选择器
+        setTimeout(() => this.initTimelineSelector(), 0);
+        
+        // 【新增】显示/隐藏新读者引导
+        const guideEl = document.getElementById('new-reader-guide');
+        if (guideEl && this.data.showNewReaderGuide && this.runMode === 'frontend') {
+            guideEl.classList.remove('hidden');
+        }
         
         const welcomeTitleEl = document.getElementById('welcome-title');
         const welcomeSubtitleEl = document.getElementById('welcome-subtitle');
@@ -682,6 +743,37 @@ Object.assign(window.app, {
         this.renderAnnouncementBanner();
         
         // 【删除】移除了不存在的 this.renderHistoryIfExists() 调用
+    },
+    // 【新增】初始化时间轴下拉选择器
+    initTimelineSelector() {
+        const selector = document.getElementById('timeline-node-selector');
+        if (!selector) return;
+        
+        // 保留前两个选项（全量、最新）
+        selector.innerHTML = `
+            <option value="all" ${this.data.currentTimelineNode === 'all' ? 'selected' : ''}>
+                📚 全量视图（无剧透保护）
+            </option>
+            <option value="latest" ${this.data.currentTimelineNode === 'latest' ? 'selected' : ''}>
+                🆕 最新进度
+            </option>
+        `;
+        
+        // 添加其他节点，按order排序
+        const sortedNodes = [...this.data.timelineNodes].sort((a, b) => a.order - b.order);
+        sortedNodes.forEach(node => {
+            const isNewReader = node.id === this.data.newReaderNodeId;
+            const isLatest = node.id === this.data.latestNodeId;
+            let label = node.name;
+            if (isNewReader) label += ' [起点]';
+            if (isLatest) label += ' [当前]';
+            
+            const option = document.createElement('option');
+            option.value = node.id;
+            option.textContent = `📖 ${label}`;
+            option.selected = this.data.currentTimelineNode === node.id;
+            selector.appendChild(option);
+        });
     },
 
     // 【完整替换】renderHomeCustomContent 函数 - 修复前台模式显示
@@ -931,6 +1023,51 @@ Object.assign(window.app, {
             backendEntry.classList.toggle('hidden', !shouldShow);
         }
     },
+    // 切换时间节点
+    switchTimelineNode(nodeId) {
+        this.data.currentTimelineNode = nodeId;
+        localStorage.setItem('wiki_current_timeline_node', nodeId);
+        
+        // 刷新当前页面
+        const currentTarget = this.data.currentTarget || 'home';
+        if (currentTarget === 'characters' || currentTarget === 'non-characters') {
+            this.router(currentTarget, false);
+        } else {
+            this.router('home', false);
+        }
+        
+        const nodeName = nodeId === 'all' ? '全量视图' : 
+                        nodeId === 'latest' ? '最新进度' : 
+                        this.data.timelineNodes.find(n => n.id === nodeId)?.name || '未知';
+        this.showToast(`已切换到：${nodeName}`, 'success');
+    },
+
+    // 进入新读者模式
+    enterNewReaderMode() {
+        if (this.data.newReaderNodeId) {
+            this.switchTimelineNode(this.data.newReaderNodeId);
+            localStorage.setItem('wiki_seen_reader_guide', 'true');
+            this.data.showNewReaderGuide = false;
+            document.getElementById('new-reader-guide')?.classList.add('hidden');
+            this.showToast('已为您切换到起点时间线，避免剧透', 'success');
+        }
+    },
+
+    // 关闭新读者引导
+    dismissReaderGuide() {
+        localStorage.setItem('wiki_seen_reader_guide', 'true');
+        this.data.showNewReaderGuide = false;
+        document.getElementById('new-reader-guide')?.classList.add('hidden');
+    },
+
+    // 显示时间轴说明
+    showTimelineGuide() {
+        this.showAlertDialog({
+            title: '时间线系统说明',
+            message: '• 全量视图：显示所有角色和设定（可能包含剧透）\n• 最新进度：显示故事最新阶段的内容\n• 时间节点：编者预设的特定故事阶段，只显示该阶段已登场的角色\n\n切换时间线不会影响词条内部的版本切换功能。',
+            type: 'info'
+        });
+    },
 
     // ========== 页面路由 ==========
     router(target, pushState = true) {
@@ -1005,6 +1142,22 @@ Object.assign(window.app, {
                     this.router('home');
                 }
                 break;
+            case 'timeline-nodes':
+                if (this.runMode === 'backend') {
+                    this.renderTimelineNodes(container);
+                } else {
+                    this.showToast('前台模式不支持编辑', 'warning');
+                    this.router('settings');
+                }
+                break;
+            case 'timeline-node-edit':
+                if (this.runMode === 'backend') {
+                    this.renderTimelineNodeEdit(container);
+                } else {
+                    this.showToast('前台模式不支持编辑', 'warning');
+                    this.router('settings');
+                }
+                break;
             default:
                 this.renderHome(container);
         }
@@ -1030,29 +1183,93 @@ Object.assign(window.app, {
             el.classList.toggle('hidden', this.runMode !== 'backend');
         });
         
-        let items = this.data.entries.filter(e => e.type === type);
+        // 【关键修改】获取当前时间节点过滤后的条目
+        let items = this.getFilteredEntriesByTimeline(type);
+        
         if (countBadge) countBadge.textContent = items.length;
         
         if (items.length === 0) {
-            masonry.innerHTML = '<div class="col-span-full text-center py-10 text-gray-400">暂无数据</div>';
+            // 【新增】如果是时间轴过滤导致为空，显示提示
+            const currentNode = this.getCurrentNode();
+            if (currentNode && this.runMode === 'frontend') {
+                masonry.innerHTML = `
+                    <div class="col-span-full text-center py-10">
+                        <div class="text-gray-300 mb-3"><i class="fa-solid fa-clock text-4xl"></i></div>
+                        <p class="text-gray-500 text-sm">该时间节点暂无${type === 'character' ? '角色' : '设定'}数据</p>
+                        <button onclick="app.switchTimelineNode('all')" class="mt-3 text-indigo-600 text-sm hover:underline">
+                            查看全量内容
+                        </button>
+                    </div>
+                `;
+            } else {
+                masonry.innerHTML = '<div class="col-span-full text-center py-10 text-gray-400">暂无数据</div>';
+            }
         } else {
-            // 按重要程度排序
+            // 按重要程度和置顶排序
             items.sort((a, b) => {
-                const vA = this.getVisibleVersion(a);
-                const vB = this.getVisibleVersion(b);
+                // 置顶版本优先
+                const aPinned = a._isPinned ? 0 : 1;
+                const bPinned = b._isPinned ? 0 : 1;
+                if (aPinned !== bPinned) return aPinned - bPinned;
+                
+                // 然后按重要程度
+                const vA = this.getVisibleVersion(a.entry || a);
+                const vB = this.getVisibleVersion(b.entry || b);
                 return (vA?.level || 5) - (vB?.level || 5);
             });
             
-            items.forEach(entry => {
-                const version = this.getVisibleVersion(entry) || entry.versions?.[0];
+            items.forEach(item => {
+                // item 可能是 {entry, version, isPinned} 或原始 entry
+                const entry = item.entry || item;
+                const version = item.version || this.getVisibleVersion(entry);
+                
                 if (version) {
-                    const card = this.createEntryCard(entry, version);
+                    const card = this.createEntryCard(entry, version, item.isPinned);
                     if (card) masonry.appendChild(card);
                 }
             });
         }
         
         container.appendChild(clone);
+    },
+
+    // 【新增】根据时间轴获取过滤后的条目
+    getFilteredEntriesByTimeline(type) {
+        const nodeId = this.getCurrentNodeId();
+        
+        // 全量模式：不过滤
+        if (nodeId === 'all' || this.runMode === 'backend') {
+            return this.data.entries.filter(e => e.type === type);
+        }
+        
+        const node = this.data.timelineNodes.find(n => n.id === nodeId);
+        if (!node || !node.entries) {
+            return this.data.entries.filter(e => e.type === type);
+        }
+        
+        // 根据节点entries配置过滤
+        const result = [];
+        node.entries.forEach(nodeEntry => {
+            const entry = this.data.entries.find(e => e.id === nodeEntry.entryId);
+            if (entry && entry.type === type) {
+                // 找到指定的版本或当前可见版本
+                let version = entry.versions.find(v => v.vid === nodeEntry.versionId);
+                if (!version) {
+                    version = this.getVisibleVersion(entry);
+                }
+                
+                if (version) {
+                    result.push({
+                        entry: entry,
+                        version: version,
+                        isPinned: nodeEntry.pinned,
+                        _isPinned: nodeEntry.pinned // 内部标记
+                    });
+                }
+            }
+        });
+        
+        return result;
     },
 
     // 【完整替换】renderDetail 函数 - 修复换行显示和角色引用
@@ -2096,9 +2313,15 @@ Object.assign(window.app, {
         }
         
         const hasImage = typeof imgUrl === 'string' && imgUrl.startsWith('http');
+        // 【新增】如果是置顶版本，添加标记
+        const pinnedBadge = isPinned ? 
+            `<div class="absolute top-2 left-2 z-20 bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded font-bold shadow-sm">
+                <i class="fa-solid fa-thumbtack mr-1"></i>推荐
+            </div>` : '';
         
         div.innerHTML = `
             <div class="relative aspect-[3/4] overflow-hidden bg-gray-100 shrink-0">
+                ${pinnedBadge}
                 <!-- 【新增】重要程度角标（右上角） -->
                 <div class="absolute top-2 right-2 z-20 ${levelColor} text-xs font-bold bg-white/90 backdrop-blur px-1.5 py-0.5 rounded shadow-sm border border-gray-100" title="重要程度：Lv.${level}">
                     ${levelStars}
@@ -3235,6 +3458,601 @@ compressImageIfNeeded: function(dataUrl, maxWidth = 1920, maxHeight = 1080, qual
         }
         
         return { data, imageCount };
+    },
+    // 时间节点列表管理
+    renderTimelineNodes(container) {
+        const tpl = document.getElementById('tpl-timeline-nodes');
+        if (!tpl) return;
+        
+        const clone = tpl.content.cloneNode(true);
+        container.appendChild(clone);
+        
+        // 填充特殊节点选择器
+        const newReaderSelect = document.getElementById('new-reader-node');
+        const latestSelect = document.getElementById('latest-node');
+        
+        this.data.timelineNodes.forEach(node => {
+            const opt1 = new Option(node.name, node.id, node.id === this.data.newReaderNodeId, node.id === this.data.newReaderNodeId);
+            const opt2 = new Option(node.name, node.id, node.id === this.data.latestNodeId, node.id === this.data.latestNodeId);
+            newReaderSelect.add(opt1);
+            latestSelect.add(opt2);
+        });
+        
+        // 保存特殊节点选择
+        newReaderSelect.onchange = (e) => {
+            this.data.newReaderNodeId = e.target.value || null;
+        };
+        latestSelect.onchange = (e) => {
+            this.data.latestNodeId = e.target.value || null;
+        };
+        
+        // 渲染节点列表（带排序）
+        const list = document.getElementById('timeline-nodes-list');
+        this.renderNodeList(list);
+    },
+
+    renderNodeList(container) {
+        container.innerHTML = '';
+        const sorted = [...this.data.timelineNodes].sort((a, b) => a.order - b.order);
+        
+        sorted.forEach((node, idx) => {
+            const item = document.createElement('div');
+            item.className = 'flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 shadow-sm';
+            item.draggable = true;
+            item.dataset.nodeId = node.id;
+            
+            const isNewReader = node.id === this.data.newReaderNodeId;
+            const isLatest = node.id === this.data.latestNodeId;
+            const badges = [
+                isNewReader ? '<span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded">起点</span>' : '',
+                isLatest ? '<span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded">最新</span>' : ''
+            ].join('');
+            
+            item.innerHTML = `
+                <div class="cursor-move text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-grip-vertical"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="font-bold text-gray-800">${node.name}</span>
+                        ${badges}
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        包含 ${node.entries?.length || 0} 个词条版本
+                    </div>
+                </div>
+                <div class="flex gap-1">
+                    <button onclick="app.editTimelineNode('${node.id}')" class="p-2 text-purple-600 hover:bg-purple-50 rounded">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button onclick="app.deleteTimelineNode('${node.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            // 拖拽事件
+            item.ondragstart = (e) => {
+                e.dataTransfer.setData('text/plain', node.id);
+                item.style.opacity = '0.5';
+            };
+            item.ondragend = () => {
+                item.style.opacity = '1';
+            };
+            item.ondragover = (e) => {
+                e.preventDefault();
+                item.style.borderTop = '2px solid #9333ea';
+            };
+            item.ondragleave = () => {
+                item.style.borderTop = '';
+            };
+            item.ondrop = (e) => {
+                e.preventDefault();
+                item.style.borderTop = '';
+                const draggedId = e.dataTransfer.getData('text/plain');
+                if (draggedId !== node.id) {
+                    this.reorderTimelineNodes(draggedId, node.id);
+                }
+            };
+            
+            container.appendChild(item);
+        });
+    },
+
+    // 节点编辑页面
+    renderTimelineNodeEdit(container) {
+        const nodeId = this.data.editingTimelineNodeId;
+        const node = this.data.timelineNodes.find(n => n.id === nodeId);
+        if (!node) return;
+        
+        const tpl = document.getElementById('tpl-timeline-node-edit');
+        if (!tpl) return;
+        
+        const clone = tpl.content.cloneNode(true);
+        container.appendChild(clone);
+        
+        document.getElementById('node-edit-title').textContent = `配置：${node.name}`;
+        
+        // 渲染可用词条列表（排除已添加的）
+        this.renderAvailableEntries(node);
+        
+        // 渲染已配置词条
+        this.renderNodeEntries(node);
+    },
+    // ========== 时间节点管理 ==========
+    renderTimelineNodes(container) {
+        const tpl = document.getElementById('tpl-timeline-nodes');
+        if (!tpl) return;
+        
+        const clone = tpl.content.cloneNode(true);
+        container.appendChild(clone);
+        
+        // 填充特殊节点选择器
+        const newReaderSelect = document.getElementById('new-reader-node');
+        const latestSelect = document.getElementById('latest-node');
+        
+        // 清空并重建选项（保留默认空选项）
+        newReaderSelect.innerHTML = '<option value="">-- 未设置 --</option>';
+        latestSelect.innerHTML = '<option value="">-- 自动（最后节点）--</option>';
+        
+        const sorted = [...this.data.timelineNodes].sort((a, b) => a.order - b.order);
+        sorted.forEach(node => {
+            const opt1 = new Option(node.name, node.id);
+            const opt2 = new Option(node.name, node.id);
+            if (node.id === this.data.newReaderNodeId) opt1.selected = true;
+            if (node.id === this.data.latestNodeId) opt2.selected = true;
+            newReaderSelect.add(opt1);
+            latestSelect.add(opt2);
+        });
+        
+        // 保存特殊节点选择
+        newReaderSelect.onchange = (e) => {
+            this.data.newReaderNodeId = e.target.value || null;
+            this.renderNodeList(document.getElementById('timeline-nodes-list'));
+        };
+        latestSelect.onchange = (e) => {
+            this.data.latestNodeId = e.target.value || null;
+            this.renderNodeList(document.getElementById('timeline-nodes-list'));
+        };
+        
+        // 渲染节点列表
+        const list = document.getElementById('timeline-nodes-list');
+        this.renderNodeList(list);
+    },
+
+    renderNodeList(container) {
+        if (!container) return;
+        container.innerHTML = '';
+        const sorted = [...this.data.timelineNodes].sort((a, b) => a.order - b.order);
+        
+        sorted.forEach((node, idx) => {
+            const item = document.createElement('div');
+            item.className = 'flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 shadow-sm';
+            item.draggable = true;
+            item.dataset.nodeId = node.id;
+            
+            const isNewReader = node.id === this.data.newReaderNodeId;
+            const isLatest = node.id === this.data.latestNodeId;
+            const badges = [
+                isNewReader ? '<span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded mr-1">起点</span>' : '',
+                isLatest ? '<span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded">最新</span>' : ''
+            ].join('');
+            
+            item.innerHTML = `
+                <div class="cursor-move text-gray-400 hover:text-gray-600 p-1">
+                    <i class="fa-solid fa-grip-vertical"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1 flex-wrap">
+                        <span class="font-bold text-gray-800">${node.name}</span>
+                        ${badges}
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        包含 ${node.entries?.length || 0} 个词条版本 · 顺序 ${node.order}
+                    </div>
+                </div>
+                <div class="flex gap-1">
+                    <button onclick="app.editTimelineNode('${node.id}')" class="p-2 text-purple-600 hover:bg-purple-50 rounded" title="配置词条">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button onclick="app.deleteTimelineNode('${node.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded" title="删除">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            // 拖拽事件
+            item.ondragstart = (e) => {
+                e.dataTransfer.setData('text/plain', node.id);
+                item.style.opacity = '0.5';
+            };
+            item.ondragend = () => {
+                item.style.opacity = '1';
+            };
+            item.ondragover = (e) => {
+                e.preventDefault();
+                item.style.borderTop = '2px solid #9333ea';
+            };
+            item.ondragleave = () => {
+                item.style.borderTop = '';
+            };
+            item.ondrop = (e) => {
+                e.preventDefault();
+                item.style.borderTop = '';
+                const draggedId = e.dataTransfer.getData('text/plain');
+                if (draggedId !== node.id) {
+                    this.reorderTimelineNodes(draggedId, node.id);
+                }
+            };
+            
+            container.appendChild(item);
+        });
+        
+        if (sorted.length === 0) {
+            container.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">暂无时间节点，点击右上角"添加节点"创建</div>';
+        }
+    },
+
+    addTimelineNode() {
+        this.showPromptDialog({
+            title: '新建时间节点',
+            message: '输入节点名称（如"第一卷·初入江湖"）：',
+            confirmText: '创建',
+            cancelText: '取消'
+        }).then(name => {
+            if (!name || !name.trim()) return;
+            
+            const newNode = {
+                id: 'node-' + Date.now(),
+                name: name.trim(),
+                order: this.data.timelineNodes.length,
+                entries: [] // 每个元素：{entryId, versionId, pinned}
+            };
+            
+            this.data.timelineNodes.push(newNode);
+            
+            // 如果是第一个节点，自动设为默认
+            if (this.data.timelineNodes.length === 1) {
+                this.data.newReaderNodeId = newNode.id;
+                this.data.latestNodeId = newNode.id;
+            }
+            
+            this.renderNodeList(document.getElementById('timeline-nodes-list'));
+            this.showToast('节点已创建，请配置包含的词条', 'success');
+        });
+    },
+
+    deleteTimelineNode(nodeId) {
+        const node = this.data.timelineNodes.find(n => n.id === nodeId);
+        if (!node) return;
+        
+        this.showConfirmDialog({
+            title: '删除确认',
+            message: `确定删除时间节点"${node.name}"？\n该节点内的词条配置将全部丢失。`,
+            confirmText: '删除',
+            cancelText: '取消',
+            type: 'danger'
+        }).then(confirmed => {
+            if (confirmed) {
+                this.data.timelineNodes = this.data.timelineNodes.filter(n => n.id !== nodeId);
+                
+                // 清理特殊节点引用
+                if (this.data.newReaderNodeId === nodeId) this.data.newReaderNodeId = null;
+                if (this.data.latestNodeId === nodeId) this.data.latestNodeId = null;
+                
+                this.renderNodeList(document.getElementById('timeline-nodes-list'));
+                this.showToast('节点已删除', 'success');
+            }
+        });
+    },
+
+    reorderTimelineNodes(draggedId, targetId) {
+        const nodes = this.data.timelineNodes;
+        const draggedIdx = nodes.findIndex(n => n.id === draggedId);
+        const targetIdx = nodes.findIndex(n => n.id === targetId);
+        
+        if (draggedIdx === -1 || targetIdx === -1) return;
+        
+        // 移除并插入
+        const [removed] = nodes.splice(draggedIdx, 1);
+        nodes.splice(targetIdx, 0, removed);
+        
+        // 重新计算order
+        nodes.forEach((n, i) => n.order = i);
+        
+        this.renderNodeList(document.getElementById('timeline-nodes-list'));
+    },
+
+    editTimelineNode(nodeId) {
+        this.data.editingTimelineNodeId = nodeId;
+        this.router('timeline-node-edit');
+    },
+
+    renderTimelineNodeEdit(container) {
+        const nodeId = this.data.editingTimelineNodeId;
+        const node = this.data.timelineNodes.find(n => n.id === nodeId);
+        if (!node) {
+            this.showToast('节点不存在', 'error');
+            this.router('timeline-nodes');
+            return;
+        }
+        
+        const tpl = document.getElementById('tpl-timeline-node-edit');
+        if (!tpl) return;
+        
+        const clone = tpl.content.cloneNode(true);
+        container.appendChild(clone);
+        
+        document.getElementById('node-edit-title').textContent = `配置：${node.name}`;
+        
+        // 初始化可用词条过滤状态
+        this._availableFilter = { type: 'all', search: '' };
+        
+        this.renderAvailableEntries(node);
+        this.renderNodeEntries(node);
+    },
+
+    renderAvailableEntries(node) {
+        const container = document.getElementById('available-entries-list');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        // 获取已添加的entryId+versionId组合，用于去重显示
+        const addedKeys = new Set((node.entries || []).map(e => `${e.entryId}-${e.versionId}`));
+        
+        // 过滤词条
+        let entries = this.data.entries;
+        if (this._availableFilter?.type && this._availableFilter.type !== 'all') {
+            entries = entries.filter(e => e.type === this._availableFilter.type);
+        }
+        if (this._availableFilter?.search) {
+            const s = this._availableFilter.search.toLowerCase();
+            entries = entries.filter(e => {
+                const v = this.getVisibleVersion(e);
+                return e.code.toLowerCase().includes(s) || v?.title?.toLowerCase().includes(s);
+            });
+        }
+        
+        entries.forEach(entry => {
+            // 遍历该词条的所有版本，每个版本都可独立添加
+            (entry.versions || []).forEach(version => {
+                const key = `${entry.id}-${version.vid}`;
+                if (addedKeys.has(key)) return; // 已添加的不显示
+                
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer border-b border-gray-50';
+                div.onclick = () => this.addEntryToNode(node, entry.id, version.vid);
+                
+                const isPinned = node.entries?.find(e => e.entryId === entry.id && e.pinned);
+                const pinBadge = isPinned ? '<i class="fa-solid fa-thumbtack text-amber-500 text-xs mr-1"></i>' : '';
+                
+                div.innerHTML = `
+                    <span class="text-xs font-mono bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">${entry.code}</span>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-700 truncate">${pinBadge}${version.title || '未命名'}</div>
+                        <div class="text-[10px] text-gray-400">v${version.vid?.substr(-4) || 'unknown'}</div>
+                    </div>
+                    <i class="fa-solid fa-plus text-gray-400 text-xs"></i>
+                `;
+                container.appendChild(div);
+            });
+        });
+        
+        if (container.children.length === 0) {
+            container.innerHTML = '<div class="text-center py-4 text-gray-400 text-xs">无可用词条或已全部添加</div>';
+        }
+    },
+
+    renderNodeEntries(node) {
+        const container = document.getElementById('node-entries-list');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        if (!node.entries || node.entries.length === 0) {
+            container.innerHTML = '<div class="text-center py-8 text-gray-400 text-xs border-2 border-dashed border-gray-200 rounded-lg">点击左侧词条添加到当前时间节点</div>';
+            return;
+        }
+        
+        // 按拖拽顺序渲染（支持拖拽排序）
+        node.entries.forEach((entryConfig, idx) => {
+            const entry = this.data.entries.find(e => e.id === entryConfig.entryId);
+            if (!entry) return; // 词条可能已被删除
+            
+            const version = entry.versions?.find(v => v.vid === entryConfig.versionId);
+            if (!version) return;
+            
+            const div = document.createElement('div');
+            div.className = `flex items-center gap-2 p-3 rounded-lg border ${entryConfig.pinned ? 'border-amber-300 bg-amber-50' : 'border-gray-200 bg-white'} mb-2`;
+            div.draggable = true;
+            
+            div.innerHTML = `
+                <div class="cursor-move text-gray-400"><i class="fa-solid fa-grip-vertical text-xs"></i></div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono bg-gray-100 text-gray-600 px-1.5 rounded">${entry.code}</span>
+                        <span class="text-sm font-medium text-gray-800 truncate">${version.title || '未命名'}</span>
+                        ${entryConfig.pinned ? '<span class="text-[10px] bg-amber-200 text-amber-800 px-1.5 rounded">置顶</span>' : ''}
+                    </div>
+                </div>
+                <div class="flex gap-1">
+                    <button onclick="app.togglePinnedVersion('${entryConfig.entryId}', '${entryConfig.versionId}')" 
+                        class="p-1.5 ${entryConfig.pinned ? 'text-amber-600 bg-amber-100' : 'text-gray-400 hover:text-amber-600 hover:bg-amber-50'} rounded"
+                        title="${entryConfig.pinned ? '取消置顶' : '设为置顶版本'}">
+                        <i class="fa-solid fa-thumbtack text-xs"></i>
+                    </button>
+                    <button onclick="app.removeEntryFromNode('${entryConfig.entryId}', '${entryConfig.versionId}')" 
+                        class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="移除">
+                        <i class="fa-solid fa-times text-xs"></i>
+                    </button>
+                </div>
+            `;
+            
+            // 拖拽排序
+            div.ondragstart = (e) => {
+                e.dataTransfer.setData('text/plain', idx);
+                div.style.opacity = '0.5';
+            };
+            div.ondragend = () => div.style.opacity = '1';
+            div.ondragover = (e) => {
+                e.preventDefault();
+                div.style.borderTop = '2px solid #9333ea';
+            };
+            div.ondragleave = () => div.style.borderTop = '';
+            div.ondrop = (e) => {
+                e.preventDefault();
+                div.style.borderTop = '';
+                const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+                if (fromIdx !== idx) {
+                    this.reorderNodeEntries(node, fromIdx, idx);
+                }
+            };
+            
+            container.appendChild(div);
+        });
+    },
+
+    filterAvailableEntries(keyword) {
+        this._availableFilter = this._availableFilter || { type: 'all', search: '' };
+        this._availableFilter.search = keyword;
+        const node = this.data.timelineNodes.find(n => n.id === this.data.editingTimelineNodeId);
+        if (node) this.renderAvailableEntries(node);
+    },
+
+    showAvailableByType(type) {
+        this._availableFilter = this._availableFilter || { type: 'all', search: '' };
+        this._availableFilter.type = type;
+        const node = this.data.timelineNodes.find(n => n.id === this.data.editingTimelineNodeId);
+        if (node) this.renderAvailableEntries(node);
+    },
+
+    addEntryToNode(node, entryId, versionId) {
+        if (!node.entries) node.entries = [];
+        
+        // 检查是否已存在
+        const exists = node.entries.find(e => e.entryId === entryId && e.versionId === versionId);
+        if (exists) {
+            this.showToast('该版本已存在', 'warning');
+            return;
+        }
+        
+        // 检查该词条是否已有其他版本被添加，如果有则提示但不会阻止
+        const hasOtherVersion = node.entries.find(e => e.entryId === entryId);
+        if (hasOtherVersion) {
+            this.showToast('已添加该角色的其他版本，可以继续添加此版本', 'info');
+        }
+        
+        node.entries.push({
+            entryId,
+            versionId,
+            pinned: false
+        });
+        
+        // 重新渲染
+        this.renderAvailableEntries(node);
+        this.renderNodeEntries(node);
+    },
+
+    removeEntryFromNode(entryId, versionId) {
+        const node = this.data.timelineNodes.find(n => n.id === this.data.editingTimelineNodeId);
+        if (!node) return;
+        
+        node.entries = node.entries.filter(e => !(e.entryId === entryId && e.versionId === versionId));
+        this.renderAvailableEntries(node);
+        this.renderNodeEntries(node);
+    },
+
+    togglePinnedVersion(entryId, versionId) {
+        const node = this.data.timelineNodes.find(n => n.id === this.data.editingTimelineNodeId);
+        if (!node) return;
+        
+        const entry = node.entries.find(e => e.entryId === entryId && e.versionId === versionId);
+        if (entry) {
+            entry.pinned = !entry.pinned;
+            this.renderNodeEntries(node);
+        }
+    },
+
+    reorderNodeEntries(node, fromIdx, toIdx) {
+        if (!node.entries || fromIdx < 0 || toIdx < 0 || fromIdx >= node.entries.length || toIdx >= node.entries.length) return;
+        
+        const [removed] = node.entries.splice(fromIdx, 1);
+        node.entries.splice(toIdx, 0, removed);
+        
+        this.renderNodeEntries(node);
+    },
+
+    saveCurrentNodeConfig() {
+        this.showToast('当前节点配置已保存（内存中），请返回后保存到GitHub', 'success');
+        this.router('timeline-nodes');
+    },
+    showPromptDialog(options) {
+        return new Promise((resolve) => {
+            const { title = '输入', message, confirmText = '确认', cancelText = '取消', defaultValue = '' } = options;
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-black/60 z-[99999] flex items-center justify-center p-4 fade-in';
+            overlay.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 transform scale-100 transition-transform">
+                    <div class="text-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">${title}</h3>
+                        <p class="text-gray-600 text-sm mb-4">${message}</p>
+                        <input type="text" id="prompt-input" class="w-full p-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none" value="${defaultValue}">
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="prompt-cancel" class="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium">
+                            ${cancelText}
+                        </button>
+                        <button id="prompt-ok" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition font-medium shadow-lg">
+                            ${confirmText}
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            const input = overlay.querySelector('#prompt-input');
+            input.focus();
+            input.select();
+            
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    overlay.querySelector('#prompt-ok').click();
+                }
+            };
+            
+            overlay.querySelector('#prompt-cancel').onclick = () => {
+                overlay.remove();
+                resolve(null);
+            };
+            
+            overlay.querySelector('#prompt-ok').onclick = () => {
+                const value = input.value.trim();
+                overlay.remove();
+                resolve(value);
+            };
+            
+            overlay.onclick = (e) => {
+                if (e.target === overlay) {
+                    overlay.remove();
+                    resolve(null);
+                }
+            };
+        });
+    },
+    async saveTimelineNodes() {
+        try {
+            await this.saveData();
+            this.showToast('时间节点配置已保存到GitHub', 'success');
+        } catch (error) {
+            this.showAlertDialog({
+                title: '保存失败',
+                message: '无法保存时间节点配置：' + error.message,
+                type: 'error'
+            });
+        }
     },
     // ========== 分享码管理 ==========
     async generateShareCode() {

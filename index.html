@@ -387,7 +387,50 @@
                         </label>
                     </div>
                 </div>
+                <!-- 【新增】时间轴控制栏 -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-500 font-medium">当前时间线</div>
+                            <select id="timeline-node-selector" onchange="app.switchTimelineNode(this.value)" 
+                                class="text-sm font-bold text-gray-800 bg-transparent border-none outline-none cursor-pointer">
+                                <option value="all">📚 全量视图（无剧透保护）</option>
+                                <option value="latest" selected>🆕 最新进度</option>
+                                <!-- 动态加载其他节点 -->
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="app.showTimelineGuide()" class="text-xs text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg">
+                        <i class="fa-solid fa-circle-info mr-1"></i>时间线说明
+                    </button>
+                </div>
 
+                <!-- 【新增】新读者引导框（首次访问显示） -->
+                <div id="new-reader-guide" class="hidden bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 shadow-sm">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 shrink-0">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-amber-900 mb-1">新读者从这里开始吧！</h3>
+                            <p class="text-sm text-amber-700 mb-3">为避免剧透，建议从故事起点开始阅读。只显示初始的角色和设定。</p>
+                            <div class="flex gap-2">
+                                <button onclick="app.enterNewReaderMode()" class="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-600 transition">
+                                    进入起点时间线
+                                </button>
+                                <button onclick="app.dismissReaderGuide()" class="text-amber-700 hover:text-amber-800 px-3 py-2 text-sm">
+                                    我已熟悉，全量浏览
+                                </button>
+                            </div>
+                        </div>
+                        <button onclick="app.dismissReaderGuide()" class="text-amber-400 hover:text-amber-600">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                </div>
                 <!-- 剧情梗概大按钮 -->
                 <div onclick="app.router('synopsis')" class="synopsis-home-entry flex items-center justify-between p-4 bg-gradient-to-r from-amber-100 to-yellow-100 rounded-xl cursor-pointer hover:shadow-md transition border-2 border-amber-200">
                     <div class="flex items-center gap-4">
@@ -780,7 +823,21 @@
                         <i class="fa-solid fa-gear mr-2"></i>管理章节
                     </button>
                 </div>
-
+                <!-- 后台模式：时间节点管理 -->
+                <div class="edit-only hidden bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-timeline text-purple-600"></i> 时间节点管理
+                    </h2>
+                    <div class="space-y-3">
+                        <p class="text-xs text-gray-500">
+                            <i class="fa-solid fa-info-circle mr-1"></i>
+                            创建时间节点并配置各节点可见的词条版本，为读者提供剧透保护
+                        </p>
+                        <button onclick="app.router('timeline-nodes')" class="w-full py-2 bg-purple-50 text-purple-600 rounded-lg text-sm hover:bg-purple-100 transition">
+                            <i class="fa-solid fa-gear mr-2"></i>管理时间节点
+                        </button>
+                    </div>
+                </div>
                 <!-- 后台模式：公告管理 -->
                 <div class="edit-only hidden bg-white rounded-xl shadow-sm border border-gray-200 p-5">
                     <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
@@ -893,6 +950,112 @@
                     <p id="settings-save-status" class="text-xs text-center mt-3 opacity-0 transition-opacity">
                         <i class="fa-solid fa-check-circle mr-1"></i>保存成功
                     </p>
+                </div>
+            </div>
+        </div>
+    </template>
+    <!-- 时间节点管理列表模板 -->
+    <template id="tpl-timeline-nodes">
+        <div class="h-full flex flex-col bg-gray-50 fade-in">
+            <div class="bg-white border-b px-4 py-3 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-2">
+                    <button onclick="app.router('settings')" class="text-gray-500 hover:text-gray-800">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <span class="font-bold text-gray-800">时间节点管理</span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="app.addTimelineNode()" class="px-3 py-1.5 text-purple-600 hover:bg-purple-50 rounded-lg text-sm">
+                        <i class="fa-solid fa-plus mr-1"></i>添加节点
+                    </button>
+                    <button onclick="app.saveTimelineNodes()" class="px-4 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 shadow text-sm">
+                        <i class="fa-solid fa-save mr-1"></i>保存
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4">
+                <div class="max-w-3xl mx-auto space-y-4 pb-20">
+                    <!-- 特殊节点设置 -->
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                        <h3 class="font-bold text-amber-900 mb-3">特殊节点标记</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs text-amber-700 mb-1">新读者起点</label>
+                                <select id="new-reader-node" class="w-full p-2 border border-amber-300 rounded-lg text-sm bg-white">
+                                    <option value="">-- 未设置 --</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-amber-700 mb-1">最新进度节点</label>
+                                <select id="latest-node" class="w-full p-2 border border-amber-300 rounded-lg text-sm bg-white">
+                                    <option value="">-- 自动（最后节点）--</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 节点列表（可拖拽排序） -->
+                    <div id="timeline-nodes-list" class="space-y-2">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- 时间节点编辑模板 -->
+    <template id="tpl-timeline-node-edit">
+        <div class="h-full flex flex-col bg-gray-50 fade-in">
+            <div class="bg-white border-b px-4 py-3 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-2">
+                    <button onclick="app.router('timeline-nodes')" class="text-gray-500 hover:text-gray-800">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <span class="font-bold text-gray-800" id="node-edit-title">编辑节点</span>
+                </div>
+                <button onclick="app.saveCurrentNodeConfig()" class="px-4 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 shadow text-sm">
+                    <i class="fa-solid fa-save mr-1"></i>保存
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4">
+                <div class="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-4 pb-20">
+                    <!-- 左侧：可用词条 -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-4">
+                        <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-database text-gray-400"></i>
+                            可用词条
+                            <span class="text-xs text-gray-400 font-normal">点击添加到当前节点</span>
+                        </h3>
+                        <div class="space-y-2 mb-3">
+                            <input type="text" id="available-search" placeholder="搜索词条..." 
+                                class="w-full p-2 border border-gray-200 rounded-lg text-sm"
+                                oninput="app.filterAvailableEntries(this.value)">
+                            <div class="flex gap-2">
+                                <button onclick="app.showAvailableByType('character')" class="flex-1 py-1 text-xs bg-blue-50 text-blue-600 rounded">角色</button>
+                                <button onclick="app.showAvailableByType('non-character')" class="flex-1 py-1 text-xs bg-emerald-50 text-emerald-600 rounded">设定</button>
+                                <button onclick="app.showAvailableByType('all')" class="flex-1 py-1 text-xs bg-gray-100 text-gray-600 rounded">全部</button>
+                            </div>
+                        </div>
+                        <div id="available-entries-list" class="space-y-1 max-h-[60vh] overflow-y-auto">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 右侧：已配置词条 -->
+                    <div class="bg-white rounded-xl border border-purple-200 p-4">
+                        <h3 class="font-bold text-purple-800 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-purple-500"></i>
+                            当前节点包含
+                            <span class="text-xs text-purple-400 font-normal">可拖拽排序，点击设为置顶版本</span>
+                        </h3>
+                        <div id="node-entries-list" class="space-y-2 max-h-[60vh] overflow-y-auto">
+                            <!-- 动态生成 -->
+                        </div>
+                        <div class="mt-4 p-3 bg-purple-50 rounded-lg text-xs text-purple-700">
+                            <i class="fa-solid fa-lightbulb mr-1"></i>
+                            提示：同一角色的多个版本可共存，置顶版本将优先在时间线中展示
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
