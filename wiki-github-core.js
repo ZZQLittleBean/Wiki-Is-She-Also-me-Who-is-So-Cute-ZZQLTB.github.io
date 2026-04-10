@@ -1405,28 +1405,29 @@ Object.assign(window.app, {
                     `;
                 }
                 
-                // 【关键修改】内容处理：支持@姓名[编号]格式和换行
+                // 【修正】内容处理：支持@姓名[编号]格式和换行
                 let content = chapter.content || '';
                 
-                // 【新增】解析 @姓名[编号] 格式 → 图3样式标签
-                content = content.replace(/@([^\[\]]+)\[([A-Z]-\d{3})\]/g, (match, name, code) => {
+                // 【关键修正】使用字符串分割方式避免正则转义问题，或修正后的正则
+                // 方式1：使用修正的正则（推荐）
+                // 注意：在字符串中，\[ 需要写成 \\[，但在正则字面量中，\[ 就是 \[
+                content = content.replace(/@([^\[\]]+)\[([A-Z]-\d{3})\]/g, function(match, name, code) {
                     // 查找对应条目
-                    const entry = this.data.entries.find(e => e.code === code);
+                    const entry = window.app.data.entries.find(e => e.code === code);
                     if (entry) {
-                        return `<span class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2 py-1 rounded-md text-sm font-medium cursor-pointer hover:bg-indigo-100 transition border border-indigo-100" onclick="app.openEntry('${entry.id}')">
-                            <i class="fa-solid fa-user text-xs text-indigo-500"></i>
-                            <span class="font-semibold">${name}</span>
-                            <span class="text-indigo-400 text-xs font-mono bg-white/50 px-1 rounded">${code}</span>
-                        </span>`;
+                        return '<span class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2 py-1 rounded-md text-sm font-medium cursor-pointer hover:bg-indigo-100 transition border border-indigo-100" onclick="window.app.openEntry(\'' + entry.id + '\')">' +
+                            '<i class="fa-solid fa-user text-xs text-indigo-500"></i>' +
+                            '<span class="font-semibold">' + name + '</span>' +
+                            '<span class="text-indigo-400 text-xs font-mono bg-white/50 px-1 rounded">' + code + '</span>' +
+                        '</span>';
                     }
-                    // 未找到条目时保持原样显示
                     return match;
                 });
                 
-                // 【新增】处理换行符（必须在HTML转换后执行，避免破坏标签）
+                // 处理换行符
                 content = content.replace(/\n/g, '<br>');
                 
-                // 【新增】支持基础HTML格式（同renderDetail）
+                // 支持基础HTML格式（安全过滤）
                 content = content.replace(/&lt;(b|i|u|br)\s*\/?&gt;/g, '<$1>');
                 content = content.replace(/&lt;\/(b|i|u)&gt;/g, '</$1>');
                 
