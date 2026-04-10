@@ -1001,6 +1001,7 @@ Object.assign(window.app, {
         container.appendChild(clone);
     },
 
+    // 【完整替换】renderDetail 函数 - 修复图片显示问题
     renderDetail(container) {
         const entry = this.data.entries.find(e => e.id === this.data.editingId);
         if (!entry) {
@@ -1028,22 +1029,54 @@ Object.assign(window.app, {
         
         const contentEl = clone.getElementById('detail-content');
         
+        // 【关键修复】构建 GitHub Raw URL 基础路径
+        let baseUrl = '';
+        if (this.githubStorage?.config?.owner) {
+            const { owner, repo, branch, dataPath } = this.githubStorage.config;
+            const safeDataPath = dataPath || 'wiki-data';
+            baseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${safeDataPath}/images/`;
+        }
+        
+        // 【关键修复】防御性获取并解析图片 URL
+        let imgUrl = '';
+        const rawImg = version.images?.card || version.images?.avatar || version.image || '';
+        
+        if (typeof rawImg === 'string') {
+            if (rawImg.startsWith('http')) {
+                // 已经是完整 URL，直接使用
+                imgUrl = rawImg;
+            } else if (rawImg.includes('{{IMG:')) {
+                // 需要实时解析 {{IMG:filename}} 格式
+                const match = rawImg.match(/\{\{IMG:\s*([^}]+)\s*\}\}/);
+                if (match && match[1]) {
+                    imgUrl = baseUrl + encodeURIComponent(match[1]);
+                    console.log(`[Detail] 实时解析图片: ${entry.code} -> ${imgUrl}`);
+                }
+            }
+        }
+        
         // 渲染内容
         let contentHtml = `
             <div class="flex flex-col md:flex-row gap-6 mb-6">
                 <div class="flex-1">
-                    <h1 class="text-3xl font-bold text-gray-900 mb-3">${version.title}</h1>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-3">${version.title || '未命名'}</h1>
                     ${version.subtitle ? `<p class="text-lg italic text-gray-600 border-l-4 border-indigo-300 pl-4">${version.subtitle}</p>` : ''}
                 </div>
         `;
         
-        // 图片
-        const img = version.images?.card || version.images?.avatar || version.image;
-        if (img && !img.startsWith('{{IMG:')) { // 确保已解析（或原本就是完整URL）
+        // 【关键修复】只有获取到有效 HTTP URL 才显示图片
+        if (imgUrl && imgUrl.startsWith('http')) {
             contentHtml += `
                 <div class="w-48 shrink-0">
-                    <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-lg bg-gray-100">
-                        <img src="${img}" class="w-full h-full object-cover" alt="${version.title}" onerror="this.style.display='none'">
+                    <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-lg bg-gray-100 flex items-center justify-center">
+                        <img src="${imgUrl}" 
+                            class="w-full h-full object-cover" 
+                            alt="${version.title || entry.code}" 
+                            crossorigin="anonymous"
+                            onerror="console.error('[Detail Image Error] 加载失败:', '${imgUrl}', '条目:', '${entry.code}'); 
+                                    this.onerror=null; 
+                                    this.style.display='none'; 
+                                    this.parentElement.innerHTML='<div class=\'flex flex-col items-center justify-center w-full h-full bg-gray-50 text-gray-400\'><i class=\'fa-solid fa-image text-4xl mb-2\'></i><span class=\'text-xs\'>图片加载失败</span></div>';">
                     </div>
                 </div>
             `;
@@ -1051,24 +1084,27 @@ Object.assign(window.app, {
         
         contentHtml += '</div>';
         
-        // 正文块
+        // 正文块渲染
         contentHtml += '<div class="prose prose-sm max-w-none">';
         if (version.blocks && version.blocks.length > 0) {
             version.blocks.forEach(block => {
                 if (block.type === 'h2') {
-                    contentHtml += `<h2 class="text-xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2">${block.text}</h2>`;
+                    contentHtml += `<h2 class="text-xl font-bold text-gray-800 mt-8 mb-4 border-b pb-2">${block.text || ''}</h2>`;
                 } else if (block.type === 'h3') {
-                    contentHtml += `<h3 class="text-lg font-bold text-gray-700 mt-6 mb-3">${block.text}</h3>`;
+                    contentHtml += `<h3 class="text-lg font-bold text-gray-700 mt-6 mb-3">${block.text || ''}</h3>`;
                 } else {
                     let text = block.text || '';
+                    // 处理内部链接 [[...]]
                     text = text.replace(/\[\[(.*?)\]\]/g, '<a href="#" onclick="app.searchAndOpen(\'$1\'); return false;" class="text-indigo-600 hover:underline">$1</a>');
                     contentHtml += `<p class="text-gray-600 leading-relaxed mb-4 break-all">${text}</p>`;
                 }
             });
+        } else {
+            contentHtml += '<p class="text-gray-400 italic">暂无详细内容</p>';
         }
         contentHtml += '</div>';
         
-        // 版本切换
+        // 版本切换（如果有多个版本）
         if (entry.versions.length > 1) {
             contentHtml += `
                 <div class="mt-8 pt-6 border-t border-gray-200">
@@ -1080,7 +1116,7 @@ Object.assign(window.app, {
                 contentHtml += `
                     <button onclick="app.switchToVersion('${entry.id}', '${v.vid}')" 
                         class="px-3 py-1.5 rounded-lg text-sm ${isCurrent ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}">
-                        版本 ${idx + 1}: ${v.title}
+                        版本 ${idx + 1}: ${v.title || '未命名'}
                     </button>
                 `;
             });
@@ -1819,22 +1855,50 @@ Object.assign(window.app, {
     },
 
     // ========== 词条操作 ==========
+    // 【替换 createEntryCard 函数】增强版，支持实时解析和错误处理
     createEntryCard(entry, version) {
         const div = document.createElement('div');
         div.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 active:scale-95 flex flex-col w-3/4 mx-auto';
         div.onclick = () => this.openEntry(entry.id);
         
-        const img = version.images?.card || version.images?.avatar || version.image || '';
-        const hasImage = img && (img.startsWith('data:') || img.startsWith('http'));
+        // 【关键】获取图片URL，并防御性实时解析 {{IMG:...}}
+        let imgUrl = version.images?.card || version.images?.avatar || version.image || '';
+        
+        // 如果仍是 {{IMG:...}} 格式（预解析失效时），实时转换
+        if (typeof imgUrl === 'string' && imgUrl.includes('{{IMG:')) {
+            const match = imgUrl.match(/\{\{IMG:\s*([^}]+)\s*\}\}/);
+            if (match && this.githubStorage?.config?.owner) {
+                const { owner, repo, branch, dataPath } = this.githubStorage.config;
+                const safePath = dataPath || 'wiki-data';
+                imgUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${safePath}/images/${encodeURIComponent(match[1])}`;
+                console.log('[Card] 实时解析图片:', imgUrl);
+            }
+        }
+        
+        // 检查是否为有效HTTP(S)链接
+        const hasImage = typeof imgUrl === 'string' && imgUrl.startsWith('http');
+        
+        // 【新增】构建带调试信息的 img 标签
+        let imgHtml;
+        if (hasImage) {
+            imgHtml = `<img src="${imgUrl}" 
+                class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" 
+                alt="${version.title || entry.code}" 
+                crossorigin="anonymous"
+                loading="lazy"
+                onerror="console.error('[Image Error] 加载失败:', this.src, 'Entry:', '${entry.code}'); 
+                        this.onerror=null; 
+                        this.style.display='none'; 
+                        this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center bg-gray-50 text-gray-300\'><i class=\'fa-solid fa-image text-4xl\'></i></div>';">`;
+        } else {
+            imgHtml = `<div class="w-full h-full flex items-center justify-center text-gray-300"><i class="fa-solid fa-user text-4xl"></i></div>`;
+        }
         
         div.innerHTML = `
             <div class="relative aspect-[3/4] overflow-hidden bg-gray-100 shrink-0">
-                ${hasImage ? 
-                    `<img src="${img}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" alt="${version.title}" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-gray-300\'><i class=\'fa-solid fa-user text-4xl\'></i></div>'">` :
-                    `<div class="w-full h-full flex items-center justify-center text-gray-300"><i class="fa-solid fa-user text-4xl"></i></div>`
-                }
+                ${imgHtml}
                 <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
-                    <div class="text-white font-bold text-sm truncate">${version.title}</div>
+                    <div class="text-white font-bold text-sm truncate">${version.title || '未命名'}</div>
                     <div class="text-white/80 text-xs font-mono truncate">${entry.code}</div>
                 </div>
             </div>
