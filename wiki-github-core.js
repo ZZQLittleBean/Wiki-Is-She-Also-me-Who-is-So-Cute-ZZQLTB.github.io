@@ -1117,7 +1117,17 @@ Object.assign(window.app, {
         // 【新增】重要程度标签样式
         const level = version.level || 5;
         const levelClass = level <= 2 ? 'bg-amber-100 text-amber-700' : (level === 3 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600');
-        
+        // 【关键修复】处理题记换行和HTML转义（与正文保持相同逻辑）
+        let processedSubtitle = '';
+        if (version.subtitle) {
+            processedSubtitle = version.subtitle
+                .replace(/</g, '&lt;')           // 1. 转义HTML防止XSS
+                .replace(/>/g, '&gt;')
+                .replace(/&lt;(b|i|u|br)\s*\/?&gt;/g, '<$1>')  // 2. 恢复允许的格式标签
+                .replace(/&lt;\/(b|i|u)&gt;/g, '</$1>')
+                .replace(/\n/g, '<br>');         // 3. 关键：将换行符转为<br>
+        }
+
         // 渲染内容头部（【修改】添加等级标签）
         let contentHtml = `
             <div class="flex flex-col md:flex-row gap-6 mb-6">
