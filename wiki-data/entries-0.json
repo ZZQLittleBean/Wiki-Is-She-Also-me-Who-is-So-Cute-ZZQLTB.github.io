@@ -1,0 +1,805 @@
+[
+  {
+    "id": "char-xiaoli",
+    "type": "character",
+    "code": "C-001",
+    "camp": "ZZQ小豆同学的主角区间",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-4",
+        "title": "张可云",
+        "subtitle": "“所以，我又是谁呢？”",
+        "image": null,
+        "chapterFrom": "ch-1774186885948-9q0x2",
+        "chapterTo": "ch-1774186885948-mhej7",
+        "blocks": [
+          {
+            "type": "h2",
+            "text": "特殊情况说明"
+          },
+          {
+            "type": "p",
+            "text": "由于世界融合的影响，在⌈茶室⌋的世界数据中目前找不到张可云曾经的，至少是“男生”时的图片，索性就使用现有的版本直接代替了......不过，像那样的图片指向的“他”如今已经在物质层面被视作“压根没有存在过”，就算还有机会找到那样的记录，真的还有意义吗......？"
+          }
+        ],
+        "relatedVersions": [
+          "v-1774543291292"
+        ],
+        "createdAt": 1774001949959,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "relatedCharacters": [
+          {
+            "charId": "char-protagonist",
+            "relationName": "“自己”"
+          }
+        ],
+        "level": 1
+      },
+      {
+        "vid": "v-1774543291292",
+        "title": "张可云",
+        "subtitle": "“被”变成了少女的少女。\n突然多出的“自己”，以及自己如今的这副模样，在外人看来已经与曾经截然不同。\n......接下来的一天、一周、一个月、一年......甚至一辈子，应该怎么办呢？",
+        "level": 1,
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": "ch-1774186885948-aaljk",
+        "chapterTo": "ch-1774543469679",
+        "blocks": [
+          {
+            "type": "h2",
+            "text": "特殊情况说明"
+          },
+          {
+            "type": "p",
+            "text": "由于世界融合的影响，在⌈茶室⌋的世界数据中目前找不到张可云曾经的，至少是“男生”时的图片，索性就使用现有的版本直接代替了......不过，像那样的图片指向的“他”如今已经在物质层面被视作“压根没有存在过”，就算还有机会找到那样的记录，真的还有意义吗......？"
+          }
+        ],
+        "relatedVersions": [
+          "v-4",
+          "v-1774543545298"
+        ],
+        "relatedCharacters": [
+          {
+            "charId": "char-protagonist",
+            "relationName": "“自己”"
+          },
+          {
+            "charId": "char-1774456559847",
+            "relationName": "堂兄妹"
+          },
+          {
+            "charId": "char-1774008119662",
+            "relationName": "好朋友"
+          }
+        ],
+        "createdAt": 1774543291292
+      },
+      {
+        "vid": "v-1774543545298",
+        "title": "张可云",
+        "subtitle": "“被”变成了少女的少女。在⌈试炼⌋中逐渐成为了真正的自己。\n而今，完全拥有“世界之核”的能力与颂颂记忆的她，应该是做好面对未来的准备了吧。",
+        "level": 1,
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": "ch-1774186885948-fbqoj",
+        "chapterTo": null,
+        "blocks": [
+          {
+            "type": "h2",
+            "text": "特殊情况说明"
+          },
+          {
+            "type": "p",
+            "text": "由于世界融合的影响，在⌈茶室⌋的世界数据中目前找不到张可云曾经的，至少是“男生”时的图片，索性就使用现有的版本直接代替了......不过，像那样的图片指向的“他”如今已经在物质层面被视作“压根没有存在过”，就算还有机会找到那样的记录，真的还有意义吗......？"
+          },
+          {
+            "type": "h2",
+            "text": "？？？"
+          },
+          {
+            "type": "p",
+            "text": "▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮\n▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮\n▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮"
+          },
+          {
+            "type": "p",
+            "text": "由于世界融合的影响，在⌈茶室⌋的世界数据中目前找不到张可云曾经的，至少是“男生”时的图片，索性就使用现有的版本直接代替了......不过，像那样的图片指向的“他”如今已经在物质层面被视作“压根没有存在过”，就算还有机会找到那样的记录，真的还有意义吗......？"
+          },
+          {
+            "type": "p",
+            "text": "If you wanna it If you wanna itIf you wanna itIf you wanna itIf you wanna itIf you wanna itIf you wanna itIf you wanna itIf you wanna itIf you wanna itIf you wanna itIf you wanna it"
+          }
+        ],
+        "relatedVersions": [
+          "v-1774543291292"
+        ],
+        "relatedCharacters": [
+          {
+            "charId": "char-protagonist",
+            "relationName": "“自己”"
+          },
+          {
+            "charId": "char-1774026694075-xgyqu152f",
+            "relationName": "“世界”之缔约"
+          },
+          {
+            "charId": "char-1774026694075-u7kq4f8ke",
+            "relationName": "基友"
+          },
+          {
+            "charId": "char-1774008119662",
+            "relationName": "好朋友-挚友"
+          },
+          {
+            "charId": "char-1774026694075-8i2iofwqf",
+            "relationName": "曾经的系统“主仆”"
+          },
+          {
+            "charId": "char-1774456559847",
+            "relationName": "堂......“姐妹”？"
+          },
+          {
+            "charId": "char-1774459740637",
+            "relationName": "“自己”"
+          },
+          {
+            "charId": "char-1774026694075-y6atk7qsi",
+            "relationName": "宠物与主人的关系（？）"
+          },
+          {
+            "charId": "char-1774026694075-pddxgmmb6",
+            "relationName": "基友"
+          },
+          {
+            "charId": "char-1774026694075-x8xop0wzb",
+            "relationName": "母女"
+          },
+          {
+            "charId": "char-1774458852650",
+            "relationName": "“自己”"
+          }
+        ],
+        "createdAt": 1774543545299
+      }
+    ],
+    "pinStartChapter": null,
+    "pinEndChapter": null,
+    "pinnedVersions": {},
+    "missingIntervalVersion": null,
+    "defaultPinnedVersion": null
+  },
+  {
+    "id": "char-protagonist",
+    "type": "character",
+    "code": "C-002",
+    "title": "主角",
+    "camp": "ZZQ小豆同学的主角区间",
+    "versions": [
+      {
+        "vid": "v-default",
+        "title": "张可颂",
+        "subtitle": "“田螺姑娘”的真身原来是No_002世界的张可云，在⌈茶室⌋的帮助下来到了No_001世界。\n在张可云看来，她精通的东西似乎太多了些——烹饪、绘画，还有......魔法？",
+        "chapterFrom": null,
+        "chapterTo": null,
+        "blocks": [
+          {
+            "type": "p",
+            "text": "位置1：{{synopsis:syn-1774191539580-57m1e:1.3 田螺姑娘的真相，没想到是自己干的？！}}\n位置2：{{synopsis:syn-1774191539580-8y14s:2.3 或许，我还是那个你最熟悉的人呢？}}"
+          }
+        ],
+        "relatedVersions": [],
+        "createdAt": 1774001949959,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "image": null,
+        "relatedCharacters": [
+          {
+            "charId": "char-xiaoli",
+            "relationName": "“自己”"
+          }
+        ],
+        "level": 1
+      }
+    ],
+    "pinned": false,
+    "pinStartChapter": null,
+    "pinEndChapter": null,
+    "pinnedVersions": {},
+    "missingIntervalVersion": null,
+    "defaultPinnedVersion": null
+  },
+  {
+    "id": "camp-1774006803815",
+    "type": "non-character",
+    "code": "N-002",
+    "level": 3,
+    "camp": "",
+    "pinned": false,
+    "isCampEntry": true,
+    "versions": [
+      {
+        "vid": "v-default",
+        "title": "访客组",
+        "subtitle": "外来的客人千奇百怪。但能放在这个组的，也许并非匆匆过客，或许是内心的一汪涟漪，又或许是......美好“奇迹”的一部分？",
+        "image": null,
+        "chapterFrom": null,
+        "chapterTo": null,
+        "blocks": [
+          {
+            "type": "h2",
+            "text": "简介"
+          },
+          {
+            "type": "p",
+            "text": "这是访客组的详细介绍。"
+          }
+        ],
+        "relatedVersions": [],
+        "createdAt": 1774006803815,
+        "images": {
+          "avatar": "{{IMG:camp-1774006803815_v-default_avatar.jpg}}",
+          "card": "{{IMG:camp-1774006803815_v-default_card.jpg}}",
+          "cover": "{{IMG:camp-1774006803815_v-default_cover.jpg}}"
+        },
+        "level": 2
+      }
+    ],
+    "settingType": "world"
+  },
+  {
+    "id": "char-1774006823382",
+    "type": "character",
+    "code": "C-003",
+    "camp": "访客组",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774006823382",
+        "title": "向鸿鸿",
+        "subtitle": "一位裁缝、一位大厨、一位“父亲”……\n一位“外派的魔法少女”，一些绕不开剪不断的过去。\n她在后悔……她在思索。\n至少现在——她又有希望了。",
+        "image": null,
+        "chapterFrom": "ch-1774186885948-e7kbk",
+        "chapterTo": null,
+        "blocks": [
+          {
+            "type": "h2",
+            "text": "基本信息"
+          },
+          {
+            "type": "h3",
+            "text": "姓名"
+          },
+          {
+            "type": "p",
+            "text": "向鸿鸿"
+          },
+          {
+            "type": "h3",
+            "text": "性别"
+          },
+          {
+            "type": "p",
+            "text": "女"
+          },
+          {
+            "type": "h3",
+            "text": "个人履历"
+          },
+          {
+            "type": "p",
+            "text": "按向鸿鸿小姐的说法，她既是一位裁缝，又是一个厨师，还有营养师、心理诊疗师，甚至还得带上个见习园艺师……相关的证明齐全到位没有任何质疑空间，但唯一的问题是，一些证明似乎有些年头了，尤其是“裁缝”的最初证明是一张看上去就很老旧的营业资格证书，貌似已经有半个世纪的岁数了。\n向鸿鸿小姐对只因货栈的大家而言，再清楚不过的身份其实是向日葵的……“父亲”？这一点在向日葵……或者说“曾经”的向日葵那儿得到了证实。最初的曦芷得知这一消息似乎尤为亢奋，后来才知晓曦芷的第一反应是联想到了某种叫作“TS”的小众文化，大概是什么……“性别转换”之类的东西。但在后来向鸿鸿小姐汗颜澄清“自己从小到大其实都是女孩子”后，曦芷又莫名冒出些不乐意了。\n至少，向鸿鸿小姐是个完全的蓝星人甚至是炎国人，而在档案部门老学究们的努力寻找下，一份大约50年代她曾经作为“外使魔女”外派到异世界文明星团732c星球的绝密档案被发掘出来。\n“外使魔女”放到现在其实就是魔法少女相关的外使工作，而巧合的是向鸿鸿小姐确有某种“魔女”的血脉且传承给了向日葵。“魔女”的血脉已无确切根源，而照向鸿鸿所说，这种血脉原本平平无奇，却在732c星球某种事物的催化下出现了特殊的效果，譬如她似乎很“长寿”的事实，以及向日葵的诞生——不过考虑到如今的向日葵有向朝阳这样一个真正的父亲背景，某些后续的研究还是得基于此作进一步的厘清。\n"
+          },
+          {
+            "type": "h3",
+            "text": "身高/体重"
+          },
+          {
+            "type": "p",
+            "text": "155cm/47.8kg"
+          },
+          {
+            "type": "h3",
+            "text": "三围"
+          },
+          {
+            "type": "p",
+            "text": "85.2/58.4/84.7\n似乎就是比“平均值”好上一点，即使曦芷在此之前对她的身体数据确实充满期待，可事实就是如此——并不是什么特别出众的数值，曦芷可以打消某些不好的念头了。\n不过据她本人所言，某些“可能让曦芷小姐产生误会”的因素，或许是出自她自己设计的这款像是风衣的常服——干练但又不失活泼，专业却又不至于给人一种陌生的感觉，甚至还有些凸显身材的附加功能。毕竟作为一位裁缝，她自然是对这种能够把女孩子最美好部分展现出来的课题相当熟练了。\n"
+          },
+          {
+            "type": "h2",
+            "text": "详细记录"
+          },
+          {
+            "type": "h3",
+            "text": "记录其一"
+          },
+          {
+            "type": "p",
+            "text": "记录员准时来到访谈室时，曦芷便已经与向鸿鸿聊上，甚至已经有一个重要话题告一段落。随着记录员的追问，曦芷这才有些失落却又羞涩（明显是对向鸿鸿）地说明，她今天刚与向鸿鸿小姐见面便忍不住询问了她貌似产生了巨变的身体特征——当初在葫芦洞时那嫩绿的发色为何现在几乎褪去，成了现在和向日葵几乎毫无二致的茶白色——而且，她那神似向日葵的金黄色眼瞳也有些晕色，似乎朝着紫红色的方向发展……这正与向鸿鸿遇到的一位关键人物，“阿丽娜”相关。\n“阿丽娜，732c星球的特殊魔法个体，与‘植物’相关法术具有极佳亲和度。”再三追问之下只得到了这么多信息，记录员只得战战兢兢地誊抄在本子上。\n不过两人的聊天也没有结束，在之后的访谈过程中记录员也大致明白了事情经过：至少向鸿鸿前往732c星球的缘由便是源自20世纪50年代，在K市周围产生的“世界联络非常现象”所产生的时空重叠，当时的名头好像叫……“外驻术使”来着。\n至于那个年代怎么会有那样的部门，甚至向鸿鸿为何在此之前便取得了葡萄星学园的学位证书，还是与当今葡萄星学园头号长寿魔女名师丝萝珥同一届的学位，曦芷警告这与某些跨时空相关的部门业务紧密相连，不应该再深入追问甚至记入档案，但私下聊聊应该还是在可接受范围之内的。\n回归正题，在找到关键窗口期从时空重叠点进入732c星球的向鸿鸿惊讶地发现当地无论气候、文化均与欧洲中世纪时期类似，且具有如今标准下极为罕见的高魔能环境，这意味着一个幻想中的“典型魔法世界”在732c星球上存续至今。由于当时技术有限，只身一人到达的向鸿鸿发现重叠点已然消失，而在最终为了回归蓝星，向鸿鸿只得借助了732c……以及，“阿丽娜”的力量。\n据向鸿鸿所说，原先绿发、黄瞳的特征正是缘自阿丽娜。在她孤立无援之时，正是这个自称“野木灵”魔法师的少女将她带往农庄照料，向鸿鸿这才存活下来。而为了报答，向鸿鸿借助自己曾经学习的裁缝技能到处为他人补衣，而两人便在长期的生活中逐渐产生了默契、友情，甚至一些……“超越友情”的特殊感情。\n“野木灵族与魔女血脉的相容性极佳，这也催生了阿丽娜想与我培育‘下一代’的想法。”说到这儿，向鸿鸿不禁脸红起来，“至于我为什么最后成了‘父亲’，也是因为生育的过程主要还是阿丽娜负责，到我这里也必须承担起父亲的职责啦。至于向日葵为什么姓‘向’——说好的‘随父姓’，其实就是我带过去的文化习惯导致的啦～”"
+          },
+          {
+            "type": "h3",
+            "text": "记录其二"
+          },
+          {
+            "type": "p",
+            "text": "“关于阿丽娜的事情，我感到很遗憾。”话语正处伤心时，曦芷轻声宽慰道。\n目前藏于葡萄星图书馆的，原先与732c的魔女向日葵相关的记录中就已经记载过暴民借除魔女的借口刺杀向日葵的情况了。就在当时，远在穷村僻壤的向鸿鸿与阿丽娜也备受波及。而为了保护阿丽娜——不如说是阿丽娜为了保护向鸿鸿，便以牺牲自己为代价成为了一颗陪伴向鸿鸿的“种子”。\n随后，近70年的时间里（但实际时间的流动与蓝星不同，在732c可能已经过去了将近230年）向鸿鸿辗转732c各地，直至极北——在那里，她意外获得了一个法子，能够同时让阿丽娜“复活”，让自己也能回归蓝星——将种子的力量与自身的血脉以特殊的手段相容，便能凭空生成折跃窗，且将种子激活。而代价便是，阿丽娜的一切——包括外在与记忆，会与向鸿鸿自己交杂、缠绕，她也在这样的情况下出现了一定时间的精神失常——而为了尽量不引起他人注意，她便把目光投在原先重叠点附近“葫芦洞”的瀑流之下：不仅为了自己，也是为了阿丽娜。\n直到近十年，精神失常的症状才得以缓解——在此期间，为了谋生以及适应时代，她学习了裁缝以外的技能——这也是前面所说的那些证明的由来。\n“向日葵一直在强调她的做饭手艺有多么出色，不过现在看来……向鸿鸿的其他东西更让人着迷呢。……要是我也能白嫖一套向鸿鸿定制的衣服就好啦。”——曦芷\n“禁止以录档案访谈为由让访客做些为难的事情。”——翎\n"
+          },
+          {
+            "type": "h3",
+            "text": "记录其三"
+          },
+          {
+            "type": "p",
+            "text": "我还能回忆起那段时光。\n多么安逸、快乐与充实。\n我还能回忆起那场怒火……\n多么炙热、痛苦……以及悔恨。\n我似乎成了孤魂野鬼。只有你……愿意在我身边。\n不过还好。现在我找回她了。\n我也很快要找回你了呢……\n"
+          }
+        ],
+        "relatedVersions": [],
+        "createdAt": 1774006823382,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "level": 2
+      }
+    ],
+    "pinStartChapter": null,
+    "pinEndChapter": null,
+    "pinnedVersions": {},
+    "missingIntervalVersion": null,
+    "defaultPinnedVersion": null
+  },
+  {
+    "id": "char-1774008119662",
+    "type": "character",
+    "code": "C-004",
+    "camp": "ZZQ小豆同学的主角区间",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774008119662",
+        "title": "向松松",
+        "subtitle": "二班的“捣乱”代表，备受大家排挤与取笑的家伙，却又对张可云有莫名的亲和感——或许这便是她首先把自己的秘密告诉他的最直接原因。\n不过照他这个脾气，总觉得下一秒就要出事了......",
+        "image": null,
+        "chapterFrom": "ch-1774186885948-t51s2",
+        "chapterTo": "ch-1774186885948-fbqoj",
+        "blocks": [],
+        "relatedVersions": [
+          "v-1774344674149"
+        ],
+        "createdAt": 1774008119662,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "relatedCharacters": [],
+        "level": 2
+      },
+      {
+        "vid": "v-1774344674149",
+        "title": "向松松",
+        "subtitle": "二班的“捣乱”代表，备受大家排挤与取笑的家伙。\n......不过，出事的好像是自己来着。\n除了张可云......还有曦芷......还有老爸和老妈！他不想让更多的人知道“向日葵”其实就是他自己的秘密了。\n呃，向松松想一个人静静。",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": "ch-1774186885948-asmjg",
+        "chapterTo": "ch-1774344830513",
+        "blocks": [],
+        "relatedVersions": [
+          "v-1774008119662",
+          "v-1774344684185"
+        ],
+        "relatedCharacters": [],
+        "createdAt": 1774344674149,
+        "level": 2
+      },
+      {
+        "vid": "v-1774344684185",
+        "title": "向日葵",
+        "subtitle": "K市的新晋魔法少女。\n在“异兽”与“只因货栈”之前，魔法少女似乎也不算是真正存在的——向松松也是那么想的。\n但现在，他......她不得不相信了。",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": "ch-1774186885948-asmjg",
+        "chapterTo": "ch-1774344830513",
+        "blocks": [],
+        "relatedVersions": [
+          "v-1774344674149",
+          "v-1774344686388"
+        ],
+        "relatedCharacters": [
+          {
+            "charId": "char-1774006823382",
+            "relationName": "“父”女"
+          }
+        ],
+        "createdAt": 1774344684185,
+        "level": 1
+      },
+      {
+        "vid": "v-1774344686388",
+        "title": "向松松，“向日葵”",
+        "subtitle": "在你的选择和“向日葵”的选择下，你最终接纳了这副模样......对吗？",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": "ch-1774186885948-7trsu",
+        "chapterTo": null,
+        "blocks": [
+          {
+            "type": "h2",
+            "text": "角色概述"
+          },
+          {
+            "type": "p",
+            "text": "在“世界融合”的作用下，原先的向松松终于不复存在，变成了如今这般少女的模样：常态除了黑发几乎与那个“向日葵”别无二致，当然好像也显得更......可爱了？\n当然，这似乎带来了意外之喜：没有人来找她取笑了，能量的溢出也不会让她强制变身了，还有......\n那段梦魇，叫做“脑炎”的深层梦魇，此刻也不翼而飞。"
+          }
+        ],
+        "relatedVersions": [
+          "v-1774344684185"
+        ],
+        "relatedCharacters": [
+          {
+            "charId": "char-1774006823382",
+            "relationName": "“父”女（？）"
+          },
+          {
+            "charId": "char-xiaoli",
+            "relationName": "挚友"
+          },
+          {
+            "charId": "char-protagonist",
+            "relationName": "逐渐重建的挚友"
+          },
+          {
+            "charId": "char-1774456559847",
+            "relationName": "曾经的基友"
+          }
+        ],
+        "createdAt": 1774344686388,
+        "level": 1
+      }
+    ],
+    "pinStartChapter": null,
+    "pinEndChapter": null,
+    "pinnedVersions": {
+      "ch-1774186885948-asmjg": "v-1774344684185"
+    },
+    "missingIntervalVersion": null,
+    "defaultPinnedVersion": null
+  },
+  {
+    "id": "char-1774026694075-u7kq4f8ke",
+    "type": "character",
+    "code": "C-007",
+    "camp": "同学组A",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-q7qxdep80",
+        "title": "徐晓乌",
+        "subtitle": "最早知晓张可云变化的朋友。自初中时开始两人的关系似乎一直很好，日常大大咧咧，每当谈及他最喜欢的车时，他又能在严肃中滔滔不绝。",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": "ch-1774186885948-o6muc",
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
+        "relatedCharacters": [
+          {
+            "charId": "char-xiaoli",
+            "relationName": "基友"
+          },
+          {
+            "charId": "char-1774008119662",
+            "relationName": "曾经的基友"
+          }
+        ],
+        "createdAt": 1774026694075,
+        "level": 2
+      }
+    ],
+    "pinStartChapter": null,
+    "pinEndChapter": null,
+    "pinnedVersions": {},
+    "missingIntervalVersion": null,
+    "defaultPinnedVersion": null
+  },
+  {
+    "id": "char-1774026694075-pddxgmmb6",
+    "type": "character",
+    "code": "C-008",
+    "camp": "同学组A",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-h3ck67fwo",
+        "title": "解顶",
+        "subtitle": "",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": "ch-1774186885948-o6muc",
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
+        "relatedCharacters": [],
+        "createdAt": 1774026694075,
+        "level": 3
+      }
+    ],
+    "pinStartChapter": null,
+    "pinEndChapter": null,
+    "pinnedVersions": {},
+    "missingIntervalVersion": null,
+    "defaultPinnedVersion": null
+  },
+  {
+    "id": "char-1774026694075-bd758umqs",
+    "type": "character",
+    "code": "C-009",
+    "camp": "同学组A",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-pdzwfsfdv",
+        "title": "王磁炮",
+        "subtitle": "",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": "ch-1774186885948-o6muc",
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
+        "relatedCharacters": [],
+        "createdAt": 1774026694075,
+        "level": 3
+      }
+    ],
+    "pinStartChapter": null,
+    "pinEndChapter": null,
+    "pinnedVersions": {},
+    "missingIntervalVersion": null,
+    "defaultPinnedVersion": null
+  },
+  {
+    "id": "char-1774026694075-x8xop0wzb",
+    "type": "character",
+    "code": "C-010",
+    "level": 5,
+    "camp": "",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-8maosavpn",
+        "title": "葛茗茗",
+        "subtitle": "",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": null,
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
+        "relatedCharacters": [],
+        "createdAt": 1774026694075
+      }
+    ]
+  },
+  {
+    "id": "char-1774026694075-7bjnusb2d",
+    "type": "character",
+    "code": "C-011",
+    "level": 5,
+    "camp": "",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-gwai28x6z",
+        "title": "葛荧荧",
+        "subtitle": "",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": null,
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
+        "relatedCharacters": [],
+        "createdAt": 1774026694075
+      }
+    ]
+  },
+  {
+    "id": "char-1774026694075-h2nh765en",
+    "type": "character",
+    "code": "C-012",
+    "level": 5,
+    "camp": "",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-u7a9xkygj",
+        "title": "葛苧苧",
+        "subtitle": "",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": null,
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
+        "relatedCharacters": [],
+        "createdAt": 1774026694075
+      }
+    ]
+  },
+  {
+    "id": "char-1774026694075-5abfiv77y",
+    "type": "character",
+    "code": "C-013",
+    "level": 5,
+    "camp": "",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-lgrv55egz",
+        "title": "Prizh",
+        "subtitle": "",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": null,
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
+        "relatedCharacters": [],
+        "createdAt": 1774026694075
+      }
+    ]
+  },
+  {
+    "id": "char-1774026694075-xgyqu152f",
+    "type": "character",
+    "code": "C-014",
+    "camp": "",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-087rwec5e",
+        "title": "微光",
+        "subtitle": "世界的至高存在，或者说是“本源”。\n由于张可云这个“世界之核”的存在，她貌似更愿意成为这“国际象棋”棋盘上的“皇后”。\n当然，她或许也挺喜欢以一个普通人的形象观察这个世界？",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": "ch-1774186885948-fbqoj",
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
+        "relatedCharacters": [
+          {
+            "charId": "char-1774026694075-wyzxy3xpt",
+            "relationName": "“命定的师徒”"
+          },
+          {
+            "charId": "char-xiaoli",
+            "relationName": "“世界”之缔约"
+          }
+        ],
+        "createdAt": 1774026694075,
+        "level": 2
+      }
+    ],
+    "pinStartChapter": null,
+    "pinEndChapter": null,
+    "pinnedVersions": {},
+    "missingIntervalVersion": null,
+    "defaultPinnedVersion": null
+  },
+  {
+    "id": "char-1774026694075-8gq06dj20",
+    "type": "character",
+    "code": "C-015",
+    "level": 5,
+    "camp": "",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-3flvwobbk",
+        "title": "塞坦",
+        "subtitle": "",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": null,
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
+        "relatedCharacters": [],
+        "createdAt": 1774026694075
+      }
+    ]
+  },
+  {
+    "id": "char-1774026694075-y6atk7qsi",
+    "type": "character",
+    "code": "C-016",
+    "level": 5,
+    "camp": "",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-r771wtfak",
+        "title": "汤圆",
+        "subtitle": "",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": null,
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
+        "relatedCharacters": [],
+        "createdAt": 1774026694075
+      }
+    ]
+  }
+]
