@@ -1398,47 +1398,81 @@ Object.assign(window.app, {
                 // 构建图片HTML（如果有）
                 let imageHtml = '';
                 if (chapter.image && chapter.image.startsWith('http')) {
-                    imageHtml = `
-                        <div class="mb-4 rounded-xl overflow-hidden shadow-md">
-                            <img src="${chapter.image}" class="w-full max-h-64 object-cover" alt="${chapter.title}" onerror="this.style.display='none'">
-                        </div>
-                    `;
+                    imageHtml = '<div class="mb-4 rounded-xl overflow-hidden shadow-md">' +
+                        '<img src="' + chapter.image + '" class="w-full max-h-64 object-cover" alt="' + (chapter.title || '') + '" onerror="this.style.display=\'none\'">' +
+                    '</div>';
                 }
                 
                 // 内容处理：支持@姓名[编号]格式和换行
                 let content = chapter.content || '';
                 
-                // 【关键修正】使用正确的正则表达式匹配 @姓名[编号]
-                // 注意：在字符类 [^\[\]] 中，方括号需要转义
-                content = content.replace(/@([^\[\]]+)\[([A-Z]-\d{3})\]/g, function(match, name, code) {
-                    const entry = window.app.data.entries.find(e => e.code === code);
-                    if (entry) {
-                        return '<span class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2 py-1 rounded-md text-sm font-medium cursor-pointer hover:bg-indigo-100 transition border border-indigo-100" onclick="window.app.openEntry(\'' + entry.id + '\')">' +
-                            '<i class="fa-solid fa-user text-xs text-indigo-500"></i>' +
-                            '<span class="font-semibold">' + name + '</span>' +
-                            '<span class="text-indigo-400 text-xs font-mono bg-white/50 px-1 rounded">' + code + '</span>' +
-                        '</span>';
+                // 【关键】使用纯字符串操作代替正则，彻底避免语法错误
+                let result = '';
+                let i = 0;
+                while (i < content.length) {
+                    const atIndex = content.indexOf('@', i);
+                    if (atIndex === -1) {
+                        result += content.substring(i);
+                        break;
                     }
-                    return match;
-                });
+                    
+                    // 添加@之前的文本
+                    result += content.substring(i, atIndex);
+                    
+                    // 查找[和]
+                    const bracketOpen = content.indexOf('[', atIndex);
+                    const bracketClose = content.indexOf(']', atIndex);
+                    
+                    // 验证格式：@姓名[C-001]
+                    if (bracketOpen > atIndex && bracketClose > bracketOpen) {
+                        const name = content.substring(atIndex + 1, bracketOpen);
+                        const code = content.substring(bracketOpen + 1, bracketClose);
+                        
+                        // 验证编号格式（如C-001, N-002）
+                        const isValidCode = code.length === 5 && 
+                                        code.charAt(1) === '-' && 
+                                        code.charAt(0) >= 'A' && code.charAt(0) <= 'Z' &&
+                                        !isNaN(code.substr(2));
+                        
+                        if (isValidCode) {
+                            const entry = this.data.entries.find(e => e.code === code);
+                            if (entry) {
+                                // 匹配成功，生成标签
+                                result += '<span class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2 py-1 rounded-md text-sm font-medium cursor-pointer hover:bg-indigo-100 transition border border-indigo-100" onclick="app.openEntry(\'' + entry.id + '\')">' +
+                                    '<i class="fa-solid fa-user text-xs text-indigo-500"></i>' +
+                                    '<span class="font-semibold">' + name + '</span>' +
+                                    '<span class="text-indigo-400 text-xs font-mono bg-white/50 px-1 rounded">' + code + '</span>' +
+                                '</span>';
+                                i = bracketClose + 1;
+                                continue;
+                            }
+                        }
+                    }
+                    
+                    // 不匹配，保留@并继续搜索
+                    result += '@';
+                    i = atIndex + 1;
+                }
+                content = result;
                 
-                // 处理换行符
-                content = content.replace(/\n/g, '<br>');
+                // 处理换行符（不使用正则）
+                content = content.split('\n').join('<br>');
                 
-                // 支持基础HTML格式
-                content = content.replace(/&lt;(b|i|u|br)\s*\/?&gt;/g, '<$1>');
-                content = content.replace(/&lt;\/(b|i|u)&gt;/g, '</$1>');
+                // 支持基础HTML格式（使用 split/join 代替正则）
+                content = content.split('&lt;b&gt;').join('<b>').split('&lt;/b&gt;').join('</b>');
+                content = content.split('&lt;i&gt;').join('<i>').split('&lt;/i&gt;').join('</i>');
+                content = content.split('&lt;u&gt;').join('<u>').split('&lt;/u&gt;').join('</u>');
+                content = content.split('&lt;br&gt;').join('<br>').split('&lt;br /&gt;').join('<br>');
                 
-                item.innerHTML = `
-                    <h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
-                        <span class="bg-indigo-600 text-white text-sm px-2 py-1 rounded-md font-mono">${this.formatChapterNum(chapter.num)}</span>
-                        <span>${chapter.title || '第' + chapter.num + '章'}</span>
-                    </h3>
-                    ${imageHtml}
-                    <div class="prose prose-sm max-w-none text-gray-600 leading-relaxed">
-                        ${content ? content : '<p class="text-gray-400 italic">暂无内容</p>'}
-                    </div>
-                `;
+                item.innerHTML = 
+                    '<h3 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">' +
+                        '<span class="bg-indigo-600 text-white text-sm px-2 py-1 rounded-md font-mono">' + this.formatChapterNum(chapter.num) + '</span>' +
+                        '<span>' + (chapter.title || '第' + chapter.num + '章') + '</span>' +
+                    '</h3>' +
+                    imageHtml +
+                    '<div class="prose prose-sm max-w-none text-gray-600 leading-relaxed">' +
+                        (content || '<p class="text-gray-400 italic">暂无内容</p>') +
+                    '</div>';
                 list.appendChild(item);
             });
         }
