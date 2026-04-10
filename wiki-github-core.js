@@ -472,86 +472,71 @@ Object.assign(window.app, {
         });
     },
 
-    // 【长期防护 V2】增强版引用解析，自动容错各种截断
+    // 【最终版】图片引用解析 - 自动容错截断和格式错误
     resolveImageReferences() {
-        if (!this.githubStorage?.config?.owner || !this.data?.entries) return;
+        if (!this.githubStorage?.config?.owner || !this.data?.entries) {
+            console.warn('[Resolve] 无配置或数据，跳过');
+            return;
+        }
         
         const { owner, repo, branch, dataPath } = this.githubStorage.config;
-        const base = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${dataPath || 'wiki-data'}/images/`;
-        let stats = { resolved: 0, fixed: 0, errors: [] };
+        const baseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${dataPath || 'wiki-data'}/images/`;
+        
+        let resolved = 0, truncated = 0;
 
-        this.data.entries.forEach((e, ei) => {
-            e.versions?.forEach((v, vi) => {
-                if (!v.images) v.images = {};
+        this.data.entries.forEach(entry => {
+            if (!entry.versions) return;
+            
+            entry.versions.forEach(v => {
+                // 确保 images 对象存在
+                if (!v.images || typeof v.images !== 'object') {
+                    v.images = { avatar: null, card: null, cover: null };
+                }
                 
                 ['avatar', 'card', 'cover'].forEach(type => {
                     let val = v.images[type];
                     if (!val || typeof val !== 'string') return;
                     
-                    // 防御性复制
-                    let original = val;
-                    
-                    // 第1层：处理已解析的URL（以 .jp 结尾但未完成）
+                    // 场景1: 已是完整 URL，跳过
                     if (val.startsWith('http')) {
-                        // 检测并修复 URL 中的截断
+                        // 但检查是否截断（.jp 结尾）
                         if (val.endsWith('.jp') && !val.endsWith('.jpg')) {
-                            val = val + 'g';
-                            stats.fixed++;
-                            console.warn(`[AutoFix] 条目[${ei}] ${e.code} URL截断修复: .jp -> .jpg`);
+                            v.images[type] = val + 'g';
+                            truncated++;
+                            console.warn(`[Resolve] 修复截断: ${entry.code}.${type}`);
                         }
-                        // 其他常见截断
-                        val = val.replace(/\.jpeg$/g, '.jpg').replace(/\.jpe$/g, '.jpg');
+                        return;
                     }
-                    // 第2层：处理 {{IMG:...}} 格式内的截断
-                    else if (val.includes('{{IMG:')) {
-                        // 提取文件名并修复截断
-                        val = val.replace(/\{\{IMG:\s*([^\}]+?)(\.jp|\.jpe|\.pn)(g?)\}\}/g, (match, p1, p2, p3) => {
-                            if (!p3) { // p3 是空的，说明缺少 g
-                                stats.fixed++;
-                                return `{{IMG:${p1}${p2}g}}`;
-                            }
-                            return match;
-                        });
-                        
-                        // 解析为完整 URL
-                        const match = val.match(/\{\{IMG:\s*([^\}]+)\s*\}\}/);
+                    
+                    // 场景2: 解析 {{IMG:filename}} 格式
+                    if (val.includes('{{IMG:')) {
+                        const match = val.match(/\{\{IMG:\s*([^}]+)\s*\}\}/);
                         if (match && match[1]) {
                             let filename = match[1].trim();
-                            // 最终检查文件名完整性
-                            if (!filename.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-                                // 无扩展名或异常，尝试补全 jpg
-                                if (filename.match(/\.jp$/i)) filename += 'g';
-                                stats.errors.push({entry: e.code, type, filename});
-                            }
-                            val = base + encodeURIComponent(filename);
-                            stats.resolved++;
+                            
+                            // 自动修复截断的扩展名
+                            if (filename.endsWith('.jp')) filename += 'g';
+                            if (filename.endsWith('.jpe')) filename += 'g';
+                            if (filename.endsWith('.pn')) filename += 'g';
+                            
+                            v.images[type] = baseUrl + encodeURIComponent(filename);
+                            resolved++;
                         }
-                    }
-                    
-                    if (val !== original) {
-                        v.images[type] = val;
                     }
                 });
                 
-                // 同步旧版字段（同样检查截断）
-                let img = v.images?.card || v.images?.avatar || v.images?.cover;
-                if (img && typeof img === 'string' && img.endsWith('.jp') && !img.endsWith('.jpg')) {
-                    img = img + 'g';
-                    v.images.card = v.images.card?.endsWith('.jp') ? v.images.card + 'g' : v.images.card;
-                }
-                v.image = img || v.image;
+                // 同步旧版 image 字段（确保详情页能显示）
+                v.image = v.images?.card || v.images?.avatar || v.images?.cover || v.image;
             });
         });
 
-        console.log(`[Resolve] 完成: ${stats.resolved} 个已解析, ${stats.fixed} 个截断已修复`);
+        console.log(`[Resolve] 完成: ${resolved} 个已解析, ${truncated} 个截断已修复`);
         
-        // 如果有修复，自动刷新视图
-        if (stats.fixed > 0) {
-            this.showToast(`已自动修复 ${stats.fixed} 个图片链接截断`, 'warning');
-            setTimeout(() => this.router(this.data.currentTarget || 'home', false), 100);
+        // 如有修复，刷新当前视图
+        if (resolved > 0 || truncated > 0) {
+            const current = this.data.currentTarget || 'home';
+            setTimeout(() => this.router(current, false), 100);
         }
-        
-        return stats;
     },
         // 【长期防护】保存前强制校验，确保所有图片引用格式正确
     validateAndFixData() {
@@ -1070,7 +1055,7 @@ Object.assign(window.app, {
         container.appendChild(clone);
     },
 
-    // 【完整替换】renderDetail 函数 - 修复图片显示问题
+    // 【完整替换】renderDetail 函数 - 最终修复版
     renderDetail(container) {
         const entry = this.data.entries.find(e => e.id === this.data.editingId);
         if (!entry) {
@@ -1106,25 +1091,42 @@ Object.assign(window.app, {
             baseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${safeDataPath}/images/`;
         }
         
-        // 【关键修复】防御性获取并解析图片 URL
+        // 【关键修复】防御性获取并实时解析图片 URL
         let imgUrl = '';
         const rawImg = version.images?.card || version.images?.avatar || version.image || '';
         
         if (typeof rawImg === 'string') {
+            // 场景1: 已是完整 URL
             if (rawImg.startsWith('http')) {
-                // 已经是完整 URL，直接使用
                 imgUrl = rawImg;
-            } else if (rawImg.includes('{{IMG:')) {
-                // 需要实时解析 {{IMG:filename}} 格式
+            }
+            // 场景2: 需要解析 {{IMG:filename}} 格式
+            else if (rawImg.includes('{{IMG:')) {
                 const match = rawImg.match(/\{\{IMG:\s*([^}]+)\s*\}\}/);
                 if (match && match[1]) {
-                    imgUrl = baseUrl + encodeURIComponent(match[1]);
-                    console.log(`[Detail] 实时解析图片: ${entry.code} -> ${imgUrl}`);
+                    let filename = match[1].trim();
+                    
+                    // 【长期防护】自动修复截断的扩展名
+                    if (filename.endsWith('.jp') && !filename.endsWith('.jpg')) {
+                        filename += 'g';
+                        console.warn(`[Detail] 修复截断: ${entry.code} .jp -> .jpg`);
+                    }
+                    if (filename.endsWith('.jpe')) filename += 'g';
+                    if (filename.endsWith('.pn')) filename += 'g';
+                    
+                    imgUrl = baseUrl + encodeURIComponent(filename);
+                    console.log(`[Detail] 实时解析: ${entry.code} -> ${filename}`);
                 }
             }
         }
         
-        // 渲染内容
+        // 【长期防护】最终检查：如果 URL 以 .jp 结尾（解析后截断），强制补全
+        if (imgUrl && imgUrl.endsWith('.jp') && !imgUrl.endsWith('.jpg')) {
+            imgUrl = imgUrl + 'g';
+            console.warn(`[Detail] 修复 URL 截断: ${entry.code}`);
+        }
+        
+        // 渲染内容头部
         let contentHtml = `
             <div class="flex flex-col md:flex-row gap-6 mb-6">
                 <div class="flex-1">
@@ -1133,7 +1135,7 @@ Object.assign(window.app, {
                 </div>
         `;
         
-        // 【关键修复】只有获取到有效 HTTP URL 才显示图片
+        // 【关键修复】只有获取到有效 HTTP URL 才显示图片，并添加错误处理
         if (imgUrl && imgUrl.startsWith('http')) {
             contentHtml += `
                 <div class="w-48 shrink-0">
@@ -1142,7 +1144,7 @@ Object.assign(window.app, {
                             class="w-full h-full object-cover" 
                             alt="${version.title || entry.code}" 
                             crossorigin="anonymous"
-                            onerror="console.error('[Detail Image Error] 加载失败:', '${imgUrl}', '条目:', '${entry.code}'); 
+                            onerror="console.error('[Detail Image Error] 加载失败:', this.src, '条目:', '${entry.code}'); 
                                     this.onerror=null; 
                                     this.style.display='none'; 
                                     this.parentElement.innerHTML='<div class=\'flex flex-col items-center justify-center w-full h-full bg-gray-50 text-gray-400\'><i class=\'fa-solid fa-image text-4xl mb-2\'></i><span class=\'text-xs\'>图片加载失败</span></div>';">
@@ -1931,47 +1933,35 @@ Object.assign(window.app, {
 
     // ========== 词条操作 ==========
     // 【替换 createEntryCard 函数】增强版，支持实时解析和错误处理
-    createEntryCard(entry, version) {
+        createEntryCard(entry, version) {
         const div = document.createElement('div');
         div.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 active:scale-95 flex flex-col w-3/4 mx-auto';
         div.onclick = () => this.openEntry(entry.id);
         
-        // 【关键】获取图片URL，并防御性实时解析 {{IMG:...}}
+        // 【关键】实时获取并解析图片 URL（防御性）
         let imgUrl = version.images?.card || version.images?.avatar || version.image || '';
         
-        // 如果仍是 {{IMG:...}} 格式（预解析失效时），实时转换
+        // 如果仍是 {{IMG:...}} 格式（预解析失效），实时转换
         if (typeof imgUrl === 'string' && imgUrl.includes('{{IMG:')) {
             const match = imgUrl.match(/\{\{IMG:\s*([^}]+)\s*\}\}/);
             if (match && this.githubStorage?.config?.owner) {
                 const { owner, repo, branch, dataPath } = this.githubStorage.config;
-                const safePath = dataPath || 'wiki-data';
-                imgUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${safePath}/images/${encodeURIComponent(match[1])}`;
-                console.log('[Card] 实时解析图片:', imgUrl);
+                imgUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${dataPath || 'wiki-data'}/images/${encodeURIComponent(match[1])}`;
             }
         }
         
-        // 检查是否为有效HTTP(S)链接
+        // 检查是否为有效 HTTP 链接
         const hasImage = typeof imgUrl === 'string' && imgUrl.startsWith('http');
-        
-        // 【新增】构建带调试信息的 img 标签
-        let imgHtml;
-        if (hasImage) {
-            imgHtml = `<img src="${imgUrl}" 
-                class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" 
-                alt="${version.title || entry.code}" 
-                crossorigin="anonymous"
-                loading="lazy"
-                onerror="console.error('[Image Error] 加载失败:', this.src, 'Entry:', '${entry.code}'); 
-                        this.onerror=null; 
-                        this.style.display='none'; 
-                        this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center bg-gray-50 text-gray-300\'><i class=\'fa-solid fa-image text-4xl\'></i></div>';">`;
-        } else {
-            imgHtml = `<div class="w-full h-full flex items-center justify-center text-gray-300"><i class="fa-solid fa-user text-4xl"></i></div>`;
-        }
         
         div.innerHTML = `
             <div class="relative aspect-[3/4] overflow-hidden bg-gray-100 shrink-0">
-                ${imgHtml}
+                ${hasImage ? 
+                    `<img src="${imgUrl}" 
+                        class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" 
+                        alt="${version.title || entry.code}"
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-gray-300\'><i class=\'fa-solid fa-image text-4xl\'></i></div>'">` :
+                    `<div class="w-full h-full flex items-center justify-center text-gray-300"><i class="fa-solid fa-user text-4xl"></i></div>`
+                }
                 <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
                     <div class="text-white font-bold text-sm truncate">${version.title || '未命名'}</div>
                     <div class="text-white/80 text-xs font-mono truncate">${entry.code}</div>
@@ -2566,10 +2556,43 @@ async importZipFile(zipFile, mode = 'ask', resumeFromShard = 0) {
             await new Promise(r => setTimeout(r, 500)); // 批次间延迟
         }
 
-        // 步骤 5.5: 建立文件名映射（用于匹配entry和图片）
-        const uploadedFileSet = new Set(imageFiles.map(p => 
-            p.replace(/^images\//, '').replace(/^\/?/, '')
-        ));
+        // 【关键修复】步骤 5.5: 强制建立图片引用映射（防止 images 全为 null）
+        progress.update(45, '建立图片引用...');
+        
+        // 使用新的变量名避免冲突：entryImageMap
+        const entryImageMap = new Set(
+            imageFiles.map(p => p.replace(/^images\//, '').replace(/^\/?/, ''))
+        );
+        
+        console.log(`[Import] 已上传 ${entryImageMap.size} 张图片，开始匹配条目...`);
+        
+        // 强制为每个 entry/version 建立 {{IMG:...}} 引用
+        entries.forEach(entry => {
+            if (!entry.versions) return;
+            
+            entry.versions.forEach(v => {
+                // 【关键】强制初始化 images 对象，清除 null/base64
+                v.images = { avatar: null, card: null, cover: null };
+                
+                // 根据 entry.id 和 v.vid 构造预期的文件名
+                const expectedFiles = {
+                    avatar: `${entry.id}_${v.vid}_avatar.jpg`,
+                    card: `${entry.id}_${v.vid}_card.jpg`, 
+                    cover: `${entry.id}_${v.vid}_cover.jpg`
+                };
+                
+                // 只要远程存在该文件，就强制设置引用（使用 entryImageMap）
+                ['avatar', 'card', 'cover'].forEach(type => {
+                    if (entryImageMap.has(expectedFiles[type])) {
+                        v.images[type] = `{{IMG:${expectedFiles[type]}}`;
+                        console.log(`[Import] 建立引用: ${entry.code}.${type} = ${expectedFiles[type]}`);
+                    }
+                });
+                
+                // 同步旧版 image 字段（优先使用 card）
+                v.image = v.images.card || v.images.avatar || v.images.cover || null;
+            });
+        });
 
         // 步骤 6: 【长期防护】强制建立正确的 {{IMG:...}} 引用（源头控制）
         progress.update(50, '建立图片引用映射（含完整性校验）...');
