@@ -1139,7 +1139,7 @@ Object.assign(window.app, {
                             Lv.${level}
                         </span>
                     </div>
-                    ${version.subtitle ? `<p class="text-lg italic text-gray-600 border-l-4 border-indigo-300 pl-4">${version.subtitle}</p>` : ''}
+                    ${version.subtitle ? `<p class="text-lg italic text-gray-600 border-l-4 border-indigo-300 pl-4" style="white-space: pre-wrap;">${version.subtitle.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>` : ''}
                 </div>
         `;
         
