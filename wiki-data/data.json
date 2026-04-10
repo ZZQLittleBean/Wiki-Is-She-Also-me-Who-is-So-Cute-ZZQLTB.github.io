@@ -1,7 +1,7 @@
 {
   "version": "2.7.0-batch",
-  "lastUpdate": 1775795441456,
-  "currentBatch": 3,
+  "lastUpdate": 1775795507617,
+  "currentBatch": 4,
   "settings": {
     "name": "我的小说 Wiki",
     "subtitle": "By ZZQLittleBean\n（Powered by Kimi AI）",
@@ -2182,6 +2182,416 @@
             {
               "type": "p",
               "text": "这是张破军的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-mflbk",
+      "type": "character",
+      "code": "C-039",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-fdozi",
+          "title": "冯珅",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是冯珅的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-k8txp",
+      "type": "character",
+      "code": "C-040",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-xxahu",
+          "title": "陈番淑",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是陈番淑的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-8d22x",
+      "type": "character",
+      "code": "C-041",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-lpnxf",
+          "title": "赵悦离谱",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是赵悦离谱的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-y8qpf",
+      "type": "character",
+      "code": "C-042",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-ww681",
+          "title": "张奇华",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是张奇华的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-jwd7n",
+      "type": "character",
+      "code": "C-043",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-ciyk4",
+          "title": "张伟骚",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是张伟骚的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-rs0hy",
+      "type": "character",
+      "code": "C-044",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-ado2j",
+          "title": "吴卷航",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是吴卷航的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-cbktx",
+      "type": "character",
+      "code": "C-045",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-opos9",
+          "title": "吴亚",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是吴亚的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-y3fj9",
+      "type": "character",
+      "code": "C-046",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-yvlw6",
+          "title": "胡上校",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是胡上校的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-jwsqg",
+      "type": "character",
+      "code": "C-047",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-oonns",
+          "title": "马聪",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是马聪的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-rb7ce",
+      "type": "character",
+      "code": "C-048",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-freqm",
+          "title": "梁金赫晓昂",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是梁金赫晓昂的角色词条。"
             }
           ],
           "relatedVersions": [],
