@@ -1,7 +1,7 @@
 {
   "version": "2.7.0-batch",
-  "lastUpdate": 1775795343323,
-  "currentBatch": 1,
+  "lastUpdate": 1775795386204,
+  "currentBatch": 2,
   "settings": {
     "name": "我的小说 Wiki",
     "subtitle": "By ZZQLittleBean\n（Powered by Kimi AI）",
@@ -1324,6 +1324,459 @@
             }
           ],
           "createdAt": 1774456771811
+        }
+      ]
+    },
+    {
+      "id": "camp-1774456624605",
+      "type": "non-character",
+      "code": "N-007",
+      "settingType": "faction",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "versions": [
+        {
+          "vid": "v-default",
+          "title": "“家人”组",
+          "subtitle": "“家人”组相关设定",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "阵营简介"
+            },
+            {
+              "type": "p",
+              "text": "这是“家人”组的详细介绍。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774456624605
+        }
+      ]
+    },
+    {
+      "id": "camp-1774456669178",
+      "type": "non-character",
+      "code": "N-008",
+      "settingType": "faction",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "versions": [
+        {
+          "vid": "v-default",
+          "title": "塞坦科技",
+          "subtitle": "塞坦科技相关设定",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "阵营简介"
+            },
+            {
+              "type": "p",
+              "text": "这是塞坦科技的详细介绍。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774456669178
+        }
+      ]
+    },
+    {
+      "id": "camp-1774458879739",
+      "type": "non-character",
+      "code": "N-009",
+      "settingType": "faction",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "versions": [
+        {
+          "vid": "v-default",
+          "title": "⌈茶室⌋",
+          "subtitle": "⌈茶室⌋相关设定",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "阵营简介"
+            },
+            {
+              "type": "p",
+              "text": "这是⌈茶室⌋的详细介绍。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774458879739
+        }
+      ]
+    },
+    {
+      "id": "char-1774458852650",
+      "type": "character",
+      "code": "C-022",
+      "camp": "⌈茶室⌋",
+      "settingType": null,
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774458852650",
+          "title": "拾",
+          "subtitle": "⌈茶室⌋的管理员。No_325世界的张可云。\n不苟言笑的背后，掩藏着世界背后的秘密——\n——以及无数“张可云”的一生。",
+          "level": 2,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "p",
+              "text": "事实上"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774458852650
+        }
+      ]
+    },
+    {
+      "id": "char-1774459740637",
+      "type": "character",
+      "code": "C-023",
+      "camp": "⌈茶室⌋",
+      "settingType": null,
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774459740637",
+          "title": "什一",
+          "subtitle": "⌈茶室⌋的图书管理员。被拾第一次自世界覆灭中救下的，No_010世界的张可云。\n似乎因为喜欢看书而逐渐遗忘了失去家的痛苦。\n⌈茶室⌋的图书馆向来被拾翻得凌乱，有总是喜欢捧着一本书的什一帮忙，总是件好事。",
+          "level": 2,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": "ch-1774459320512",
+          "chapterTo": "ch-1774459973949",
+          "blocks": [],
+          "relatedVersions": [
+            "v-1774459778040"
+          ],
+          "relatedCharacters": [
+            {
+              "charId": "char-1774458852650",
+              "relationName": "师徒"
+            }
+          ],
+          "createdAt": 1774459740637
+        },
+        {
+          "vid": "v-1774459778040",
+          "title": "什一",
+          "subtitle": "⌈茶室⌋的图书馆管理员，No_010世界的张可云。在多次⌈茶室⌋的工作后，似乎学会了不少防身与进攻的手段。\n常袭一身紫袍，所到之处的塞坦残党片甲不留，“江湖”外号“紫袍魔女”......\n呃好吧，如今的她看起来确实得好好休息了。",
+          "level": 2,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": "ch-1774459709192",
+          "chapterTo": "ch-1774459664526",
+          "blocks": [],
+          "relatedVersions": [
+            "v-1774459740637",
+            "v-1774459780540"
+          ],
+          "relatedCharacters": [
+            {
+              "charId": "char-1774458852650",
+              "relationName": "师徒"
+            }
+          ],
+          "createdAt": 1774459778040
+        },
+        {
+          "vid": "v-1774459780540",
+          "title": "张可流",
+          "subtitle": "什一，No_010世界的张可云，一个最终找回了“家”与名字的孩子。\n此刻，她与图书管理员脱钩，与“紫袍魔女”脱钩。\n她现在，就是张可流，仅此而已。\n“绵‘流’终降草表歆......”",
+          "level": 1,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": "ch-1774459664526",
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [
+            "v-1774459778040"
+          ],
+          "relatedCharacters": [
+            {
+              "charId": "char-1774458852650",
+              "relationName": "师徒"
+            }
+          ],
+          "createdAt": 1774459780540
+        }
+      ]
+    },
+    {
+      "id": "camp-1774544495965",
+      "type": "non-character",
+      "code": "N-010",
+      "settingType": "faction",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "versions": [
+        {
+          "vid": "v-default",
+          "title": "同学组A",
+          "subtitle": "同学组A相关设定",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "阵营简介"
+            },
+            {
+              "type": "p",
+              "text": "这是同学组A的详细介绍。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774544495965
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-zuwzm",
+      "type": "character",
+      "code": "C-025",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-lxfn1",
+          "title": "老爸",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是老爸的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-6mpm0",
+      "type": "character",
+      "code": "C-026",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-f64zz",
+          "title": "冯程才",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是冯程才的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-68kzu",
+      "type": "character",
+      "code": "C-027",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-90sh9",
+          "title": "马米粒",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是马米粒的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-cyrwx",
+      "type": "character",
+      "code": "C-028",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-m56cr",
+          "title": "张桥",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是张桥的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
         }
       ]
     }
