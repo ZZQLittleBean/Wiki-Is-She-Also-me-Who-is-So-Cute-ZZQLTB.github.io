@@ -81,6 +81,14 @@
         },
 
         getHeaders() {
+            // 【关键修复】前台模式无Token时，不提供Authorization头（允许匿名读取公开仓库）
+            if (!this.config.token) {
+                return {
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                };
+            }
+            
             return {
                 'Authorization': `token ${this.config.token}`,
                 'Accept': 'application/vnd.github.v3+json',
@@ -122,34 +130,35 @@
         },
 
         // 替换 putFile 方法（正确编码 UTF-8）
-        async putFile(path, content, message = 'Update via Wiki', isBinary = false, retryCount = 3) {
+        async putFile(path, content, message = 'Update via Wiki', isBinary = false, retryCount = 5) {
             let attempt = 0;
+            let lastSha = null;
             
             while (attempt < retryCount) {
                 attempt++;
                 
                 try {
-                    // 获取现有文件 SHA
+                    // 获取现有文件 SHA（每次重试都重新获取）
                     let sha = null;
-                    const existing = await this.getFile(path);
-                    if (existing && existing.sha) {
-                        sha = existing.sha;
+                    try {
+                        const existing = await this.getFile(path);
+                        if (existing && existing.sha) {
+                            sha = existing.sha;
+                            lastSha = sha;
+                        }
+                    } catch (e) {
+                        // 文件可能不存在，继续（创建新文件）
+                        sha = null;
                     }
 
                     let encodedContent;
                     
                     if (isBinary) {
-                        // 图片：已经是 base64，清理空白即可
                         encodedContent = content.replace(/\s/g, '');
                     } else {
-                        // 【关键修复】正确编码 UTF-8 文本（支持中文）
-                        // 步骤1: 使用 TextEncoder 将 UTF-8 字符串转换为 Uint8Array
+                        // UTF-8编码
                         const utf8Bytes = new TextEncoder().encode(content);
-                        
-                        // 步骤2: 将字节数组转换为二进制字符串（用于 btoa）
                         const binaryString = Array.from(utf8Bytes, byte => String.fromCharCode(byte)).join('');
-                        
-                        // 步骤3: Base64 编码
                         encodedContent = btoa(binaryString);
                     }
 
@@ -158,6 +167,7 @@
                         content: encodedContent,
                         branch: this.config.branch
                     };
+                    
                     if (sha) body.sha = sha;
 
                     const response = await fetch(
@@ -169,31 +179,33 @@
                         }
                     );
 
-                    if (response.status === 422 || response.status === 409) {
+                    // 【关键修复】409冲突处理：强制指数退避
+                    if (response.status === 409 || response.status === 422) {
                         const err = await response.json().catch(() => ({}));
-                        console.warn(`[GitHub] ${response.status}: ${err.message}，重新获取SHA...`);
+                        console.warn(`[GitHub] ${response.status}: ${err.message || 'Conflict'}，等待后重试...`);
                         
-                        // 【关键修复】409冲突时强制重新获取最新SHA
-                        if (response.status === 409) {
-                            try {
-                                // 等待更长时间确保GitHub内部状态同步
-                                await new Promise(r => setTimeout(r, 3000));
-                                const latest = await this.getFile(path);
-                                if (latest && latest.sha) {
-                                    sha = latest.sha;
-                                    console.log(`[GitHub] 已刷新SHA: ${sha.substr(0,8)}...`);
-                                }
-                            } catch (e) {
-                                console.warn('[GitHub] SHA刷新失败:', e.message);
+                        // 指数退避：1秒, 2秒, 4秒, 8秒, 16秒
+                        const waitTime = Math.min(1000 * Math.pow(2, attempt - 1), 20000);
+                        console.log(`[GitHub] 等待 ${waitTime}ms 后重试 (${attempt}/${retryCount})...`);
+                        await new Promise(r => setTimeout(r, waitTime));
+                        
+                        // 强制重新获取SHA（GitHub缓存延迟）
+                        try {
+                            const latest = await this.getFile(path);
+                            if (latest && latest.sha && latest.sha !== lastSha) {
+                                lastSha = latest.sha;
+                                console.log(`[GitHub] SHA已更新为: ${latest.sha.substr(0,8)}...`);
                             }
+                        } catch (e) {
+                            // 忽略获取失败
                         }
                         
-                        await new Promise(r => setTimeout(r, 2000 * attempt));
-                        continue;
+                        continue; // 进入下一次重试
                     }
 
                     if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(`HTTP ${response.status}: ${errorData.message || 'Unknown error'}`);
                     }
 
                     console.log(`[GitHub] ✅ ${path} 保存成功`);
@@ -201,12 +213,20 @@
                     
                 } catch (error) {
                     console.error(`[GitHub] 尝试 ${attempt} 失败:`, error.message);
+                    
+                    // 如果是409，继续重试；如果是401，直接抛出（权限不足）
+                    if (error.message && error.message.includes('401')) {
+                        throw new Error('未授权：请检查Token是否有效或是否已过期');
+                    }
+                    
                     if (attempt >= retryCount) throw error;
+                    
+                    // 其他错误也使用退避
                     await new Promise(r => setTimeout(r, 1000 * attempt));
                 }
             }
             
-            throw new Error('超过最大重试次数');
+            throw new Error(`超过最大重试次数 (${retryCount})，文件 ${path} 保存失败`);
         },
 
         // 【新增】专门用于保存图片的简化方法
