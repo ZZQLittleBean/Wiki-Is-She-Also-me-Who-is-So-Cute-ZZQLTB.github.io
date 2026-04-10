@@ -3916,7 +3916,7 @@
   ],
   "currentTimeline": "latest",
   "currentMode": "view",
-  "editingId": null,
+  "editingId": "char-1774006823382",
   "editingType": null,
   "viewingVersionId": null,
   "wikiTitle": "未命名 Wiki",
@@ -3937,8 +3937,5 @@
     "welcomeSubtitle": "部分章节属未来内容，仅作占位示意(●'◡'●)",
     "customFont": "'Noto Sans SC', sans-serif",
     "homeCustomTitle": "首页自定义内容"
-  },
-  "currentAnnouncement": null,
-  "version": "2.7.0-atomic",
-  "lastUpdate": 1775817559910
+  }
 }
