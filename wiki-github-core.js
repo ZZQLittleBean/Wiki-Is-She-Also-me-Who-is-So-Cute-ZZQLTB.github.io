@@ -346,10 +346,8 @@ Object.assign(window.app, {
             // 【关键】检测分片版本
             let entries = [];
             if (baseData.version && baseData.version.includes('sharded') && baseData.entryFiles) {
-                // 使用分片加载
                 entries = await this.loadShardedData(baseData);
             } else {
-                // 旧版单文件兼容
                 entries = baseData.entries || [];
             }
             
@@ -374,6 +372,9 @@ Object.assign(window.app, {
                 this.data.settings.subtitle = baseData.wikiSubtitle;
             }
             
+            // 【关键修复】解析图片引用为实际URL
+            this.resolveImageReferences();
+            
             console.log('[Wiki] ✅ 数据加载完成，词条数:', entries.length);
             this.applyFont();
             this.updateUIForMode();
@@ -389,6 +390,44 @@ Object.assign(window.app, {
             if (!this.data || !this.data.entries) {
                 this.initDefaultData();
             }
+        }
+    },
+    // 【新增】解析图片引用，将 {{IMG:filename}} 转换为 GitHub Raw URL
+    resolveImageReferences() {
+        if (!this.data.entries || !this.githubStorage.config.owner) return;
+        
+        const { owner, repo, branch, dataPath } = this.githubStorage.config;
+        const baseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${dataPath}/images/`;
+        
+        let resolvedCount = 0;
+        
+        this.data.entries.forEach(entry => {
+            if (!entry.versions) return;
+            
+            entry.versions.forEach(version => {
+                // 处理旧版单个image字段
+                if (version.image && version.image.startsWith('{{IMG:')) {
+                    const filename = version.image.slice(6, -2);
+                    version.image = baseUrl + filename;
+                    resolvedCount++;
+                }
+                
+                // 处理新版images对象
+                if (version.images) {
+                    ['avatar', 'card', 'cover'].forEach(type => {
+                        const value = version.images[type];
+                        if (value && value.startsWith('{{IMG:')) {
+                            const filename = value.slice(6, -2);
+                            version.images[type] = baseUrl + filename;
+                            resolvedCount++;
+                        }
+                    });
+                }
+            });
+        });
+        
+        if (resolvedCount > 0) {
+            console.log(`[Wiki] 已解析 ${resolvedCount} 个图片引用`);
         }
     },
     initDefaultData() {
@@ -769,11 +808,11 @@ Object.assign(window.app, {
         
         // 图片
         const img = version.images?.card || version.images?.avatar || version.image;
-        if (img) {
+        if (img && !img.startsWith('{{IMG:')) { // 确保已解析（或原本就是完整URL）
             contentHtml += `
                 <div class="w-48 shrink-0">
                     <div class="aspect-[3/4] rounded-xl overflow-hidden shadow-lg bg-gray-100">
-                        <img src="${img}" class="w-full h-full object-cover" alt="${version.title}">
+                        <img src="${img}" class="w-full h-full object-cover" alt="${version.title}" onerror="this.style.display='none'">
                     </div>
                 </div>
             `;
@@ -1337,7 +1376,7 @@ Object.assign(window.app, {
         div.innerHTML = `
             <div class="relative aspect-[3/4] overflow-hidden bg-gray-100 shrink-0">
                 ${hasImage ? 
-                    `<img src="${img}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" alt="${version.title}">` :
+                    `<img src="${img}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" alt="${version.title}" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-gray-300\'><i class=\'fa-solid fa-user text-4xl\'></i></div>'">` :
                     `<div class="w-full h-full flex items-center justify-center text-gray-300"><i class="fa-solid fa-user text-4xl"></i></div>`
                 }
                 <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
@@ -1754,7 +1793,7 @@ Object.assign(window.app, {
 async importZipFile(zipFile, mode = 'ask', resumeFromShard = 0) {
     const isResuming = resumeFromShard > 0;
     const progress = this.showProgressDialog(
-        isResuming ? `继续导入（从第 ${resumeFromShard} 批开始）` : '准备导入...'
+        isResuming ? `继续导入（从第 ${resumeFromShard} 批开始）` : '即将完成...'
     );
     
     // 【修复】在函数顶部定义imageFiles，确保整个函数可访问
@@ -1944,7 +1983,7 @@ async importZipFile(zipFile, mode = 'ask', resumeFromShard = 0) {
         }
 
         // 步骤 8: 处理图片（并行但限制并发数）
-        progress.update(85, `处理图片 (${imageFiles.length}张)...`);
+        progress.update(85, `还有图片的内容...... (${imageFiles.length}张)...`);
         
         // 限制并发数（避免过多并行请求）
         const CONCURRENT_LIMIT = 3;
