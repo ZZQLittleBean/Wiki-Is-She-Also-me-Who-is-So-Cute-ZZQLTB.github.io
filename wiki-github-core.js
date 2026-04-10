@@ -368,18 +368,38 @@ Object.assign(window.app, {
                 console.log('[Wiki] 使用非分片数据，条目数:', entries.length);
             }
             
-            // 【关键】合并数据到 this.data（确保 entries 先赋值）
+            // 【关键】合并数据到 this.data（确保 entries 已赋值）
             this.data = {
                 ...this.data,
-                settings: baseData.settings || this.data.settings || {},
+                settings: baseData.settings || {},
                 chapters: baseData.chapters || [],
-                camps: baseData.camps || ['主角团', '反派', '中立'],
+                camps: baseData.camps || [],
                 synopsis: baseData.synopsis || [],
                 announcements: baseData.announcements || [],
                 homeContent: baseData.homeContent || [],
                 customFields: baseData.customFields || {},
-                entries: entries  // 确保这行在调用 resolveImageReferences 之前
+                entries: entries  // 确保这行在调用 resolveImageReferences 之前执行
             };
+            
+            console.log('[Wiki] 数据合并完成，条目数:', this.data.entries.length);
+            
+            // 【关键修复】延迟执行解析，确保数据绑定完成且DOM就绪
+            setTimeout(() => {
+                this.resolveImageReferences();
+                
+                // 检查是否仍有未解析的 {{IMG:（表示导入时未建立引用）
+                const hasUnresolved = this.data.entries.some(e => 
+                    e.versions?.some(v => 
+                        JSON.stringify(v).includes('{{IMG:') && 
+                        !JSON.stringify(v).includes('raw.githubusercontent.com')
+                    )
+                );
+                
+                if (hasUnresolved) {
+                    console.warn('[Wiki] 检测到未解析的图片引用，尝试自动修复...');
+                    this.autoFixImageReferences();
+                }
+            }, 100);
             
             // 兼容旧版字段映射
             if (baseData.wikiTitle && !this.data.settings.name) {
@@ -451,83 +471,161 @@ Object.assign(window.app, {
         });
     },
 
-    // 【完整替换】resolveImageReferences 函数 - 强化版本
+    // 【完整替换】resolveImageReferences 函数 - 增强版
     resolveImageReferences() {
-        if (!this.githubStorage?.config?.owner || !this.data?.entries) {
-            console.warn('[Resolve] 跳过：无GitHub配置或无条目数据');
+        if (!this.githubStorage?.config?.owner) {
+            console.warn('[Resolve] 无GitHub配置，跳过');
             return;
         }
         
         const { owner, repo, branch, dataPath } = this.githubStorage.config;
         const safeDataPath = dataPath || 'wiki-data';
+        // 【关键】确保URL格式正确，末尾无斜杠重复
         const baseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${safeDataPath}/images/`;
         
-        let resolved = 0;
+        let resolvedCount = 0;
         
-        const resolveVal = (val) => {
+        // 解析函数：将 {{IMG:filename}} 转换为完整URL
+        const resolveValue = (val) => {
             if (!val || typeof val !== 'string') return null;
             if (val.startsWith('http')) return val; // 已解析
             
-            // 匹配 {{IMG:filename}} 格式（支持多余空格）
+            // 匹配 {{IMG:filename}} 格式（支持空格）
             const match = val.match(/\{\{IMG:\s*([^}]+)\s*\}\}/);
             if (match && match[1]) {
-                const filename = match[1].trim();
-                if (filename) {
-                    resolved++;
-                    return baseUrl + encodeURIComponent(filename);
-                }
+                resolvedCount++;
+                return baseUrl + encodeURIComponent(match[1].trim());
             }
             return null;
         };
 
-        // 处理所有条目的所有版本
+        // 处理所有条目
+        if (!this.data?.entries || !Array.isArray(this.data.entries)) {
+            console.warn('[Resolve] 无条目数据');
+            return;
+        }
+
         this.data.entries.forEach(entry => {
-            if (!entry.versions) return;
+            if (!entry?.versions) return;
             
-            entry.versions.forEach(v => {
-                // 清理残留的base64（不应存在于GitHub版数据中）
-                if (v.image?.startsWith('data:')) v.image = null;
-                if (v.images) {
-                    ['avatar', 'card', 'cover'].forEach(k => {
-                        if (v.images[k]?.startsWith('data:')) v.images[k] = null;
-                    });
+            entry.versions.forEach(version => {
+                if (!version) return;
+                
+                // 【关键修复】确保 images 对象存在，防止 null 错误
+                if (!version.images || typeof version.images !== 'object') {
+                    version.images = { avatar: null, card: null, cover: null };
                 }
                 
-                // 解析旧版image字段
-                if (v.image && !v.image.startsWith('http')) {
-                    const newUrl = resolveVal(v.image);
-                    if (newUrl) v.image = newUrl;
-                }
+                // 清理残留的 base64（防止数据污染）
+                if (version.image?.startsWith('data:')) version.image = null;
                 
-                // 解析新版images对象
-                if (v.images && typeof v.images === 'object') {
-                    ['avatar', 'card', 'cover'].forEach(k => {
-                        if (v.images[k] && !v.images[k].startsWith('http')) {
-                            const newUrl = resolveVal(v.images[k]);
-                            if (newUrl) v.images[k] = newUrl;
-                        }
-                    });
+                // 解析新版 images 对象的各个字段
+                ['avatar', 'card', 'cover'].forEach(type => {
+                    const current = version.images[type];
+                    
+                    // 如果是 base64，清空
+                    if (current?.startsWith('data:')) {
+                        version.images[type] = null;
+                        return;
+                    }
+                    
+                    // 如果有值且未解析，进行解析
+                    if (current && typeof current === 'string' && !current.startsWith('http')) {
+                        const newUrl = resolveValue(current);
+                        if (newUrl) version.images[type] = newUrl;
+                    }
+                });
+                
+                // 兼容旧版单 image 字段（优先使用 card，其次 avatar）
+                if (version.image && typeof version.image === 'string' && !version.image.startsWith('http')) {
+                    const newUrl = resolveValue(version.image);
+                    if (newUrl) version.image = newUrl;
+                } else if (!version.image && version.images) {
+                    // 【新增】自动从 images 对象推导 image 字段
+                    version.image = version.images.card || version.images.avatar || version.images.cover || null;
                 }
             });
         });
-        
-        // 解析剧情梗概图片
-        this.data.synopsis?.forEach(s => {
-            if (s.image?.startsWith('data:')) s.image = null;
-            if (s.image && !s.image.startsWith('http')) {
-                const newUrl = resolveVal(s.image);
-                if (newUrl) s.image = newUrl;
-            }
-        });
 
-        console.log(`[Resolve] 完成：解析了 ${resolved} 个图片引用`);
+        // 处理剧情梗概图片
+        if (this.data.synopsis?.length > 0) {
+            this.data.synopsis.forEach(syn => {
+                if (syn.image?.startsWith('data:')) syn.image = null;
+                if (syn.image && typeof syn.image === 'string' && !syn.image.startsWith('http')) {
+                    const newUrl = resolveValue(syn.image);
+                    if (newUrl) syn.image = newUrl;
+                }
+            });
+        }
+
+        console.log(`[Resolve] 完成：解析了 ${resolvedCount} 个图片引用`);
         
-        // 强制刷新当前页面以显示图片（如果是列表或详情页）
-        if (resolved > 0) {
-            const current = document.querySelector('.nav-btn.text-indigo-600')?.dataset.target || 'home';
-            if (['home', 'characters', 'non-characters'].includes(current)) {
-                this.router(current, false);
+        // 【新增】如果解析了图片，强制刷新当前视图
+        if (resolvedCount > 0) {
+            console.log('[Resolve] 检测到图片更新，刷新视图...');
+            const currentRoute = this.data.currentTarget || 'home';
+            this.router(currentRoute, false);
+        }
+    },
+        // 【新增】自动修复缺失的图片引用（根据远程图片列表自动补全）
+    async autoFixImageReferences() {
+        try {
+            console.log('[AutoFix] 尝试从远程仓库匹配图片...');
+            
+            // 获取远程图片列表
+            const imageList = await this.githubStorage.getImageList();
+            if (!imageList || imageList.length === 0) {
+                console.warn('[AutoFix] 远程无图片文件');
+                return;
             }
+            
+            const imageSet = new Set(imageList);
+            let fixedCount = 0;
+            
+            this.data.entries.forEach(entry => {
+                if (!entry.versions) return;
+                
+                entry.versions.forEach(v => {
+                    // 预期的文件名格式
+                    const expectedFiles = {
+                        avatar: `${entry.id}_${v.vid}_avatar.jpg`,
+                        card: `${entry.id}_${v.vid}_card.jpg`,
+                        cover: `${entry.id}_${v.vid}_cover.jpg`
+                    };
+                    
+                    // 初始化 images 对象
+                    if (!v.images || typeof v.images !== 'object') {
+                        v.images = { avatar: null, card: null, cover: null };
+                    }
+                    
+                    // 检查每个类型
+                    ['avatar', 'card', 'cover'].forEach(type => {
+                        // 如果当前无值或值为空，且远程存在该文件，则建立引用
+                        if (!v.images[type] || v.images[type].startsWith('data:')) {
+                            if (imageSet.has(expectedFiles[type])) {
+                                v.images[type] = `{{IMG:${expectedFiles[type]}}`;
+                                console.log(`[AutoFix] 建立引用: ${entry.code} -> ${expectedFiles[type]}`);
+                                fixedCount++;
+                            }
+                        }
+                    });
+                    
+                    // 同步旧版 image 字段
+                    v.image = v.images.card || v.images.avatar || v.images.cover || v.image;
+                });
+            });
+            
+            if (fixedCount > 0) {
+                console.log(`[AutoFix] 成功修复 ${fixedCount} 个图片引用，重新解析...`);
+                // 重新解析为完整URL
+                this.resolveImageReferences();
+                // 保存修复后的数据到GitHub（可选，建议开启）
+                // await this.saveDataAtomic();
+                this.showToast(`已自动修复 ${fixedCount} 个图片引用`, 'success');
+            }
+            
+        } catch (e) {
+            console.error('[AutoFix] 自动修复失败:', e);
         }
     },
 
@@ -2334,42 +2432,42 @@ async importZipFile(zipFile, mode = 'ask', resumeFromShard = 0) {
             p.replace(/^images\//, '').replace(/^\/?/, '')
         ));
 
-        // 步骤 6: 更新 entries 中的图片引用（关键修复）
+        // 步骤 6: 【关键修复】强制更新 entries 中的图片引用
+        progress.update(50, '更新图片引用...');
+        
+        // 建立上传文件映射（去除路径前缀）
+        const uploadedFiles = new Set(
+            imageFiles.map(p => p.replace(/^images\//, '').replace(/^\/?/, ''))
+        );
+        
         entries.forEach(entry => {
             if (!entry.versions) return;
             
             entry.versions.forEach(v => {
-                // 处理新版 images 对象
-                if (v.images) {
-                    ['avatar', 'card', 'cover'].forEach(type => {
-                        const currentVal = v.images[type];
-                        // 如果是null或base64，尝试重建引用
-                        if (!currentVal || currentVal.startsWith('data:')) {
-                            const expectedFile = `${entry.id}_${v.vid}_${type}.jpg`;
-                            if (uploadedFileSet.has(expectedFile)) {
-                                v.images[type] = `{{IMG:${expectedFile}}}`;
-                                console.log(`[Import] 设置图片引用: ${expectedFile}`);
-                            } else {
-                                v.images[type] = null; // 未找到对应图片，清空
-                            }
-                        }
-                    });
+                // 强制初始化 images 对象
+                if (!v.images || typeof v.images !== 'object') {
+                    v.images = { avatar: null, card: null, cover: null };
                 }
                 
-                // 处理旧版单个image字段（fallback到card或avatar）
-                if (!v.image || v.image.startsWith('data:')) {
-                    const candidates = ['card', 'avatar', 'cover'].map(t => 
-                        `${entry.id}_${v.vid}_${t}.jpg`
-                    );
-                    let found = null;
-                    for (const fname of candidates) {
-                        if (uploadedFileSet.has(fname)) {
-                            found = fname;
-                            break;
-                        }
+                const filePatterns = {
+                    avatar: `${entry.id}_${v.vid}_avatar.jpg`,
+                    card: `${entry.id}_${v.vid}_card.jpg`,
+                    cover: `${entry.id}_${v.vid}_cover.jpg`
+                };
+                
+                // 强制匹配：只要远程有该文件，就设置引用（覆盖原有值）
+                ['avatar', 'card', 'cover'].forEach(type => {
+                    if (uploadedFiles.has(filePatterns[type])) {
+                        v.images[type] = `{{IMG:${filePatterns[type]}}`;
+                        console.log(`[Import] 设置 ${entry.code}.${type} = ${filePatterns[type]}`);
+                    } else if (v.images[type]?.startsWith('data:')) {
+                        // 清除残留的 base64
+                        v.images[type] = null;
                     }
-                    v.image = found ? `{{IMG:${found}}}` : null;
-                }
+                });
+                
+                // 同步旧版 image 字段
+                v.image = v.images.card || v.images.avatar || v.images.cover || null;
             });
         });
 
