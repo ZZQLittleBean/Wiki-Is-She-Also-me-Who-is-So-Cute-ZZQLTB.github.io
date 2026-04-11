@@ -1,310 +1,165 @@
 [
   {
-    "id": "camp-1774456624605",
-    "type": "non-character",
-    "code": "N-007",
-    "settingType": "faction",
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "versions": [
-      {
-        "vid": "v-default",
-        "title": "“家人”组",
-        "subtitle": "“家人”组相关设定",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "阵营简介"
-          },
-          {
-            "type": "p",
-            "text": "这是“家人”组的详细介绍。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774456624605
-      }
-    ]
-  },
-  {
-    "id": "camp-1774456669178",
-    "type": "non-character",
-    "code": "N-008",
-    "settingType": "faction",
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "versions": [
-      {
-        "vid": "v-default",
-        "title": "塞坦科技",
-        "subtitle": "塞坦科技相关设定",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "阵营简介"
-          },
-          {
-            "type": "p",
-            "text": "这是塞坦科技的详细介绍。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774456669178
-      }
-    ]
-  },
-  {
-    "id": "camp-1774458879739",
-    "type": "non-character",
-    "code": "N-009",
-    "settingType": "faction",
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "versions": [
-      {
-        "vid": "v-default",
-        "title": "⌈茶室⌋",
-        "subtitle": "⌈茶室⌋相关设定",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "阵营简介"
-          },
-          {
-            "type": "p",
-            "text": "这是⌈茶室⌋的详细介绍。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774458879739
-      }
-    ]
-  },
-  {
-    "id": "char-1774458852650",
+    "id": "char-1774026694075-x8xop0wzb",
     "type": "character",
-    "code": "C-022",
-    "camp": "⌈茶室⌋",
-    "settingType": null,
+    "code": "C-010",
+    "level": 5,
+    "camp": "",
     "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
     "versions": [
       {
-        "vid": "v-1774458852650",
-        "title": "拾",
-        "subtitle": "⌈茶室⌋的管理员。No_325世界的张可云。\n不苟言笑的背后，掩藏着世界背后的秘密——\n——以及无数“张可云”的一生。",
-        "level": 2,
-        "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774458852650_v-1774458852650_card.jpg",
+        "vid": "v-1774026694075-8maosavpn",
+        "title": "葛茗茗",
+        "subtitle": "",
+        "image": null,
         "images": {
-          "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774458852650_v-1774458852650_avatar.jpg",
-          "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774458852650_v-1774458852650_card.jpg",
-          "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774458852650_v-1774458852650_cover.jpg"
+          "avatar": null,
+          "card": null,
+          "cover": null
         },
         "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "p",
-            "text": "事实上"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774458852650
-      }
-    ]
-  },
-  {
-    "id": "char-1774459740637",
-    "type": "character",
-    "code": "C-023",
-    "camp": "⌈茶室⌋",
-    "settingType": null,
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
-    "versions": [
-      {
-        "vid": "v-1774459740637",
-        "title": "什一",
-        "subtitle": "⌈茶室⌋的图书管理员。被拾第一次自世界覆灭中救下的，No_010世界的张可云。\n似乎因为喜欢看书而逐渐遗忘了失去家的痛苦。\n⌈茶室⌋的图书馆向来被拾翻得凌乱，有总是喜欢捧着一本书的什一帮忙，总是件好事。",
-        "level": 2,
-        "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459740637_card.jpg",
-        "images": {
-          "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459740637_avatar.jpg",
-          "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459740637_card.jpg",
-          "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459740637_cover.jpg"
-        },
-        "chapterFrom": "ch-1774459320512",
-        "chapterTo": "ch-1774459973949",
-        "blocks": [],
-        "relatedVersions": [
-          "v-1774459778040"
-        ],
-        "relatedCharacters": [
-          {
-            "charId": "char-1774458852650",
-            "relationName": "师徒"
-          }
-        ],
-        "createdAt": 1774459740637
-      },
-      {
-        "vid": "v-1774459778040",
-        "title": "什一",
-        "subtitle": "⌈茶室⌋的图书馆管理员，No_010世界的张可云。在多次⌈茶室⌋的工作后，似乎学会了不少防身与进攻的手段。\n常袭一身紫袍，所到之处的塞坦残党片甲不留，“江湖”外号“紫袍魔女”......\n呃好吧，如今的她看起来确实得好好休息了。",
-        "level": 2,
-        "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459778040_card.jpg",
-        "images": {
-          "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459778040_avatar.jpg",
-          "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459778040_card.jpg",
-          "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459778040_cover.jpg"
-        },
-        "chapterFrom": "ch-1774459709192",
-        "chapterTo": "ch-1774459664526",
-        "blocks": [],
-        "relatedVersions": [
-          "v-1774459740637",
-          "v-1774459780540"
-        ],
-        "relatedCharacters": [
-          {
-            "charId": "char-1774458852650",
-            "relationName": "师徒"
-          }
-        ],
-        "createdAt": 1774459778040
-      },
-      {
-        "vid": "v-1774459780540",
-        "title": "张可流",
-        "subtitle": "什一，No_010世界的张可云，一个最终找回了“家”与名字的孩子。\n此刻，她与图书管理员脱钩，与“紫袍魔女”脱钩。\n她现在，就是张可流，仅此而已。\n“绵‘流’终降草表歆......”",
-        "level": 1,
-        "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459780540_card.jpg",
-        "images": {
-          "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459780540_avatar.jpg",
-          "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459780540_card.jpg",
-          "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459780540_cover.jpg"
-        },
-        "chapterFrom": "ch-1774459664526",
         "chapterTo": null,
         "blocks": [],
-        "relatedVersions": [
-          "v-1774459778040"
-        ],
+        "relatedVersions": [],
+        "relatedCharacters": [],
+        "createdAt": 1774026694075
+      }
+    ]
+  },
+  {
+    "id": "char-1774026694075-7bjnusb2d",
+    "type": "character",
+    "code": "C-011",
+    "level": 5,
+    "camp": "",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-gwai28x6z",
+        "title": "葛荧荧",
+        "subtitle": "",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": null,
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
+        "relatedCharacters": [],
+        "createdAt": 1774026694075
+      }
+    ]
+  },
+  {
+    "id": "char-1774026694075-h2nh765en",
+    "type": "character",
+    "code": "C-012",
+    "level": 5,
+    "camp": "",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-u7a9xkygj",
+        "title": "葛苧苧",
+        "subtitle": "",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": null,
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
+        "relatedCharacters": [],
+        "createdAt": 1774026694075
+      }
+    ]
+  },
+  {
+    "id": "char-1774026694075-5abfiv77y",
+    "type": "character",
+    "code": "C-013",
+    "level": 5,
+    "camp": "",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-lgrv55egz",
+        "title": "Prizh",
+        "subtitle": "",
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": null,
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
+        "relatedCharacters": [],
+        "createdAt": 1774026694075
+      }
+    ]
+  },
+  {
+    "id": "char-1774026694075-xgyqu152f",
+    "type": "character",
+    "code": "C-014",
+    "camp": "",
+    "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-087rwec5e",
+        "title": "微光",
+        "subtitle": "世界的至高存在，或者说是“本源”。\n由于张可云这个“世界之核”的存在，她貌似更愿意成为这“国际象棋”棋盘上的“皇后”。\n当然，她或许也挺喜欢以一个普通人的形象观察这个世界？",
+        "image": "{{IMG:char-1774026694075-xgyqu152f_v-1774026694075-087rwec5e_card.jpg}",
+        "images": {
+          "avatar": "{{IMG:char-1774026694075-xgyqu152f_v-1774026694075-087rwec5e_avatar.jpg}",
+          "card": "{{IMG:char-1774026694075-xgyqu152f_v-1774026694075-087rwec5e_card.jpg}",
+          "cover": "{{IMG:char-1774026694075-xgyqu152f_v-1774026694075-087rwec5e_cover.jpg}"
+        },
+        "chapterFrom": "ch-1774186885948-fbqoj",
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
         "relatedCharacters": [
           {
-            "charId": "char-1774458852650",
-            "relationName": "师徒"
+            "charId": "char-1774026694075-wyzxy3xpt",
+            "relationName": "“命定的师徒”"
+          },
+          {
+            "charId": "char-xiaoli",
+            "relationName": "“世界”之缔约"
           }
         ],
-        "createdAt": 1774459780540
+        "createdAt": 1774026694075,
+        "level": 2
       }
-    ]
-  },
-  {
-    "id": "camp-1774544495965",
-    "type": "non-character",
-    "code": "N-010",
-    "settingType": "faction",
-    "pinned": false,
+    ],
     "pinStartChapter": null,
     "pinEndChapter": null,
     "pinnedVersions": {},
     "missingIntervalVersion": null,
-    "versions": [
-      {
-        "vid": "v-default",
-        "title": "同学组A",
-        "subtitle": "同学组A相关设定",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "阵营简介"
-          },
-          {
-            "type": "p",
-            "text": "这是同学组A的详细介绍。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774544495965
-      }
-    ]
+    "defaultPinnedVersion": null
   },
   {
-    "id": "char-1774546471127-zuwzm",
+    "id": "char-1774026694075-8gq06dj20",
     "type": "character",
-    "code": "C-025",
+    "code": "C-015",
+    "level": 5,
     "camp": "",
     "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
     "versions": [
       {
-        "vid": "v-1774546471127-lxfn1",
-        "title": "老爸",
+        "vid": "v-1774026694075-3flvwobbk",
+        "title": "塞坦",
         "subtitle": "",
-        "level": 3,
         "image": null,
         "images": {
           "avatar": null,
@@ -313,39 +168,25 @@
         },
         "chapterFrom": null,
         "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "角色简介"
-          },
-          {
-            "type": "p",
-            "text": "这是老爸的角色词条。"
-          }
-        ],
+        "blocks": [],
         "relatedVersions": [],
         "relatedCharacters": [],
-        "createdAt": 1774546471127
+        "createdAt": 1774026694075
       }
     ]
   },
   {
-    "id": "char-1774546471127-6mpm0",
+    "id": "char-1774026694075-y6atk7qsi",
     "type": "character",
-    "code": "C-026",
+    "code": "C-016",
+    "level": 5,
     "camp": "",
     "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
     "versions": [
       {
-        "vid": "v-1774546471127-f64zz",
-        "title": "冯程才",
+        "vid": "v-1774026694075-r771wtfak",
+        "title": "汤圆",
         "subtitle": "",
-        "level": 3,
         "image": null,
         "images": {
           "avatar": null,
@@ -354,512 +195,48 @@
         },
         "chapterFrom": null,
         "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "角色简介"
-          },
-          {
-            "type": "p",
-            "text": "这是冯程才的角色词条。"
-          }
-        ],
+        "blocks": [],
         "relatedVersions": [],
         "relatedCharacters": [],
-        "createdAt": 1774546471127
+        "createdAt": 1774026694075
       }
     ]
   },
   {
-    "id": "char-1774546471127-68kzu",
+    "id": "char-1774026694075-wyzxy3xpt",
     "type": "character",
-    "code": "C-027",
-    "camp": "",
+    "code": "C-017",
+    "camp": "访客组",
     "pinned": false,
+    "versions": [
+      {
+        "vid": "v-1774026694075-pod22im44",
+        "title": "阿米诺斯",
+        "subtitle": "一只疑似失忆过的“诺斯”家族小矛隼“萨满”，但是在认知上完全就是个完全正常的少女嘛......\n不过——她会魔法！\n她能实现愿望！\n她能给大家实现愿望！\n......如果能帮到老爸的话......",
+        "image": "{{IMG:char-1774026694075-wyzxy3xpt_v-1774026694075-pod22im44_card.jpg}",
+        "images": {
+          "avatar": "{{IMG:char-1774026694075-wyzxy3xpt_v-1774026694075-pod22im44_avatar.jpg}",
+          "card": "{{IMG:char-1774026694075-wyzxy3xpt_v-1774026694075-pod22im44_card.jpg}",
+          "cover": "{{IMG:char-1774026694075-wyzxy3xpt_v-1774026694075-pod22im44_cover.jpg}"
+        },
+        "chapterFrom": "ch-1774186885948-pgmjy",
+        "chapterTo": null,
+        "blocks": [],
+        "relatedVersions": [],
+        "relatedCharacters": [
+          {
+            "charId": "char-1774026694075-xgyqu152f",
+            "relationName": "“命定的师徒”"
+          }
+        ],
+        "createdAt": 1774026694075,
+        "level": 1
+      }
+    ],
     "pinStartChapter": null,
     "pinEndChapter": null,
     "pinnedVersions": {},
     "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
-    "versions": [
-      {
-        "vid": "v-1774546471127-90sh9",
-        "title": "马米粒",
-        "subtitle": "",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "角色简介"
-          },
-          {
-            "type": "p",
-            "text": "这是马米粒的角色词条。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774546471127
-      }
-    ]
-  },
-  {
-    "id": "char-1774546471127-cyrwx",
-    "type": "character",
-    "code": "C-028",
-    "camp": "",
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
-    "versions": [
-      {
-        "vid": "v-1774546471127-m56cr",
-        "title": "张桥",
-        "subtitle": "",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "角色简介"
-          },
-          {
-            "type": "p",
-            "text": "这是张桥的角色词条。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774546471127
-      }
-    ]
-  },
-  {
-    "id": "char-1774546471127-guldb",
-    "type": "character",
-    "code": "C-029",
-    "camp": "",
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
-    "versions": [
-      {
-        "vid": "v-1774546471127-z13mr",
-        "title": "杨克妙",
-        "subtitle": "",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "角色简介"
-          },
-          {
-            "type": "p",
-            "text": "这是杨克妙的角色词条。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774546471127
-      }
-    ]
-  },
-  {
-    "id": "char-1774546471127-fhkpf",
-    "type": "character",
-    "code": "C-030",
-    "camp": "",
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
-    "versions": [
-      {
-        "vid": "v-1774546471127-onbek",
-        "title": "马四季",
-        "subtitle": "",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "角色简介"
-          },
-          {
-            "type": "p",
-            "text": "这是马四季的角色词条。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774546471127
-      }
-    ]
-  },
-  {
-    "id": "char-1774546471127-6hef5",
-    "type": "character",
-    "code": "C-031",
-    "camp": "",
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
-    "versions": [
-      {
-        "vid": "v-1774546471127-qp5qe",
-        "title": "代氪",
-        "subtitle": "",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "角色简介"
-          },
-          {
-            "type": "p",
-            "text": "这是代氪的角色词条。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774546471127
-      }
-    ]
-  },
-  {
-    "id": "char-1774546471127-snrlt",
-    "type": "character",
-    "code": "C-032",
-    "camp": "",
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
-    "versions": [
-      {
-        "vid": "v-1774546471127-v5lz0",
-        "title": "刘璺薪",
-        "subtitle": "",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "角色简介"
-          },
-          {
-            "type": "p",
-            "text": "这是刘璺薪的角色词条。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774546471127
-      }
-    ]
-  },
-  {
-    "id": "char-1774546471127-2oqs0",
-    "type": "character",
-    "code": "C-033",
-    "camp": "",
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
-    "versions": [
-      {
-        "vid": "v-1774546471127-rchqd",
-        "title": "易谟戟",
-        "subtitle": "",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "角色简介"
-          },
-          {
-            "type": "p",
-            "text": "这是易谟戟的角色词条。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774546471127
-      }
-    ]
-  },
-  {
-    "id": "char-1774546471127-g322r",
-    "type": "character",
-    "code": "C-034",
-    "camp": "",
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
-    "versions": [
-      {
-        "vid": "v-1774546471127-3sgaj",
-        "title": "翊",
-        "subtitle": "",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "角色简介"
-          },
-          {
-            "type": "p",
-            "text": "这是翊的角色词条。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774546471127
-      }
-    ]
-  },
-  {
-    "id": "char-1774546471127-f70cb",
-    "type": "character",
-    "code": "C-035",
-    "camp": "",
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
-    "versions": [
-      {
-        "vid": "v-1774546471127-4kjo6",
-        "title": "翎",
-        "subtitle": "",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "角色简介"
-          },
-          {
-            "type": "p",
-            "text": "这是翎的角色词条。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774546471127
-      }
-    ]
-  },
-  {
-    "id": "char-1774546471127-v4ch0",
-    "type": "character",
-    "code": "C-036",
-    "camp": "",
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
-    "versions": [
-      {
-        "vid": "v-1774546471127-cgjwd",
-        "title": "曦芷",
-        "subtitle": "",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "角色简介"
-          },
-          {
-            "type": "p",
-            "text": "这是曦芷的角色词条。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774546471127
-      }
-    ]
-  },
-  {
-    "id": "char-1774546471127-pi7t0",
-    "type": "character",
-    "code": "C-037",
-    "camp": "",
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
-    "versions": [
-      {
-        "vid": "v-1774546471127-i5tfo",
-        "title": "楚山本",
-        "subtitle": "",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "角色简介"
-          },
-          {
-            "type": "p",
-            "text": "这是楚山本的角色词条。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774546471127
-      }
-    ]
-  },
-  {
-    "id": "char-1774546471127-5thlx",
-    "type": "character",
-    "code": "C-038",
-    "camp": "",
-    "pinned": false,
-    "pinStartChapter": null,
-    "pinEndChapter": null,
-    "pinnedVersions": {},
-    "missingIntervalVersion": null,
-    "defaultPinnedVersion": null,
-    "versions": [
-      {
-        "vid": "v-1774546471127-g6b1g",
-        "title": "张破军",
-        "subtitle": "",
-        "level": 3,
-        "image": null,
-        "images": {
-          "avatar": null,
-          "card": null,
-          "cover": null
-        },
-        "chapterFrom": null,
-        "chapterTo": null,
-        "blocks": [
-          {
-            "type": "h2",
-            "text": "角色简介"
-          },
-          {
-            "type": "p",
-            "text": "这是张破军的角色词条。"
-          }
-        ],
-        "relatedVersions": [],
-        "relatedCharacters": [],
-        "createdAt": 1774546471127
-      }
-    ]
+    "defaultPinnedVersion": null
   }
 ]
