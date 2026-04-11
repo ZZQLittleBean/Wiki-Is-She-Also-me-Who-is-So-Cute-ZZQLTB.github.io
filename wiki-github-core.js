@@ -2902,80 +2902,39 @@ async importZipFile(zipFile, mode = 'ask', resumeFromShard = 0) {
             this.syncSynopsisWithChapters();
         }
 
-        // 步骤 5: 处理图片（带并发控制）
-        progress.update(20, `上传图片 (${imageFiles.length}张)...`);
-        
-        const CONCURRENT_LIMIT = 2; // 降低并发避免限流
-        let uploadedCount = 0;
-        
-        for (let i = 0; i < imageFiles.length; i += CONCURRENT_LIMIT) {
-            const batch = imageFiles.slice(i, i + CONCURRENT_LIMIT);
-            await Promise.all(batch.map(async (imgPath) => {
-                // 处理路径，提取纯文件名
-                const filename = imgPath.replace(/^images\//, '').replace(/^\/?/, '');
-                
-                try {
-                    const arrayBuffer = await zip.file(imgPath).async('arraybuffer');
-                    const blob = new Blob([arrayBuffer]);
-                    
-                    const dataUrl = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => resolve(e.target.result);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    });
-                    
-                    // 压缩大图片
-                    const compressed = await this.compressImageIfNeeded(dataUrl, 1920, 1080, 0.85, 2);
-                    
-                    // 上传到GitHub
-                    await this.githubStorage.saveImage(filename, compressed);
-                    uploadedCount++;
-                    
-                    // 记录映射关系（原路径 -> 文件名）
-                    imageNameMap.set(imgPath, filename);
-                    imageNameMap.set(filename, filename);
-                    
-                } catch (e) {
-                    console.error(`[Import] 图片上传失败 ${filename}:`, e.message);
-                    failedImages.push(filename);
-                }
-            }));
-            
-            progress.update(20 + (30 * uploadedCount / imageFiles.length), `已上传 ${uploadedCount}/${imageFiles.length} 张图片...`);
-            await new Promise(r => setTimeout(r, 500)); // 批次间延迟
+        // 【步骤 5】处理图片后，构建统一的文件集合（修正变量名并防截断）
+        const uploadedFileSet = new Set();
+        for (const imgPath of imageFiles) {
+            let filename = imgPath.replace(/^images\//, '').replace(/^\/?/, '');
+            // 【整合第三段代码】预防性修复：.jp → .jpg
+            if (filename.endsWith('.jp') && !filename.endsWith('.jpg')) {
+                filename += 'g';
+            }
+            if (!failedImages.includes(filename)) {
+                uploadedFileSet.add(filename);
+            }
         }
 
-        // 【关键修复】步骤 5.5: 强制建立图片引用映射（防止 images 全为 null）
-        progress.update(45, '建立图片引用...');
-        
-        // 使用新的变量名避免冲突：entryImageMap
-        const entryImageMap = new Set(
-            imageFiles.map(p => p.replace(/^images\//, '').replace(/^\/?/, ''))
-        );
-        
-        console.log(`[Import] 已上传 ${entryImageMap.size} 张图片，开始匹配条目...`);
-        
-        // 强制为每个 entry/version 建立 {{IMG:...}} 引用
+        // 【步骤 5.5 替代原有逻辑】强制建立图片引用（整合第一段代码）
+        progress.update(45, '建立图片引用映射...');
         entries.forEach(entry => {
             if (!entry.versions) return;
-            
             entry.versions.forEach(v => {
-                // 【关键】强制初始化 images 对象，清除 null/base64
+                // 强制初始化 images 对象（清除旧的 null/base64/错误数据）
                 v.images = { avatar: null, card: null, cover: null };
                 
-                // 根据 entry.id 和 v.vid 构造预期的文件名
-                const expectedFiles = {
+                // 预期的标准文件名
+                const patterns = {
                     avatar: `${entry.id}_${v.vid}_avatar.jpg`,
-                    card: `${entry.id}_${v.vid}_card.jpg`, 
+                    card: `${entry.id}_${v.vid}_card.jpg`,
                     cover: `${entry.id}_${v.vid}_cover.jpg`
                 };
                 
-                // 只要远程存在该文件，就强制设置引用（使用 entryImageMap）
+                // 智能匹配：检查该文件是否已成功上传
                 ['avatar', 'card', 'cover'].forEach(type => {
-                    if (entryImageMap.has(expectedFiles[type])) {
-                        v.images[type] = `{{IMG:${expectedFiles[type]}}`;
-                        console.log(`[Import] 建立引用: ${entry.code}.${type} = ${expectedFiles[type]}`);
+                    const expectedFile = patterns[type];
+                    if (uploadedFileSet.has(expectedFile)) {
+                        v.images[type] = `{{IMG:${expectedFile}}`;
                     }
                 });
                 
@@ -2984,56 +2943,16 @@ async importZipFile(zipFile, mode = 'ask', resumeFromShard = 0) {
             });
         });
 
-        // 步骤 6: 【长期防护】强制建立正确的 {{IMG:...}} 引用（源头控制）
-        progress.update(50, '建立图片引用映射（含完整性校验）...');
-        
-        const uploadedFiles = new Set(
-            imageFiles.map(p => p.replace(/^images\//, '').replace(/^\/?/, ''))
-        );
-        
-        entries.forEach(entry => {
-            if (!entry.versions) return;
-            
-            entry.versions.forEach(v => {
-                // 强制初始化 images 对象（清除旧的 null/base64/错误数据）
-                v.images = { avatar: null, card: null, cover: null };
-                
-                const patterns = {
-                    avatar: `${entry.id}_${v.vid}_avatar.jpg`,
-                    card: `${entry.id}_${v.vid}_card.jpg`,
-                    cover: `${entry.id}_${v.vid}_cover.jpg`
-                };
-                
-                ['avatar', 'card', 'cover'].forEach(type => {
-                    const expectedFile = patterns[type];
-                    
-                    // 严格校验：只有当远程确实上传了该文件，才建立引用
-                    if (uploadedFiles.has(expectedFile)) {
-                        // 确保文件名不以 .jp 结尾（异常检查）
-                        if (expectedFile.endsWith('.jp') && !expectedFile.endsWith('.jpg')) {
-                            console.error(`[Import] 异常文件名跳过: ${expectedFile}`);
-                            return;
-                        }
-                        v.images[type] = `{{IMG:${expectedFile}}}`;
-                        console.log(`[Import] 建立引用: ${entry.code}.${type} -> ${expectedFile}`);
-                    }
-                });
-                
-                // 同步旧版字段（优先 card）
-                v.image = v.images.card || v.images.avatar || v.images.cover || null;
-            });
-        });
-
-        // 【同时】确保 synopsis 中的图片引用也被处理
+        // 【步骤 6】处理 synopsis 图片（使用已定义的 uploadedFileSet）
         if (importedData.synopsis) {
             importedData.synopsis.forEach(syn => {
                 if (!syn.image || syn.image.startsWith('data:')) {
-                    // 尝试查找 synopsis-{chapterId}-{timestamp}.jpg 格式的图片
-                    const possibleSynFiles = Array.from(uploadedFiles).filter(f => 
-                        f.startsWith(`synopsis-${syn.chapterId || syn.id}`)
+                    const synPattern = `synopsis-${syn.chapterId || syn.id}`;
+                    const possibleFiles = Array.from(uploadedFileSet).filter(f => 
+                        f.startsWith(synPattern) && f.endsWith('.jpg')
                     );
-                    if (possibleSynFiles.length > 0) {
-                        syn.image = `{{IMG:${possibleSynFiles[0]}}}`;
+                    if (possibleFiles.length > 0) {
+                        syn.image = `{{IMG:${possibleFiles[0]}}`;
                     }
                 }
             });
@@ -3097,7 +3016,33 @@ async importZipFile(zipFile, mode = 'ask', resumeFromShard = 0) {
         // 步骤 9: 最终同步与清理
         progress.update(95, '同步剧情梗概...');
         this.syncSynopsisWithChapters();
-        
+        // 【整合第三段代码】导入后深度修复截断（作为保险机制）
+        progress.update(88, '校验文件名完整性...');
+        let truncationFixed = 0;
+        this.data.entries.forEach(entry => {
+            if (!entry.versions) return;
+            entry.versions.forEach(v => {
+                if (!v.images) return;
+                ['avatar', 'card', 'cover'].forEach(type => {
+                    let val = v.images[type];
+                    if (!val || typeof val !== 'string') return;
+                    
+                    // 检测 {{IMG:...}} 格式内被截断为 .jp}}
+                    if (val.includes('{{IMG:') && val.endsWith('.jp}}')) {
+                        v.images[type] = val.slice(0, -5) + '.jpg}}';
+                        truncationFixed++;
+                    }
+                    // 检测其他 .jp 截断变体
+                    else if (val.endsWith('.jp') && !val.endsWith('.jpg')) {
+                        v.images[type] = val + 'g';
+                        truncationFixed++;
+                    }
+                });
+            });
+        });
+        if (truncationFixed > 0) {
+            console.log(`[Import] 修复了 ${truncationFixed} 处文件名截断`);
+        }
         // 再次保存（包含同步后的 synopsis）
         await this.saveDataSimple(progress);
 
@@ -3113,9 +3058,24 @@ async importZipFile(zipFile, mode = 'ask', resumeFromShard = 0) {
             `图片: ${uploadedCount}/${imageFiles.length} 成功${failedImages.length > 0 ? `, ${failedImages.length} 失败` : ''}`
         ].filter(Boolean).join('\n');
 
+        // 导入成功后的处理（约第 3110 行附近，成功消息提示之前）
+        progress.update(95, '刷新图片显示...');
+
+        // 【整合第二段代码】立即解析所有 {{IMG:...}} 为完整 URL
+        this.resolveImageReferences();
+
+        // 刷新当前页面以显示图片
+        this.router(this.data.currentTarget || 'home', false);
+
+        // 延迟执行二次刷新（确保GitHub Raw URL生效）
+        setTimeout(() => {
+            this.resolveImageReferences();
+            this.router(this.data.currentTarget || 'home', false);
+        }, 1000);
+
         this.showAlertDialog({
             title: '导入成功',
-            message: msg,
+            message: msg + (truncationFixed > 0 ? `\n\n（自动修复了 ${truncationFixed} 个文件名截断）` : ''),
             type: 'success'
         });
 
