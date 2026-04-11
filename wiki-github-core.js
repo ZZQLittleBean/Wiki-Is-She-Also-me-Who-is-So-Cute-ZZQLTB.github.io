@@ -200,6 +200,7 @@ Object.assign(window.app, {
                 // 延迟执行自检
         setTimeout(() => this.periodicDataCheck(), 3000);
     },
+    
     // 确保默认节点存在
     ensureDefaultNodes() {
         // 如果没有设置最新节点，自动选择order最大的节点
@@ -1400,7 +1401,18 @@ Object.assign(window.app, {
                     text = text.replace(/\n/g, '<br>');
                     // 处理内部链接 [[...]]
                     text = text.replace(/\[\[(.*?)\]\]/g, '<a href="#" onclick="app.searchAndOpen(\'$1\'); return false;" class="text-indigo-600 hover:underline">$1</a>');
-                    
+                    // 1. 角色引用：@姓名[编号] -> 蓝色标签（与本地版一致）
+                    text = text.replace(/@([^\[]+)\[([^\]]+)\]/g, (match, name, code) => {
+                        const cleanCode = code.replace(/\\/g, ''); // 清除可能的转义
+                        return `<span class="synopsis-entry-ref cursor-pointer text-indigo-600 font-medium border-b-2 border-indigo-300 hover:bg-indigo-50 px-1 rounded transition" data-entry-code="${cleanCode}" onmouseenter="app.handleSynopsisRefHover(this)" onmouseleave="app.handleSynopsisRefLeave(this)" onclick="app.openEntryByCode('${cleanCode}')"><i class="fa-solid fa-user text-xs mr-1"></i>${name}</span>`;
+                    });
+
+                    // 2. 剧情引用：{{synopsis:id:title}} -> 蓝色标签（与本地版一致）
+                    text = text.replace(/\{\{synopsis:([^:]+):([^}]+)\}\}/g, (match, chapterId, title) => {
+                        const chapter = this.data.synopsis.find(s => s.id === chapterId);
+                        if (!chapter) return match;
+                        return `<span class="synopsis-entry-ref cursor-pointer text-indigo-600 font-medium border-b-2 border-indigo-300 hover:bg-indigo-50 px-1 rounded transition" data-chapter-id="${chapterId}" onmouseenter="app.handleSynopsisRefHover(this)" onmouseleave="app.handleSynopsisRefLeave(this)" onclick="app.handleSynopsisRefClick(this)"><i class="fa-solid fa-film text-xs mr-1"></i>${title}</span>`;
+                    });
                     contentHtml += `<p class="text-gray-600 leading-relaxed mb-4 break-all">${text}</p>`;
                 }
             });
@@ -1439,10 +1451,10 @@ Object.assign(window.app, {
         
         // 【修复】使用正确的正则表达式：/@姓名[C-001]/
         // [^\[\]] 匹配非方括号字符，\[ 匹配字面量左方括号
-        return text.replace(/@([^\[\]]+)\[([A-Z]-\d{3})\]/g, (match, name, code) => {
+        return text.replace(/@([^\[]+)\[([^\]]+)\]/g, (match, name, code) => {
             const entry = this.data.entries.find(e => e.code === code);
             const entryId = entry ? entry.id : '';
-            return `<span class="character-reference-tag" data-entry-id="${entryId}" data-code="${code}" onclick="app.openEntryByCode('${code}')">${name}</span>`;
+            return `<span class="synopsis-entry-ref" data-entry-id="${entryId}" data-entry-code="${code}" onclick="app.openEntryByCode('${code}')"><i class="fa-solid fa-user text-xs mr-1"></i>${name}</span>`;
         });
     },
 
@@ -1666,11 +1678,7 @@ Object.assign(window.app, {
                         if (isValid) {
                             var entry = self.data.entries.find(function(e) { return e.code === code; });
                             if (entry) {
-                                result += '<span class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 px-2 py-1 rounded-md text-sm font-medium cursor-pointer hover:bg-indigo-100 transition border border-indigo-100" onclick="app.openEntry(\'' + entry.id + '\')">' +
-                                    '<i class="fa-solid fa-user text-xs text-indigo-500"></i>' +
-                                    '<span class="font-semibold">' + name + '</span>' +
-                                    '<span class="text-indigo-400 text-xs font-mono bg-white/50 px-1 rounded">' + code + '</span>' +
-                                '</span>';
+                                result += `<span class="synopsis-entry-ref" data-entry-id="${entry.id}" data-entry-code="${code}" onclick="app.openEntryByCode('${code}')"><i class="fa-solid fa-user text-xs mr-1"></i>${name}<span class="text-xs opacity-70 ml-1 font-mono">${code}</span></span>`;
                                 pos = closeBracket + 1;
                                 continue;
                             }
@@ -4933,5 +4941,59 @@ compressImageIfNeeded: function(dataUrl, maxWidth = 1920, maxHeight = 1080, qual
         }
     }
 });
+app.handleSynopsisRefHover = function(element) {
+    const entryCode = element.dataset.entryCode;
+    const chapterId = element.dataset.chapterId;
+    
+    if (entryCode) {
+        const entry = this.data.entries.find(e => e.code === entryCode);
+        if (entry) {
+            // 简单的 tooltip 实现，可替换为更复杂的预览弹窗
+            element.title = `点击查看角色：${entry.versions?.[0]?.title || entryCode}`;
+        }
+    } else if (chapterId) {
+        const chapter = this.data.synopsis.find(s => s.id === chapterId);
+        if (chapter) {
+            element.title = `点击查看剧情：${chapter.title}`;
+        }
+    }
+};
+
+/**
+ * 悬停离开（清理逻辑）
+ */
+app.handleSynopsisRefLeave = function(element) {
+    // 如有复杂的 tooltip DOM 操作，在此处移除
+    element.title = '';
+};
+
+/**
+ * 剧情引用点击事件
+ */
+app.handleSynopsisRefClick = function(element) {
+    const chapterId = element.dataset.chapterId;
+    if (!chapterId) return;
+    
+    const chapter = this.data.synopsis.find(s => s.id === chapterId);
+    if (chapter) {
+        // 跳转到剧情梗概视图并定位到对应章节
+        this.data.synopsisViewIndex = this.data.synopsis.findIndex(s => s.id === chapterId);
+        this.router('synopsis');
+    }
+};
+
+/**
+ * 通过编号打开条目（已存在则跳过，确保参数清洗）
+ */
+app.openEntryByCode = function(code) {
+    // 清除可能的转义字符（与本地版兼容）
+    const cleanCode = code.replace(/\\/g, '');
+    const entry = this.data.entries.find(e => e.code === cleanCode);
+    if (entry) {
+        this.openEntry(entry.id);
+    } else {
+        this.showToast('未找到该角色: ' + cleanCode, 'warning');
+    }
+};
 
 console.log('GitHub Wiki Core v2.0 加载完成');
