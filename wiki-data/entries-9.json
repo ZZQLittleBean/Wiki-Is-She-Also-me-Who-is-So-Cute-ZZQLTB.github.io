@@ -1,0 +1,84 @@
+[
+  {
+    "id": "char-1774546471127-mhuoc",
+    "type": "character",
+    "code": "C-071",
+    "camp": "",
+    "pinned": false,
+    "pinStartChapter": null,
+    "pinEndChapter": null,
+    "pinnedVersions": {},
+    "missingIntervalVersion": null,
+    "defaultPinnedVersion": null,
+    "versions": [
+      {
+        "vid": "v-1774546471127-9gla6",
+        "title": "宋罗汤",
+        "subtitle": "",
+        "level": 3,
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": null,
+        "chapterTo": null,
+        "blocks": [
+          {
+            "type": "h2",
+            "text": "角色简介"
+          },
+          {
+            "type": "p",
+            "text": "这是宋罗汤的角色词条。"
+          }
+        ],
+        "relatedVersions": [],
+        "relatedCharacters": [],
+        "createdAt": 1774546471127
+      }
+    ]
+  },
+  {
+    "id": "char-1774546471127-r9kwo",
+    "type": "character",
+    "code": "C-072",
+    "camp": "",
+    "pinned": false,
+    "pinStartChapter": null,
+    "pinEndChapter": null,
+    "pinnedVersions": {},
+    "missingIntervalVersion": null,
+    "defaultPinnedVersion": null,
+    "versions": [
+      {
+        "vid": "v-1774546471127-p3314",
+        "title": "马文一",
+        "subtitle": "",
+        "level": 3,
+        "image": null,
+        "images": {
+          "avatar": null,
+          "card": null,
+          "cover": null
+        },
+        "chapterFrom": null,
+        "chapterTo": null,
+        "blocks": [
+          {
+            "type": "h2",
+            "text": "角色简介"
+          },
+          {
+            "type": "p",
+            "text": "这是马文一的角色词条。"
+          }
+        ],
+        "relatedVersions": [],
+        "relatedCharacters": [],
+        "createdAt": 1774546471127
+      }
+    ]
+  }
+]
