@@ -1,21 +1,3327 @@
 {
-  "version": "2.7.0-sharded",
-  "lastUpdate": 1775936067357,
-  "totalEntries": 74,
-  "entryFiles": [
-    "entries-0.json",
-    "entries-1.json",
-    "entries-2.json",
-    "entries-3.json"
+  "entries": [
+    {
+      "id": "char-xiaoli",
+      "type": "character",
+      "code": "C-001",
+      "camp": "ZZQ小豆同学的主角区间",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-4",
+          "title": "张可云",
+          "subtitle": "“所以，我又是谁呢？”",
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-xiaoli_v-4_card.jpg",
+          "chapterFrom": "ch-1774186885948-9q0x2",
+          "chapterTo": "ch-1774186885948-mhej7",
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "特殊情况说明"
+            },
+            {
+              "type": "p",
+              "text": "由于世界融合的影响，在⌈茶室⌋的世界数据中目前找不到张可云曾经的，至少是“男生”时的图片，索性就使用现有的版本直接代替了......不过，像那样的图片指向的“他”如今已经在物质层面被视作“压根没有存在过”，就算还有机会找到那样的记录，真的还有意义吗......？"
+            },
+            {
+              "type": "p",
+              "text": "......"
+            },
+            {
+              "type": "h2",
+              "text": "基本信息"
+            },
+            {
+              "type": "p",
+              "text": "一个看起来普普通通，过着家长期望的生活轨迹的男孩子......反正云云是这么评价曾经的自己的。\n“不过，硬要说的话，我一直都很喜欢......做梦？——当、当然不是白日梦的说。”与我几乎是一个模子里刻出来的少女苦思冥想了好半天，这才找到点她认为可以真正拿上来讲的东西。\n-“那......是做些什么梦呢？”我感觉自己有些明知故问——不。虽然“平行同步性”可以决定不同世界“自己”的思维方向基本相同，可一旦在性别上发生了差异，不少东西的实质变化就会特别、特别大。\n我是这么想的。我坚信如此。\n“嗯......哈哈。”看着我认真的模样，刚刚还有些踌躇不定的云云竟不由得笑了。\n“现在还暂时是个秘密。......但在不久的将来，也许你就在不经意间知道了呢？”\n唔......没想到，云云居然这么快就掌握了女孩子表现俏皮的小技巧——真是可恶呢！"
+            },
+            {
+              "type": "p",
+              "text": "***注意：本词条忠实地记录了目前已知的张可云在变化之前的信息，但世界融合导致的乱流使得信息逐渐向她当前的状态同质化，更多信息仍待补充。关于她当前的状态，请移步第一大章开始的版本继续阅读。***"
+            }
+          ],
+          "relatedVersions": [
+            "v-1774543291292"
+          ],
+          "createdAt": 1774001949959,
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-xiaoli_v-4_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-xiaoli_v-4_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-xiaoli_v-4_cover.jpg"
+          },
+          "relatedCharacters": [
+            {
+              "charId": "char-protagonist",
+              "relationName": "“自己”"
+            }
+          ],
+          "level": 1
+        },
+        {
+          "vid": "v-1774543291292",
+          "title": "张可云",
+          "subtitle": "“被”变成了少女的少女。\n突然多出的“自己”，以及自己如今的这副模样，在外人看来已经与曾经截然不同。\n......接下来的一天、一周、一个月、一年......甚至一辈子，应该怎么办呢？",
+          "level": 1,
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-xiaoli_v-1774543291292_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-xiaoli_v-1774543291292_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-xiaoli_v-1774543291292_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-xiaoli_v-1774543291292_cover.jpg"
+          },
+          "chapterFrom": "ch-1774186885948-aaljk",
+          "chapterTo": "ch-1774543469679",
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "特殊情况说明"
+            },
+            {
+              "type": "p",
+              "text": "由于世界融合的影响，在⌈茶室⌋的世界数据中目前找不到张可云曾经的，至少是“男生”时的图片，索性就使用现有的版本直接代替了......不过，像那样的图片指向的“他”如今已经在物质层面被视作“压根没有存在过”，就算还有机会找到那样的记录，真的还有意义吗......？"
+            }
+          ],
+          "relatedVersions": [
+            "v-4",
+            "v-1774543545298"
+          ],
+          "relatedCharacters": [
+            {
+              "charId": "char-protagonist",
+              "relationName": "“自己”"
+            },
+            {
+              "charId": "char-1774456559847",
+              "relationName": "堂兄妹"
+            },
+            {
+              "charId": "char-1774008119662",
+              "relationName": "好朋友"
+            }
+          ],
+          "createdAt": 1774543291292
+        },
+        {
+          "vid": "v-1774543545298",
+          "title": "张可云",
+          "subtitle": "“被”变成了少女的少女。在⌈试炼⌋中逐渐成为了真正的自己。\n而今，完全拥有“世界之核”的能力与颂颂记忆的她，应该是做好面对未来的准备了吧。",
+          "level": 1,
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-xiaoli_v-1774543545298_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-xiaoli_v-1774543545298_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-xiaoli_v-1774543545298_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-xiaoli_v-1774543545298_cover.jpg"
+          },
+          "chapterFrom": "ch-1774186885948-fbqoj",
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "特殊情况说明"
+            },
+            {
+              "type": "p",
+              "text": "由于世界融合的影响，在⌈茶室⌋的世界数据中目前找不到张可云曾经的，至少是“男生”时的图片，索性就使用现有的版本直接代替了......不过，像那样的图片指向的“他”如今已经在物质层面被视作“压根没有存在过”，就算还有机会找到那样的记录，真的还有意义吗......？"
+            },
+            {
+              "type": "h2",
+              "text": "？？？"
+            },
+            {
+              "type": "p",
+              "text": "▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮\n▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮\n▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮"
+            },
+            {
+              "type": "p",
+              "text": "由于世界融合的影响，在⌈茶室⌋的世界数据中目前找不到张可云曾经的，至少是“男生”时的图片，索性就使用现有的版本直接代替了......不过，像那样的图片指向的“他”如今已经在物质层面被视作“压根没有存在过”，就算还有机会找到那样的记录，真的还有意义吗......？"
+            },
+            {
+              "type": "p",
+              "text": "If you wanna it If you wanna itIf you wanna itIf you wanna itIf you wanna itIf you wanna itIf you wanna itIf you wanna itIf you wanna itIf you wanna itIf you wanna itIf you wanna it"
+            }
+          ],
+          "relatedVersions": [
+            "v-1774543291292"
+          ],
+          "relatedCharacters": [
+            {
+              "charId": "char-protagonist",
+              "relationName": "“自己”"
+            },
+            {
+              "charId": "char-1774026694075-xgyqu152f",
+              "relationName": "“世界”之缔约"
+            },
+            {
+              "charId": "char-1774026694075-u7kq4f8ke",
+              "relationName": "基友"
+            },
+            {
+              "charId": "char-1774008119662",
+              "relationName": "好朋友-挚友"
+            },
+            {
+              "charId": "char-1774026694075-8i2iofwqf",
+              "relationName": "曾经的系统“主仆”"
+            },
+            {
+              "charId": "char-1774456559847",
+              "relationName": "堂......“姐妹”？"
+            },
+            {
+              "charId": "char-1774459740637",
+              "relationName": "“自己”"
+            },
+            {
+              "charId": "char-1774026694075-y6atk7qsi",
+              "relationName": "宠物与主人的关系（？）"
+            },
+            {
+              "charId": "char-1774026694075-pddxgmmb6",
+              "relationName": "基友"
+            },
+            {
+              "charId": "char-1774026694075-x8xop0wzb",
+              "relationName": "母女"
+            },
+            {
+              "charId": "char-1774458852650",
+              "relationName": "“自己”"
+            }
+          ],
+          "createdAt": 1774543545299
+        }
+      ],
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null
+    },
+    {
+      "id": "char-protagonist",
+      "type": "character",
+      "code": "C-002",
+      "title": "主角",
+      "camp": "ZZQ小豆同学的主角区间",
+      "versions": [
+        {
+          "vid": "v-default",
+          "title": "张可颂",
+          "subtitle": "“田螺姑娘”的真身原来是No_002世界的张可云，在⌈茶室⌋的帮助下来到了No_001世界。\n在张可云看来，她精通的东西似乎太多了些——烹饪、绘画，还有......魔法？",
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "p",
+              "text": "位置1：{{synopsis:syn-1774191539580-57m1e:1.3 田螺姑娘的真相，没想到是自己干的？！}}\n位置2：{{synopsis:syn-1774191539580-8y14s:2.3 或许，我还是那个你最熟悉的人呢？}}"
+            }
+          ],
+          "relatedVersions": [],
+          "createdAt": 1774001949959,
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-protagonist_v-default_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-protagonist_v-default_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-protagonist_v-default_cover.jpg"
+          },
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-protagonist_v-default_card.jpg",
+          "relatedCharacters": [
+            {
+              "charId": "char-xiaoli",
+              "relationName": "“自己”"
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null
+    },
+    {
+      "id": "camp-1774006803815",
+      "type": "non-character",
+      "code": "N-002",
+      "level": 3,
+      "camp": "",
+      "pinned": false,
+      "isCampEntry": true,
+      "versions": [
+        {
+          "vid": "v-default",
+          "title": "访客组",
+          "subtitle": "外来的客人千奇百怪。但能放在这个组的，也许并非匆匆过客，或许是内心的一汪涟漪，又或许是......美好“奇迹”的一部分？",
+          "image": null,
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "简介"
+            },
+            {
+              "type": "p",
+              "text": "这是访客组的详细介绍。"
+            }
+          ],
+          "relatedVersions": [],
+          "createdAt": 1774006803815,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "level": 2
+        }
+      ],
+      "settingType": "world"
+    },
+    {
+      "id": "char-1774006823382",
+      "type": "character",
+      "code": "C-003",
+      "camp": "访客组",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774006823382",
+          "title": "向鸿鸿",
+          "subtitle": "一位裁缝、一位大厨、一位“父亲”……\n一位“外派的魔法少女”，一些绕不开剪不断的过去。\n她在后悔……她在思索。\n至少现在——她又有希望了。",
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774006823382_v-1774006823382_card.jpg",
+          "chapterFrom": "ch-1774186885948-e7kbk",
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "基本信息"
+            },
+            {
+              "type": "h3",
+              "text": "姓名"
+            },
+            {
+              "type": "p",
+              "text": "向鸿鸿"
+            },
+            {
+              "type": "h3",
+              "text": "性别"
+            },
+            {
+              "type": "p",
+              "text": "女"
+            },
+            {
+              "type": "h3",
+              "text": "个人履历"
+            },
+            {
+              "type": "p",
+              "text": "按向鸿鸿小姐的说法，她既是一位裁缝，又是一个厨师，还有营养师、心理诊疗师，甚至还得带上个见习园艺师……相关的证明齐全到位没有任何质疑空间，但唯一的问题是，一些证明似乎有些年头了，尤其是“裁缝”的最初证明是一张看上去就很老旧的营业资格证书，貌似已经有半个世纪的岁数了。\n向鸿鸿小姐对只因货栈的大家而言，再清楚不过的身份其实是向日葵的……“父亲”？这一点在向日葵……或者说“曾经”的向日葵那儿得到了证实。最初的曦芷得知这一消息似乎尤为亢奋，后来才知晓曦芷的第一反应是联想到了某种叫作“TS”的小众文化，大概是什么……“性别转换”之类的东西。但在后来向鸿鸿小姐汗颜澄清“自己从小到大其实都是女孩子”后，曦芷又莫名冒出些不乐意了。\n至少，向鸿鸿小姐是个完全的蓝星人甚至是炎国人，而在档案部门老学究们的努力寻找下，一份大约50年代她曾经作为“外使魔女”外派到异世界文明星团732c星球的绝密档案被发掘出来。\n“外使魔女”放到现在其实就是魔法少女相关的外使工作，而巧合的是向鸿鸿小姐确有某种“魔女”的血脉且传承给了向日葵。“魔女”的血脉已无确切根源，而照向鸿鸿所说，这种血脉原本平平无奇，却在732c星球某种事物的催化下出现了特殊的效果，譬如她似乎很“长寿”的事实，以及向日葵的诞生——不过考虑到如今的向日葵有向朝阳这样一个真正的父亲背景，某些后续的研究还是得基于此作进一步的厘清。\n"
+            },
+            {
+              "type": "h3",
+              "text": "身高/体重"
+            },
+            {
+              "type": "p",
+              "text": "155cm/47.8kg"
+            },
+            {
+              "type": "h3",
+              "text": "三围"
+            },
+            {
+              "type": "p",
+              "text": "85.2/58.4/84.7\n似乎就是比“平均值”好上一点，即使曦芷在此之前对她的身体数据确实充满期待，可事实就是如此——并不是什么特别出众的数值，曦芷可以打消某些不好的念头了。\n不过据她本人所言，某些“可能让曦芷小姐产生误会”的因素，或许是出自她自己设计的这款像是风衣的常服——干练但又不失活泼，专业却又不至于给人一种陌生的感觉，甚至还有些凸显身材的附加功能。毕竟作为一位裁缝，她自然是对这种能够把女孩子最美好部分展现出来的课题相当熟练了。\n"
+            },
+            {
+              "type": "h2",
+              "text": "详细记录"
+            },
+            {
+              "type": "h3",
+              "text": "记录其一"
+            },
+            {
+              "type": "p",
+              "text": "记录员准时来到访谈室时，曦芷便已经与向鸿鸿聊上，甚至已经有一个重要话题告一段落。随着记录员的追问，曦芷这才有些失落却又羞涩（明显是对向鸿鸿）地说明，她今天刚与向鸿鸿小姐见面便忍不住询问了她貌似产生了巨变的身体特征——当初在葫芦洞时那嫩绿的发色为何现在几乎褪去，成了现在和向日葵几乎毫无二致的茶白色——而且，她那神似向日葵的金黄色眼瞳也有些晕色，似乎朝着紫红色的方向发展……这正与向鸿鸿遇到的一位关键人物，“阿丽娜”相关。\n“阿丽娜，732c星球的特殊魔法个体，与‘植物’相关法术具有极佳亲和度。”再三追问之下只得到了这么多信息，记录员只得战战兢兢地誊抄在本子上。\n不过两人的聊天也没有结束，在之后的访谈过程中记录员也大致明白了事情经过：至少向鸿鸿前往732c星球的缘由便是源自20世纪50年代，在K市周围产生的“世界联络非常现象”所产生的时空重叠，当时的名头好像叫……“外驻术使”来着。\n至于那个年代怎么会有那样的部门，甚至向鸿鸿为何在此之前便取得了葡萄星学园的学位证书，还是与当今葡萄星学园头号长寿魔女名师丝萝珥同一届的学位，曦芷警告这与某些跨时空相关的部门业务紧密相连，不应该再深入追问甚至记入档案，但私下聊聊应该还是在可接受范围之内的。\n回归正题，在找到关键窗口期从时空重叠点进入732c星球的向鸿鸿惊讶地发现当地无论气候、文化均与欧洲中世纪时期类似，且具有如今标准下极为罕见的高魔能环境，这意味着一个幻想中的“典型魔法世界”在732c星球上存续至今。由于当时技术有限，只身一人到达的向鸿鸿发现重叠点已然消失，而在最终为了回归蓝星，向鸿鸿只得借助了732c……以及，“阿丽娜”的力量。\n据向鸿鸿所说，原先绿发、黄瞳的特征正是缘自阿丽娜。在她孤立无援之时，正是这个自称“野木灵”魔法师的少女将她带往农庄照料，向鸿鸿这才存活下来。而为了报答，向鸿鸿借助自己曾经学习的裁缝技能到处为他人补衣，而两人便在长期的生活中逐渐产生了默契、友情，甚至一些……“超越友情”的特殊感情。\n“野木灵族与魔女血脉的相容性极佳，这也催生了阿丽娜想与我培育‘下一代’的想法。”说到这儿，向鸿鸿不禁脸红起来，“至于我为什么最后成了‘父亲’，也是因为生育的过程主要还是阿丽娜负责，到我这里也必须承担起父亲的职责啦。至于向日葵为什么姓‘向’——说好的‘随父姓’，其实就是我带过去的文化习惯导致的啦～”"
+            },
+            {
+              "type": "h3",
+              "text": "记录其二"
+            },
+            {
+              "type": "p",
+              "text": "“关于阿丽娜的事情，我感到很遗憾。”话语正处伤心时，曦芷轻声宽慰道。\n目前藏于葡萄星图书馆的，原先与732c的魔女向日葵相关的记录中就已经记载过暴民借除魔女的借口刺杀向日葵的情况了。就在当时，远在穷村僻壤的向鸿鸿与阿丽娜也备受波及。而为了保护阿丽娜——不如说是阿丽娜为了保护向鸿鸿，便以牺牲自己为代价成为了一颗陪伴向鸿鸿的“种子”。\n随后，近70年的时间里（但实际时间的流动与蓝星不同，在732c可能已经过去了将近230年）向鸿鸿辗转732c各地，直至极北——在那里，她意外获得了一个法子，能够同时让阿丽娜“复活”，让自己也能回归蓝星——将种子的力量与自身的血脉以特殊的手段相容，便能凭空生成折跃窗，且将种子激活。而代价便是，阿丽娜的一切——包括外在与记忆，会与向鸿鸿自己交杂、缠绕，她也在这样的情况下出现了一定时间的精神失常——而为了尽量不引起他人注意，她便把目光投在原先重叠点附近“葫芦洞”的瀑流之下：不仅为了自己，也是为了阿丽娜。\n直到近十年，精神失常的症状才得以缓解——在此期间，为了谋生以及适应时代，她学习了裁缝以外的技能——这也是前面所说的那些证明的由来。\n“向日葵一直在强调她的做饭手艺有多么出色，不过现在看来……向鸿鸿的其他东西更让人着迷呢。……要是我也能白嫖一套向鸿鸿定制的衣服就好啦。”——曦芷\n“禁止以录档案访谈为由让访客做些为难的事情。”——翎\n"
+            },
+            {
+              "type": "h3",
+              "text": "记录其三"
+            },
+            {
+              "type": "p",
+              "text": "我还能回忆起那段时光。\n多么安逸、快乐与充实。\n我还能回忆起那场怒火……\n多么炙热、痛苦……以及悔恨。\n我似乎成了孤魂野鬼。只有你……愿意在我身边。\n不过还好。现在我找回她了。\n我也很快要找回你了呢……\n"
+            }
+          ],
+          "relatedVersions": [],
+          "createdAt": 1774006823382,
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774006823382_v-1774006823382_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774006823382_v-1774006823382_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774006823382_v-1774006823382_cover.jpg"
+          },
+          "level": 2
+        }
+      ],
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null
+    },
+    {
+      "id": "char-1774008119662",
+      "type": "character",
+      "code": "C-004",
+      "camp": "ZZQ小豆同学的主角区间",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774008119662",
+          "title": "向松松",
+          "subtitle": "二班的“捣乱”代表，备受大家排挤与取笑的家伙，却又对张可云有莫名的亲和感——或许这便是她首先把自己的秘密告诉他的最直接原因。\n不过照他这个脾气，总觉得下一秒就要出事了......",
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774008119662_card.jpg",
+          "chapterFrom": "ch-1774186885948-t51s2",
+          "chapterTo": "ch-1774186885948-fbqoj",
+          "blocks": [],
+          "relatedVersions": [
+            "v-1774344674149"
+          ],
+          "createdAt": 1774008119662,
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774008119662_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774008119662_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774008119662_cover.jpg"
+          },
+          "relatedCharacters": [],
+          "level": 2
+        },
+        {
+          "vid": "v-1774344674149",
+          "title": "向松松",
+          "subtitle": "二班的“捣乱”代表，备受大家排挤与取笑的家伙。\n......不过，出事的好像是自己来着。\n除了张可云......还有曦芷......还有老爸和老妈！他不想让更多的人知道“向日葵”其实就是他自己的秘密了。\n呃，向松松想一个人静静。",
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774344674149_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774344674149_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774344674149_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774344674149_cover.jpg"
+          },
+          "chapterFrom": "ch-1774186885948-asmjg",
+          "chapterTo": "ch-1774344830513",
+          "blocks": [],
+          "relatedVersions": [
+            "v-1774008119662",
+            "v-1774344684185"
+          ],
+          "relatedCharacters": [],
+          "createdAt": 1774344674149,
+          "level": 2
+        },
+        {
+          "vid": "v-1774344684185",
+          "title": "向日葵",
+          "subtitle": "K市的新晋魔法少女。\n在“异兽”与“只因货栈”之前，魔法少女似乎也不算是真正存在的——向松松也是那么想的。\n但现在，他......她不得不相信了。",
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774344684185_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774344684185_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774344684185_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774344684185_cover.jpg"
+          },
+          "chapterFrom": "ch-1774186885948-asmjg",
+          "chapterTo": "ch-1774344830513",
+          "blocks": [],
+          "relatedVersions": [
+            "v-1774344674149",
+            "v-1774344686388"
+          ],
+          "relatedCharacters": [
+            {
+              "charId": "char-1774006823382",
+              "relationName": "“父”女"
+            }
+          ],
+          "createdAt": 1774344684185,
+          "level": 1
+        },
+        {
+          "vid": "v-1774344686388",
+          "title": "向松松，“向日葵”",
+          "subtitle": "在你的选择和“向日葵”的选择下，你最终接纳了这副模样......对吗？",
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774344686388_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774344686388_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774344686388_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774008119662_v-1774344686388_cover.jpg"
+          },
+          "chapterFrom": "ch-1774186885948-7trsu",
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色概述"
+            },
+            {
+              "type": "p",
+              "text": "在“世界融合”的作用下，原先的向松松终于不复存在，变成了如今这般少女的模样：常态除了黑发几乎与那个“向日葵”别无二致，当然好像也显得更......可爱了？\n当然，这似乎带来了意外之喜：没有人来找她取笑了，能量的溢出也不会让她强制变身了，还有......\n那段梦魇，叫做“脑炎”的深层梦魇，此刻也不翼而飞。"
+            }
+          ],
+          "relatedVersions": [
+            "v-1774344684185"
+          ],
+          "relatedCharacters": [
+            {
+              "charId": "char-1774006823382",
+              "relationName": "“父”女（？）"
+            },
+            {
+              "charId": "char-xiaoli",
+              "relationName": "挚友"
+            },
+            {
+              "charId": "char-protagonist",
+              "relationName": "逐渐重建的挚友"
+            },
+            {
+              "charId": "char-1774456559847",
+              "relationName": "曾经的基友"
+            }
+          ],
+          "createdAt": 1774344686388,
+          "level": 1
+        }
+      ],
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {
+        "ch-1774186885948-asmjg": "v-1774344684185"
+      },
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null
+    },
+    {
+      "id": "char-1774026694075-u7kq4f8ke",
+      "type": "character",
+      "code": "C-007",
+      "camp": "同学组A",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774026694075-q7qxdep80",
+          "title": "徐晓乌",
+          "subtitle": "最早知晓张可云变化的朋友。自初中时开始两人的关系似乎一直很好，日常大大咧咧，每当谈及他最喜欢的车时，他又能在严肃中滔滔不绝。",
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-u7kq4f8ke_v-1774026694075-q7qxdep80_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-u7kq4f8ke_v-1774026694075-q7qxdep80_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-u7kq4f8ke_v-1774026694075-q7qxdep80_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-u7kq4f8ke_v-1774026694075-q7qxdep80_cover.jpg"
+          },
+          "chapterFrom": "ch-1774186885948-o6muc",
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [],
+          "relatedCharacters": [
+            {
+              "charId": "char-xiaoli",
+              "relationName": "基友"
+            },
+            {
+              "charId": "char-1774008119662",
+              "relationName": "曾经的基友"
+            }
+          ],
+          "createdAt": 1774026694075,
+          "level": 2
+        }
+      ],
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null
+    },
+    {
+      "id": "char-1774026694075-pddxgmmb6",
+      "type": "character",
+      "code": "C-008",
+      "camp": "同学组A",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774026694075-h3ck67fwo",
+          "title": "解顶",
+          "subtitle": "",
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": "ch-1774186885948-o6muc",
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774026694075,
+          "level": 3
+        }
+      ],
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null
+    },
+    {
+      "id": "char-1774026694075-bd758umqs",
+      "type": "character",
+      "code": "C-009",
+      "camp": "同学组A",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774026694075-pdzwfsfdv",
+          "title": "王磁炮",
+          "subtitle": "",
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": "ch-1774186885948-o6muc",
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774026694075,
+          "level": 3
+        }
+      ],
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null
+    },
+    {
+      "id": "char-1774546471127-jwsqg",
+      "type": "character",
+      "code": "C-047",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-oonns",
+          "title": "马聪",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是马聪的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-rb7ce",
+      "type": "character",
+      "code": "C-048",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-freqm",
+          "title": "梁金赫晓昂",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是梁金赫晓昂的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-ib9s4",
+      "type": "character",
+      "code": "C-049",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-e9nxk",
+          "title": "张源源",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是张源源的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-ya7bw",
+      "type": "character",
+      "code": "C-050",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-rdq51",
+          "title": "马暮光",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是马暮光的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-uv1yn",
+      "type": "character",
+      "code": "C-051",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-nej1s",
+          "title": "雷阵雨",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是雷阵雨的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-q5cn5",
+      "type": "character",
+      "code": "C-052",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-qsxlr",
+          "title": "毕碧梓",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是毕碧梓的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-764cz",
+      "type": "character",
+      "code": "C-053",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-1r6xc",
+          "title": "张癸癸",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是张癸癸的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-8duoa",
+      "type": "character",
+      "code": "C-054",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-we8gh",
+          "title": "李姐",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是李姐的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-53ct5",
+      "type": "character",
+      "code": "C-063",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-9ewt8",
+          "title": "锥哥",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是锥哥的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-vwtil",
+      "type": "character",
+      "code": "C-064",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-7nq16",
+          "title": "苏北溪",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是苏北溪的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-h46x6",
+      "type": "character",
+      "code": "C-065",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-tst8t",
+          "title": "马大钊",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是马大钊的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-bqswl",
+      "type": "character",
+      "code": "C-066",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-yu8ug",
+          "title": "郑班长",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是郑班长的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-xflm8",
+      "type": "character",
+      "code": "C-067",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-r1oka",
+          "title": "卖米线的阿姨",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是卖米线的阿姨的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-jfq9d",
+      "type": "character",
+      "code": "C-068",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-vjwej",
+          "title": "保安",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是保安的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-1rmwq",
+      "type": "character",
+      "code": "C-069",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-bf17s",
+          "title": "董加法",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是董加法的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-37jhx",
+      "type": "character",
+      "code": "C-070",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-wg8im",
+          "title": "邱丘人",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是邱丘人的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-rrfmj",
+      "type": "character",
+      "code": "C-055",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-vuazz",
+          "title": "姨爹",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是姨爹的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-e6em0",
+      "type": "character",
+      "code": "C-056",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-h0rv3",
+          "title": "公公",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是公公的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-34mwg",
+      "type": "character",
+      "code": "C-057",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-zs0k0",
+          "title": "阿婆",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是阿婆的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-fcutt",
+      "type": "character",
+      "code": "C-058",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-q1evl",
+          "title": "陈小鸥",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是陈小鸥的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-uw7uy",
+      "type": "character",
+      "code": "C-059",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-a24ga",
+          "title": "李芸芸",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是李芸芸的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-4aoz5",
+      "type": "character",
+      "code": "C-060",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-z9q70",
+          "title": "张睿祥",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是张睿祥的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-kxobi",
+      "type": "character",
+      "code": "C-061",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-o69xi",
+          "title": "梅友乾",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是梅友乾的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-5k8t4",
+      "type": "character",
+      "code": "C-062",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-o6acy",
+          "title": "刀钟声",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是刀钟声的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774026694075-x8xop0wzb",
+      "type": "character",
+      "code": "C-010",
+      "level": 5,
+      "camp": "",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774026694075-8maosavpn",
+          "title": "葛茗茗",
+          "subtitle": "",
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774026694075
+        }
+      ]
+    },
+    {
+      "id": "char-1774026694075-7bjnusb2d",
+      "type": "character",
+      "code": "C-011",
+      "level": 5,
+      "camp": "",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774026694075-gwai28x6z",
+          "title": "葛荧荧",
+          "subtitle": "",
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774026694075
+        }
+      ]
+    },
+    {
+      "id": "char-1774026694075-h2nh765en",
+      "type": "character",
+      "code": "C-012",
+      "level": 5,
+      "camp": "",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774026694075-u7a9xkygj",
+          "title": "葛苧苧",
+          "subtitle": "",
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774026694075
+        }
+      ]
+    },
+    {
+      "id": "char-1774026694075-5abfiv77y",
+      "type": "character",
+      "code": "C-013",
+      "level": 5,
+      "camp": "",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774026694075-lgrv55egz",
+          "title": "Prizh",
+          "subtitle": "",
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774026694075
+        }
+      ]
+    },
+    {
+      "id": "char-1774026694075-xgyqu152f",
+      "type": "character",
+      "code": "C-014",
+      "camp": "",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774026694075-087rwec5e",
+          "title": "微光",
+          "subtitle": "世界的至高存在，或者说是“本源”。\n由于张可云这个“世界之核”的存在，她貌似更愿意成为这“国际象棋”棋盘上的“皇后”。\n当然，她或许也挺喜欢以一个普通人的形象观察这个世界？",
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-xgyqu152f_v-1774026694075-087rwec5e_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-xgyqu152f_v-1774026694075-087rwec5e_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-xgyqu152f_v-1774026694075-087rwec5e_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-xgyqu152f_v-1774026694075-087rwec5e_cover.jpg"
+          },
+          "chapterFrom": "ch-1774186885948-fbqoj",
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [],
+          "relatedCharacters": [
+            {
+              "charId": "char-1774026694075-wyzxy3xpt",
+              "relationName": "“命定的师徒”"
+            },
+            {
+              "charId": "char-xiaoli",
+              "relationName": "“世界”之缔约"
+            }
+          ],
+          "createdAt": 1774026694075,
+          "level": 2
+        }
+      ],
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null
+    },
+    {
+      "id": "char-1774026694075-8gq06dj20",
+      "type": "character",
+      "code": "C-015",
+      "level": 5,
+      "camp": "",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774026694075-3flvwobbk",
+          "title": "塞坦",
+          "subtitle": "",
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774026694075
+        }
+      ]
+    },
+    {
+      "id": "char-1774026694075-y6atk7qsi",
+      "type": "character",
+      "code": "C-016",
+      "level": 5,
+      "camp": "",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774026694075-r771wtfak",
+          "title": "汤圆",
+          "subtitle": "",
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774026694075
+        }
+      ]
+    },
+    {
+      "id": "char-1774026694075-wyzxy3xpt",
+      "type": "character",
+      "code": "C-017",
+      "camp": "访客组",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774026694075-pod22im44",
+          "title": "阿米诺斯",
+          "subtitle": "一只疑似失忆过的“诺斯”家族小矛隼“萨满”，但是在认知上完全就是个完全正常的少女嘛......\n不过——她会魔法！\n她能实现愿望！\n她能给大家实现愿望！\n......如果能帮到老爸的话......",
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-wyzxy3xpt_v-1774026694075-pod22im44_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-wyzxy3xpt_v-1774026694075-pod22im44_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-wyzxy3xpt_v-1774026694075-pod22im44_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-wyzxy3xpt_v-1774026694075-pod22im44_cover.jpg"
+          },
+          "chapterFrom": "ch-1774186885948-pgmjy",
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [],
+          "relatedCharacters": [
+            {
+              "charId": "char-1774026694075-xgyqu152f",
+              "relationName": "“命定的师徒”"
+            }
+          ],
+          "createdAt": 1774026694075,
+          "level": 1
+        }
+      ],
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null
+    },
+    {
+      "id": "char-1774459740637",
+      "type": "character",
+      "code": "C-023",
+      "camp": "⌈茶室⌋",
+      "settingType": null,
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774459740637",
+          "title": "什一",
+          "subtitle": "⌈茶室⌋的图书管理员。被拾第一次自世界覆灭中救下的，No_010世界的张可云。\n似乎因为喜欢看书而逐渐遗忘了失去家的痛苦。\n⌈茶室⌋的图书馆向来被拾翻得凌乱，有总是喜欢捧着一本书的什一帮忙，总是件好事。",
+          "level": 2,
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459740637_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459740637_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459740637_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459740637_cover.jpg"
+          },
+          "chapterFrom": "ch-1774459320512",
+          "chapterTo": "ch-1774459973949",
+          "blocks": [],
+          "relatedVersions": [
+            "v-1774459778040"
+          ],
+          "relatedCharacters": [
+            {
+              "charId": "char-1774458852650",
+              "relationName": "师徒"
+            }
+          ],
+          "createdAt": 1774459740637
+        },
+        {
+          "vid": "v-1774459778040",
+          "title": "什一",
+          "subtitle": "⌈茶室⌋的图书馆管理员，No_010世界的张可云。在多次⌈茶室⌋的工作后，似乎学会了不少防身与进攻的手段。\n常袭一身紫袍，所到之处的塞坦残党片甲不留，“江湖”外号“紫袍魔女”......\n呃好吧，如今的她看起来确实得好好休息了。",
+          "level": 2,
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459778040_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459778040_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459778040_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459778040_cover.jpg"
+          },
+          "chapterFrom": "ch-1774459709192",
+          "chapterTo": "ch-1774459664526",
+          "blocks": [],
+          "relatedVersions": [
+            "v-1774459740637",
+            "v-1774459780540"
+          ],
+          "relatedCharacters": [
+            {
+              "charId": "char-1774458852650",
+              "relationName": "师徒"
+            }
+          ],
+          "createdAt": 1774459778040
+        },
+        {
+          "vid": "v-1774459780540",
+          "title": "张可流",
+          "subtitle": "什一，No_010世界的张可云，一个最终找回了“家”与名字的孩子。\n此刻，她与图书管理员脱钩，与“紫袍魔女”脱钩。\n她现在，就是张可流，仅此而已。\n“绵‘流’终降草表歆......”",
+          "level": 1,
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459780540_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459780540_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459780540_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774459740637_v-1774459780540_cover.jpg"
+          },
+          "chapterFrom": "ch-1774459664526",
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [
+            "v-1774459778040"
+          ],
+          "relatedCharacters": [
+            {
+              "charId": "char-1774458852650",
+              "relationName": "师徒"
+            }
+          ],
+          "createdAt": 1774459780540
+        }
+      ]
+    },
+    {
+      "id": "camp-1774544495965",
+      "type": "non-character",
+      "code": "N-010",
+      "settingType": "faction",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "versions": [
+        {
+          "vid": "v-default",
+          "title": "同学组A",
+          "subtitle": "同学组A相关设定",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "阵营简介"
+            },
+            {
+              "type": "p",
+              "text": "这是同学组A的详细介绍。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774544495965
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-zuwzm",
+      "type": "character",
+      "code": "C-025",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-lxfn1",
+          "title": "老爸",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是老爸的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-6mpm0",
+      "type": "character",
+      "code": "C-026",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-f64zz",
+          "title": "冯程才",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是冯程才的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-68kzu",
+      "type": "character",
+      "code": "C-027",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-90sh9",
+          "title": "马米粒",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是马米粒的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-cyrwx",
+      "type": "character",
+      "code": "C-028",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-m56cr",
+          "title": "张桥",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是张桥的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-guldb",
+      "type": "character",
+      "code": "C-029",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-z13mr",
+          "title": "杨克妙",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是杨克妙的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-fhkpf",
+      "type": "character",
+      "code": "C-030",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-onbek",
+          "title": "马四季",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是马四季的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-6hef5",
+      "type": "character",
+      "code": "C-031",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-qp5qe",
+          "title": "代氪",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是代氪的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-snrlt",
+      "type": "character",
+      "code": "C-032",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-v5lz0",
+          "title": "刘璺薪",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是刘璺薪的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-2oqs0",
+      "type": "character",
+      "code": "C-033",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-rchqd",
+          "title": "易谟戟",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是易谟戟的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-g322r",
+      "type": "character",
+      "code": "C-034",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-3sgaj",
+          "title": "翊",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是翊的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-f70cb",
+      "type": "character",
+      "code": "C-035",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-4kjo6",
+          "title": "翎",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是翎的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-v4ch0",
+      "type": "character",
+      "code": "C-036",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-cgjwd",
+          "title": "曦芷",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是曦芷的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-pi7t0",
+      "type": "character",
+      "code": "C-037",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-i5tfo",
+          "title": "楚山本",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是楚山本的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-5thlx",
+      "type": "character",
+      "code": "C-038",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-g6b1g",
+          "title": "张破军",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是张破军的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-mflbk",
+      "type": "character",
+      "code": "C-039",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-fdozi",
+          "title": "冯珅",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是冯珅的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-k8txp",
+      "type": "character",
+      "code": "C-040",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-xxahu",
+          "title": "陈番淑",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是陈番淑的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-8d22x",
+      "type": "character",
+      "code": "C-041",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-lpnxf",
+          "title": "赵悦离谱",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是赵悦离谱的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-y8qpf",
+      "type": "character",
+      "code": "C-042",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-ww681",
+          "title": "张奇华",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是张奇华的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-jwd7n",
+      "type": "character",
+      "code": "C-043",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-ciyk4",
+          "title": "张伟骚",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是张伟骚的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-rs0hy",
+      "type": "character",
+      "code": "C-044",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-ado2j",
+          "title": "吴卷航",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是吴卷航的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-cbktx",
+      "type": "character",
+      "code": "C-045",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-opos9",
+          "title": "吴亚",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是吴亚的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-y3fj9",
+      "type": "character",
+      "code": "C-046",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-yvlw6",
+          "title": "胡上校",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是胡上校的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774026694075-8i2iofwqf",
+      "type": "character",
+      "code": "C-018",
+      "camp": "塞坦科技",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774026694075-il4fgzpsm",
+          "title": "张可歆",
+          "subtitle": "自系统人格束缚中找回了自我的少女。\n似乎是“奇迹”从中作梗，她如今的模样与曾经的那个“出厂化”面孔截然不同，倒是与张可云有几分相似。\n......“你也该，有个属于自己的名字了吧？”",
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-8i2iofwqf_v-1774026694075-il4fgzpsm_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-8i2iofwqf_v-1774026694075-il4fgzpsm_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-8i2iofwqf_v-1774026694075-il4fgzpsm_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-8i2iofwqf_v-1774026694075-il4fgzpsm_cover.jpg"
+          },
+          "chapterFrom": "ch-1774186885948-fbqoj",
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [
+            "v-1774459049483"
+          ],
+          "relatedCharacters": [
+            {
+              "charId": "char-xiaoli",
+              "relationName": "曾经的系统“主仆”"
+            }
+          ],
+          "createdAt": 1774026694075,
+          "level": 2
+        },
+        {
+          "vid": "v-1774459049483",
+          "title": "“终端酱”",
+          "subtitle": "张可云的“塞坦终端”中不知何时添加进来的“系统人格”，通俗点说可以算是一种语言模型。\n具有不可忽视的运算能力，对张可云貌似有很深的好感，但总觉得有一种被“底层”强行修正的错觉。\n......你说，这家伙好像也太像个真正的人了吧？",
+          "level": 3,
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-8i2iofwqf_v-1774459049483_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-8i2iofwqf_v-1774459049483_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-8i2iofwqf_v-1774459049483_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774026694075-8i2iofwqf_v-1774459049483_cover.jpg"
+          },
+          "chapterFrom": "ch-1774459223566",
+          "chapterTo": "ch-1774186885948-7gaqi",
+          "blocks": [],
+          "relatedVersions": [
+            "v-1774026694075-il4fgzpsm"
+          ],
+          "relatedCharacters": [],
+          "createdAt": 1774459049483
+        }
+      ],
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": "v-1774026694075-il4fgzpsm"
+    },
+    {
+      "id": "non-1774026872991",
+      "type": "non-character",
+      "code": "N-004",
+      "camp": "",
+      "settingType": "custom",
+      "pinned": false,
+      "versions": [
+        {
+          "vid": "v-1774026872991",
+          "title": "325与相关概念",
+          "subtitle": "“什么是325？难道说......”",
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774026872991,
+          "level": 4
+        }
+      ],
+      "customSettingType": "325目录（？）",
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null
+    },
+    {
+      "id": "camp-1774176471569",
+      "type": "non-character",
+      "code": "N-005",
+      "level": 3,
+      "camp": "",
+      "settingType": "faction",
+      "pinned": false,
+      "isCampEntry": true,
+      "versions": [
+        {
+          "vid": "v-default",
+          "title": "ZZQ小豆同学的主角区间",
+          "subtitle": "ZZQ小豆同学的主角区间相关设定",
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "阵营简介"
+            },
+            {
+              "type": "p",
+              "text": "这是ZZQ小豆同学的主角区间的详细介绍。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774176471569
+        }
+      ]
+    },
+    {
+      "id": "char-1774456559847",
+      "type": "character",
+      "code": "C-021",
+      "camp": "塞坦科技",
+      "settingType": null,
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774456559847",
+          "title": "孙小孙",
+          "subtitle": "张可云的堂哥。塞坦科技技术部的成员，主要工作是测试公司近期较新的科研成果，在正式发布前把关，因此他们总能拿到比较尖端的产品。\n只不过，工作之外他貌似更喜欢摸鱼？\n你说......“摸鱼是为了更有力气工作”？\n得了吧你。",
+          "level": 2,
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774456559847_v-1774456559847_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774456559847_v-1774456559847_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774456559847_v-1774456559847_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774456559847_v-1774456559847_cover.jpg"
+          },
+          "chapterFrom": "ch-1774186885948-1q7ip",
+          "chapterTo": "ch-1774456712953",
+          "blocks": [],
+          "relatedVersions": [
+            "v-1774456771811"
+          ],
+          "relatedCharacters": [
+            {
+              "charId": "char-xiaoli",
+              "relationName": "堂兄妹"
+            },
+            {
+              "charId": "char-protagonist",
+              "relationName": "堂兄妹"
+            }
+          ],
+          "createdAt": 1774456559847
+        },
+        {
+          "vid": "v-1774456771811",
+          "title": "孙小孙",
+          "subtitle": "“世界融合”最首当其冲的“受害者”（存疑）。不论是自己的身体与认知，还是他人对她的记忆，均已经完全变成了No_002世界的孙小孙的模样。\n出于某些特殊的原因离开了塞坦科技。\n说起来，她现在是不是开始对曾经的好基友产生些许奇怪的好感了？\n“我会替你，替‘我们’......好好活下去的。”",
+          "level": 2,
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774456559847_v-1774456771811_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774456559847_v-1774456771811_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774456559847_v-1774456771811_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774456559847_v-1774456771811_cover.jpg"
+          },
+          "chapterFrom": "ch-1774186885948-zbwvr",
+          "chapterTo": null,
+          "blocks": [],
+          "relatedVersions": [
+            "v-1774456559847"
+          ],
+          "relatedCharacters": [
+            {
+              "charId": "char-1774026694075-wyzxy3xpt",
+              "relationName": "偶遇"
+            },
+            {
+              "charId": "char-xiaoli",
+              "relationName": "堂......姐妹？"
+            },
+            {
+              "charId": "char-protagonist",
+              "relationName": "堂......姐妹？"
+            }
+          ],
+          "createdAt": 1774456771811
+        }
+      ]
+    },
+    {
+      "id": "camp-1774456624605",
+      "type": "non-character",
+      "code": "N-007",
+      "settingType": "faction",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "versions": [
+        {
+          "vid": "v-default",
+          "title": "“家人”组",
+          "subtitle": "“家人”组相关设定",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "阵营简介"
+            },
+            {
+              "type": "p",
+              "text": "这是“家人”组的详细介绍。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774456624605
+        }
+      ]
+    },
+    {
+      "id": "camp-1774456669178",
+      "type": "non-character",
+      "code": "N-008",
+      "settingType": "faction",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "versions": [
+        {
+          "vid": "v-default",
+          "title": "塞坦科技",
+          "subtitle": "塞坦科技相关设定",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "阵营简介"
+            },
+            {
+              "type": "p",
+              "text": "这是塞坦科技的详细介绍。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774456669178
+        }
+      ]
+    },
+    {
+      "id": "camp-1774458879739",
+      "type": "non-character",
+      "code": "N-009",
+      "settingType": "faction",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "versions": [
+        {
+          "vid": "v-default",
+          "title": "⌈茶室⌋",
+          "subtitle": "⌈茶室⌋相关设定",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "阵营简介"
+            },
+            {
+              "type": "p",
+              "text": "这是⌈茶室⌋的详细介绍。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774458879739
+        }
+      ]
+    },
+    {
+      "id": "char-1774458852650",
+      "type": "character",
+      "code": "C-022",
+      "camp": "⌈茶室⌋",
+      "settingType": null,
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774458852650",
+          "title": "拾",
+          "subtitle": "⌈茶室⌋的管理员。No_325世界的张可云。\n不苟言笑的背后，掩藏着世界背后的秘密——\n——以及无数“张可云”的一生。",
+          "level": 2,
+          "image": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774458852650_v-1774458852650_card.jpg",
+          "images": {
+            "avatar": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774458852650_v-1774458852650_avatar.jpg",
+            "card": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774458852650_v-1774458852650_card.jpg",
+            "cover": "https://raw.githubusercontent.com/ZZQLittleBean/Wiki-Is-She-Also-me-Who-is-So-Cute-ZZQLTB.github.io/main/wiki-data/images/char-1774458852650_v-1774458852650_cover.jpg"
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "p",
+              "text": "事实上"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774458852650
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-mhuoc",
+      "type": "character",
+      "code": "C-071",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-9gla6",
+          "title": "宋罗汤",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是宋罗汤的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    },
+    {
+      "id": "char-1774546471127-r9kwo",
+      "type": "character",
+      "code": "C-072",
+      "camp": "",
+      "pinned": false,
+      "pinStartChapter": null,
+      "pinEndChapter": null,
+      "pinnedVersions": {},
+      "missingIntervalVersion": null,
+      "defaultPinnedVersion": null,
+      "versions": [
+        {
+          "vid": "v-1774546471127-p3314",
+          "title": "马文一",
+          "subtitle": "",
+          "level": 3,
+          "image": null,
+          "images": {
+            "avatar": null,
+            "card": null,
+            "cover": null
+          },
+          "chapterFrom": null,
+          "chapterTo": null,
+          "blocks": [
+            {
+              "type": "h2",
+              "text": "角色简介"
+            },
+            {
+              "type": "p",
+              "text": "这是马文一的角色词条。"
+            }
+          ],
+          "relatedVersions": [],
+          "relatedCharacters": [],
+          "createdAt": 1774546471127
+        }
+      ]
+    }
   ],
-  "settings": {
-    "name": "听说这个Wiki的标题经常被张可云吃掉",
-    "subtitle": "反正就是嗷呜一口~By ZZQLittleBean\n（Powered by Kimi AI）",
-    "welcomeTitle": "当前正在锐意更新中！",
-    "welcomeSubtitle": "demov2.6-GitHub版本更新了图片上传逻辑-部分章节属未来内容，仅作占位示意(●'◡'●)",
-    "customFont": "'Noto Sans SC', sans-serif",
-    "homeCustomTitle": "首页自定义内容"
-  },
   "chapters": [
     {
       "id": "ch-1774186885948-9q0x2",
@@ -625,6 +3931,15 @@
       "updatedAt": 1775823478332
     }
   ],
+  "currentTimeline": "latest",
+  "currentMode": "edit",
+  "editingId": "camp-1774176471569",
+  "editingType": null,
+  "viewingVersionId": null,
+  "wikiTitle": "未命名 Wiki",
+  "wikiSubtitle": "",
+  "fontFamily": "'Noto Sans SC', sans-serif",
+  "customFields": {},
   "homeContent": [
     {
       "type": "entry-ref",
@@ -641,5 +3956,16 @@
       "content": "这里是主页自定义内容，未来我会在这里提供更多内容供读者参考。"
     }
   ],
-  "customFields": {}
+  "timelineNodes": [],
+  "newReaderNodeId": null,
+  "latestNodeId": null,
+  "currentTimelineNode": "latest",
+  "settings": {
+    "name": "听说这个Wiki的标题经常被张可云吃掉",
+    "subtitle": "反正就是嗷呜一口~By ZZQLittleBean\n（Powered by Kimi AI）",
+    "welcomeTitle": "当前正在锐意更新中！",
+    "welcomeSubtitle": "demov2.6-GitHub版本更新了图片上传逻辑-部分章节属未来内容，仅作占位示意(●'◡'●)",
+    "customFont": "'Noto Sans SC', sans-serif",
+    "homeCustomTitle": "首页自定义内容"
+  }
 }
